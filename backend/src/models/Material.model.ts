@@ -9,6 +9,8 @@ export interface MaterialDocument extends Document {
   quantity: number;
   unit: string;
   status: InventoryStatus;
+  
+  materialStatusId?: mongoose.Types.ObjectId;
   condition: 'NEW' | 'GOOD' | 'SLIGHTLY_DAMAGED' | 'NEEDS_REPAIR' | 'SCRAP';
   isSurplus: boolean;
   availableFrom: Date;
@@ -42,6 +44,7 @@ const MaterialSchema = new Schema<MaterialDocument>(
       default: 'AVAILABLE',
       required: true 
     },
+    materialStatusId: { type: Schema.Types.ObjectId, ref: 'MaterialStatus' },
     condition: { 
       type: String, 
       enum: ['NEW', 'GOOD', 'SLIGHTLY_DAMAGED', 'NEEDS_REPAIR', 'SCRAP'], 

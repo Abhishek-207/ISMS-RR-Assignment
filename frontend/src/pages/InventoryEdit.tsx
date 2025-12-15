@@ -21,11 +21,13 @@ import {
   UploadOutlined, 
   SaveOutlined,
   DeleteOutlined,
-  EyeOutlined
+  EyeOutlined,
+  ArrowLeftOutlined
 } from '@ant-design/icons'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { api } from '../lib/api'
 import { fetchMaterialCategories, fetchMaterialStatuses, MaterialStatus } from '../lib/masters'
+import { getCurrentUser as getUser, isOrgAdmin } from '../lib/auth'
 import dayjs from 'dayjs'
 
 const { Title, Text } = Typography
@@ -39,10 +41,13 @@ interface UploadedImage {
   publicId: string
 }
 
-export default function InventoryCreate() {
+export default function InventoryEdit() {
+  const { id } = useParams()
   const navigate = useNavigate()
+  const user = getUser()
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
+  const [fetchLoading, setFetchLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
   const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([])
   const [isSurplus, setIsSurplus] = useState(false)
@@ -54,7 +59,10 @@ export default function InventoryCreate() {
   useEffect(() => {
     loadCategories()
     loadStatuses()
-  }, [])
+    if (id) {
+      fetchItem()
+    }
+  }, [id])
 
   const loadCategories = async () => {
     setLoadingCategories(true)
@@ -79,6 +87,55 @@ export default function InventoryCreate() {
       setStatuses([])
     } finally {
       setLoadingStatuses(false)
+    }
+  }
+
+  const fetchItem = async () => {
+    setFetchLoading(true)
+    try {
+      const response = await api.get(`/materials/${id}`)
+      const item = response.data.data
+
+      // Check if user can edit this item
+      if (user && user._id && item.createdBy && item.createdBy._id !== user._id && !isOrgAdmin()) {
+        message.error('You do not have permission to edit this item')
+        navigate('/inventory')
+        return
+      }
+
+      // Set form values
+      form.setFieldsValue({
+        name: item.name,
+        categoryId: item.categoryId?._id || item.categoryId,
+        quantity: item.quantity,
+        unit: item.unit,
+        condition: item.condition,
+        availableFrom: item.availableFrom ? dayjs(item.availableFrom) : null,
+        availableUntil: item.availableUntil ? dayjs(item.availableUntil) : null,
+        location: item.location,
+        estimatedCost: item.estimatedCost,
+        notes: item.notes,
+        materialStatusId: item.materialStatusId
+      })
+
+      setIsSurplus(item.isSurplus || false)
+
+      // Set uploaded images if available
+      if (item.attachments && Array.isArray(item.attachments)) {
+        const images = item.attachments.map((att: any) => ({
+          id: att._id || att.id,
+          url: att.url,
+          thumbnail: att.thumbnail || att.url,
+          originalName: att.originalName || 'Image',
+          publicId: att.publicId || ''
+        }))
+        setUploadedImages(images)
+      }
+    } catch (error: any) {
+      message.error(error.response?.data?.message || 'Failed to fetch item details')
+      navigate('/inventory')
+    } finally {
+      setFetchLoading(false)
     }
   }
 
@@ -158,15 +215,14 @@ export default function InventoryCreate() {
         notes: values.notes,
         materialStatusId: values.materialStatusId || undefined,
         isSurplus: isSurplus,
-        attachments: uploadedImages.map(img => img.id),
-        status: 'AVAILABLE'
+        attachments: uploadedImages.map(img => img.id)
       }
 
-      await api.post('/materials', inventoryData)
-      message.success('Inventory item created successfully!')
-      navigate('/inventory')
+      await api.put(`/materials/${id}`, inventoryData)
+      message.success('Inventory item updated successfully!')
+      navigate(`/inventory/${id}`)
     } catch (error: any) {
-      message.error(error.response?.data?.message || 'Failed to create inventory item')
+      message.error(error.response?.data?.message || 'Failed to update inventory item')
     } finally {
       setLoading(false)
     }
@@ -191,11 +247,23 @@ export default function InventoryCreate() {
     }
   }
 
+  if (fetchLoading) {
+    return <div style={{ padding: 24, textAlign: 'center' }}>Loading...</div>
+  }
+
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: 15 }}>
+        <Button 
+          type="text" 
+          icon={<ArrowLeftOutlined />} 
+          onClick={() => navigate(`/inventory/${id}`)}
+          style={{ marginRight: 16 }}
+        >
+          Back
+        </Button>
         <Title level={4} style={{ margin: 0 }}>
-          Add Inventory Item
+          Edit Inventory Item
         </Title>
       </div>
 
@@ -205,11 +273,6 @@ export default function InventoryCreate() {
           layout="vertical"
           onFinish={onFinish}
           onFinishFailed={onFinishFailed}
-          initialValues={{
-            availableFrom: dayjs(),
-            availableUntil: dayjs().add(6, 'month'),
-            condition: 'GOOD'
-          }}
         >
           <Row gutter={[24, 0]}>
             <Col xs={24}>
@@ -608,9 +671,9 @@ export default function InventoryCreate() {
                 icon={<SaveOutlined />}
                 size="middle"
               >
-                Add to Inventory
+                Update Item
               </Button>
-              <Button onClick={() => navigate('/inventory')} size="middle">
+              <Button onClick={() => navigate(`/inventory/${id}`)} size="middle">
                 Cancel
               </Button>
             </Space>

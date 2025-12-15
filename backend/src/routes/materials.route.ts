@@ -25,6 +25,7 @@ router.post('/', [
   body('condition').isIn(['NEW', 'GOOD', 'SLIGHTLY_DAMAGED', 'NEEDS_REPAIR', 'SCRAP']),
   body('availableFrom').isISO8601(),
   body('availableUntil').isISO8601(),
+  body('materialStatusId').optional().isMongoId(),
   body('estimatedCost').optional().isNumeric().isFloat({ min: 0 })
 ], audit('Material', 'INVENTORY_CREATED', () => null, (req, result) => result), MaterialsController.create);
 
@@ -40,6 +41,7 @@ router.patch('/:id', [
   body('quantity').optional().isNumeric().isFloat({ min: 0 }),
   body('unit').optional().isLength({ min: 1 }),
   body('status').optional().isIn(['AVAILABLE', 'RESERVED', 'TRANSFERRED', 'ARCHIVED']),
+  body('materialStatusId').optional().isMongoId(),
   body('condition').optional().isIn(['NEW', 'GOOD', 'SLIGHTLY_DAMAGED', 'NEEDS_REPAIR', 'SCRAP']),
   body('availableFrom').optional().isISO8601(),
   body('availableUntil').optional().isISO8601(),

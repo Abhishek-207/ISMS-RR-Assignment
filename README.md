@@ -1,7 +1,7 @@
 ## Inventory & Surplus Management System (ISMS)
 
 Live demo (frontend): [`https://isms-app.netlify.app`](https://isms-app.netlify.app)  
-Backend API: [`https://route-isms-deploy-production.up.railway.app`](https://route-isms-deploy-production.up.railway.app)
+Backend API: [`https://sms-deploy-production.up.railway.app`](https://sms-deploy-production.up.railway.app)
 
 This repository contains a full‑stack **MERN** application that helps organizations manage their internal inventory, surplus materials, and procurement requests.  
 The system is built as a **final‑year project** and demonstrates authentication, authorization with roles, CRUD operations, analytics, and production‑ready deployment.
@@ -46,7 +46,7 @@ Permissions are enforced:
 
 ---
 
-## 3. Features (>= 6)
+## 3. Features
 
 - **Authentication & Authorization**
 
@@ -77,10 +77,12 @@ Permissions are enforced:
 - **Analytics & Dashboards**
 
   - High‑level analytics view for inventory, surplus, and transfers
+  - Export reports as CSV/Excel for My Inventory, Browse Surplus, Procurement requests, and Analytics summaries
 
 - **Notifications & UX**
   - In‑app notifications and alerts for important events
   - Responsive UI using Ant Design (desktop + mobile)
+  - Installable **Progressive Web App (PWA)** experience on supported browsers (can be installed on desktop or mobile like a native app)
 
 ---
 
@@ -110,6 +112,7 @@ Permissions are enforced:
 - **Charts**: `recharts`
 - **Build Tool**: Vite
 - **Styling**: CSS + Ant Design theming, Tailwind (utility classes configured)
+- **PWA**: Vite PWA plugin + service worker for offline caching and “install app” support on desktop and mobile
 
 ### 4.3 Deployment Targets
 
@@ -185,41 +188,79 @@ Vite will start the React app on `http://localhost:5173`.
 
 ---
 
-## 7. API Summary (Selected Endpoints)
+## 7. API Summary
 
-Base URL (development):
+**Base URLs**
 
-- **Backend**: `http://localhost:8000/api`
+- **Development backend**: `http://localhost:8000/api`
+- **Production backend**: `https://sms-deploy-production.up.railway.app/api`
 
-### 7.1 Auth
+### 7.1 Auth (`/api/auth`)
 
-- `POST /api/auth/signup` – Register a new user (ORG_ADMIN / ORG_USER)
-- `POST /api/auth/login` – Login with email & password, returns JWT + user
-- `GET  /api/auth/me` – Get current authenticated user
-- `POST /api/auth/logout` – Logout current user
+- `POST /signup` – Register a new user (ORG_ADMIN / ORG_USER)
+- `POST /login` – Login with email & password, returns JWT + user
+- `GET  /me` – Get current authenticated user
+- `POST /logout` – Logout current user
 
-### 7.2 Materials / Inventory
+### 7.2 Materials / Inventory (`/api/materials`)
 
-- `GET    /api/materials` – List all materials for the current organization
-- `GET    /api/materials/:id` – Get a single material
-- `POST   /api/materials` – Create a new material
-- `PATCH  /api/materials/:id` – Update material details
-- `DELETE /api/materials/:id` – Delete a material
-- `GET    /api/materials/surplus` – List surplus materials
-- `PATCH  /api/materials/:id/mark-surplus` – Mark a material as surplus
-- `GET    /api/materials/stats/overview` – Aggregated stats for analytics
+- `GET    /` – List all materials for the current organization
+- `GET    /surplus` – List surplus materials
+- `GET    /stats/overview` – Aggregated stats for analytics
+- `GET    /:id` – Get a single material
+- `POST   /` – Create a new material
+- `PATCH  /:id` – Update material details
+- `PATCH  /:id/mark-surplus` – Mark a material as surplus
+- `DELETE /:id` – Delete a material
 
-### 7.3 Organizations, Users, Transfers, Files, Analytics
+### 7.3 Masters / Configuration (`/api/masters`)
 
-Additional route groups:
+- `GET    /material-categories` – List material categories
+- `POST   /material-categories` – Create a material category (org admin)
+- `PATCH  /material-categories/:id` – Update a material category
+- `DELETE /material-categories/:id` – Delete a material category
+- `GET    /material-statuses` – List material statuses
+- `POST   /material-statuses` – Create a material status (org admin)
+- `PATCH  /material-statuses/:id` – Update a material status
+- `DELETE /material-statuses/:id` – Delete a material status
 
-- `/api/organizations` – Manage organizations (admin)
-- `/api/users` – Manage users and roles (platform/org admin)
-- `/api/transfers` – Create and manage transfer/procurement requests
-- `/api/files` – Upload and manage files (e.g. attachments)
-- `/api/analytics` – Platform and organization analytics
+### 7.4 Organizations (`/api/organizations`)
 
-> See the route files in `backend/src/routes/*.ts` for full details.
+- `GET    /` – List organizations
+- `GET    /:id` – Get organization by ID
+- `POST   /` – Create organization
+- `PATCH  /:id` – Update organization (org admin / platform admin)
+- `DELETE /:id` – Delete organization (platform admin)
+
+### 7.5 Users (`/api/users`)
+
+- `GET    /` – List users for current organization
+- `GET    /:id` – Get user by ID
+- `POST   /` – Create user (admin only)
+- `PATCH  /:id` – Update user details or role
+- `PATCH  /:id/password` – Change user password
+- `DELETE /:id` – Delete user (admin only)
+
+### 7.6 Transfers / Procurement (`/api/transfers`)
+
+- `GET    /` – List transfer/procurement requests
+- `GET    /:id` – Get a single transfer request
+- `POST   /` – Create a new transfer / procurement request
+- `PATCH  /:id/approve` – Approve request (org admin or platform admin)
+- `PATCH  /:id/reject` – Reject request (org admin or platform admin)
+- `PATCH  /:id/cancel` – Cancel request
+
+### 7.7 Files (`/api/files`)
+
+- `POST   /upload` – Upload a file
+- `GET    /:id` – Download file
+- `DELETE /:id` – Delete file
+
+### 7.8 Analytics (`/api/analytics`)
+
+- `GET /availability` – Inventory availability analytics
+- `GET /transfers` – Transfer / procurement analytics
+- `GET /conditions` – Material condition breakdown
 
 ---
 
@@ -259,9 +300,52 @@ Embedded in this README:
 
 ---
 
-## 10. Deployment
+## 10. UI Screenshots
 
-### 10.1 Backend Deployment (Railway)
+Some key screens of the ISMS web app (all images are in the `assets/` folder):
+
+- **Landing & Key Information**
+  - Landing page / hero section – `assets/SS-1.png`
+  - Key features section – `assets/SS-2.png`
+  - “How it works” / “Why choose ISMS” section – `assets/SS-3.png`
+- **Inventory & Procurement**
+  - My Inventory list – `assets/SS-4.png`
+  - Add items to inventory – `assets/SS-5.png`
+  - Procurement / request creation – `assets/SS-6.png`
+- **Analytics & Configuration**
+  - Analytics dashboard – `assets/SS-7.png`
+  - Configuration settings / masters – `assets/SS-8.png`
+- **User‑focused Screens**
+  - Profile page – `assets/SS-9.png`
+  - Browse surplus – `assets/SS-10.png`
+  - Notifications center – `assets/SS-11.png`
+  - Signup screens – `assets/SS-12.png`, `assets/SS-13.png`
+  - Login screen – `assets/SS-14.png`
+  - Additional analytics view – `assets/SS-15.png`
+
+Embedded screenshots:
+
+![Landing / Hero](assets/SS-1.png)
+![Key Features](assets/SS-2.png)
+![How It Works / Why ISMS](assets/SS-3.png)
+![My Inventory](assets/SS-4.png)
+![Add Inventory Item](assets/SS-5.png)
+![Procurement](assets/SS-6.png)
+![Analytics](assets/SS-7.png)
+![Analytics (Detail)](assets/SS-15.png)
+![Configuration Settings](assets/SS-8.png)
+![Profile](assets/SS-9.png)
+![Browse Surplus](assets/SS-10.png)
+![Notifications](assets/SS-11.png)
+![Signup](assets/SS-12.png)
+![Signup (Step/Variant)](assets/SS-13.png)
+![Login](assets/SS-14.png)
+
+---
+
+## 11. Deployment
+
+### 11.1 Backend Deployment (Railway)
 
 Steps to deploy the backend API on **Railway**:
 
@@ -272,11 +356,11 @@ Steps to deploy the backend API on **Railway**:
    - Build: `npm run build`
    - Start: `npm start`
 5. After deployment, confirm the backend URL:
-   - **Backend URL**: `https://route-isms-deploy-production.up.railway.app`
+   - **Backend URL**: `https://sms-deploy-production.up.railway.app`
 
 Update `frontend/src/lib/api.ts` (or environment variables) to point to the deployed backend base URL above.
 
-### 10.2 Frontend Deployment (Netlify)
+### 11.2 Frontend Deployment (Netlify)
 
 Steps to deploy the frontend on **Netlify**:
 
@@ -287,7 +371,7 @@ Steps to deploy the frontend on **Netlify**:
 4. After deployment, confirm the frontend URL:
    - **Frontend URL**: `https://isms-app.netlify.app`
 
-### 10.3 Final Deployed URLs
+### 11.3 Final Deployed URLs
 
 - **Frontend (Netlify)**: `https://isms-app.netlify.app`
-- **Backend (Railway)**: `https://route-isms-deploy-production.up.railway.app`
+- **Backend (Railway)**: `https://sms-deploy-production.up.railway.app`

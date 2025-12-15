@@ -36,6 +36,12 @@ router.patch('/:id/password', [
   body('newPassword').isLength({ min: 6 })
 ], UsersController.changePassword);
 
+router.patch('/:id/toggle-status', requireAdmin, audit('User', 'UPDATE', async (req) => {
+  return await User.findById(req.params.id).lean();
+}, async (req, result) => {
+  return await User.findById(req.params.id).lean();
+}), UsersController.toggleStatus);
+
 router.delete('/:id', requireAdmin, audit('User', 'DELETE', async (req) => {
   return await User.findById(req.params.id).lean();
 }, () => null), UsersController.delete);

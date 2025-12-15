@@ -14,10 +14,10 @@ router.get('/', TransfersController.getAll);
 router.get('/:id', TransfersController.getById);
 
 router.post('/', [
-  body('materialId').isMongoId(),
-  body('quantityRequested').isNumeric().isFloat({ min: 0 }),
-  body('purpose').isLength({ min: 10, max: 1000 }),
-  body('comment').optional().isLength({ min: 1 })
+  body('materialId').isMongoId().withMessage('Invalid material ID'),
+  body('quantityRequested').isFloat({ min: 0.01 }).withMessage('Quantity must be a positive number'),
+  body('purpose').isLength({ min: 10, max: 1000 }).withMessage('Purpose must be between 10 and 1000 characters'),
+  body('comment').optional().isLength({ min: 1 }).withMessage('Comment must not be empty if provided')
 ], audit('TransferRequest', 'PROCUREMENT_REQUEST_CREATED', () => null, (req, result) => result), TransfersController.create);
 
 router.patch('/:id/approve', requireOrgAdminOrPlatformAdmin, [

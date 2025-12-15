@@ -29,12 +29,12 @@ const { Title, Text } = Typography
 interface InventoryItem {
   _id: string
   name: string
-  category: string
+  categoryId?: { _id: string; name: string } | string
   quantity: number
   unit: string
-  organizationId: { _id: string; name: string; category: string }
-  status: string
-  condition: string
+  organizationId?: { _id: string; name: string; category: string }
+  status?: string
+  condition?: string
   isSurplus: boolean
   availableFrom: string
   availableUntil: string
@@ -43,7 +43,7 @@ interface InventoryItem {
   notes?: string
   attachments: any[]
   allocationHistory: any[]
-  createdBy: { _id: string; name: string }
+  createdBy?: { _id: string; name: string }
   updatedBy?: { _id: string; name: string }
   createdAt: string
   updatedAt: string
@@ -67,7 +67,7 @@ export default function InventoryDetail() {
     setLoading(true)
     try {
       const response = await api.get(`/materials/${id}`)
-      setItem(response.data)
+      setItem(response.data.data)
     } catch (error) {
       message.error('Failed to fetch item details')
       navigate('/inventory')
@@ -130,17 +130,17 @@ export default function InventoryDetail() {
     })
   }
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status?: string) => {
     const colors: Record<string, string> = {
       'AVAILABLE': 'green',
       'RESERVED': 'orange',
       'TRANSFERRED': 'purple',
       'ARCHIVED': 'default'
     }
-    return colors[status] || 'default'
+    return status ? (colors[status] || 'default') : 'default'
   }
 
-  const getConditionColor = (condition: string) => {
+  const getConditionColor = (condition?: string) => {
     const colors: Record<string, string> = {
       'NEW': 'green',
       'GOOD': 'blue',
@@ -148,11 +148,14 @@ export default function InventoryDetail() {
       'NEEDS_REPAIR': 'red',
       'SCRAP': 'red'
     }
-    return colors[condition] || 'default'
+    return condition ? (colors[condition] || 'default') : 'default'
   }
 
   const canEditItem = () => {
-    if (!item || !user) return false
+    if (!item) return false
+    if (!user) return false
+    if (!user._id) return false
+    if (!item.createdBy?._id) return false
     return user._id === item.createdBy._id || isOrgAdmin()
   }
 
@@ -162,6 +165,10 @@ export default function InventoryDetail() {
 
   if (!item) {
     return <div style={{ padding: 24, textAlign: 'center' }}>Item not found</div>
+  }
+
+  if (!user) {
+    return <div style={{ padding: 24, textAlign: 'center' }}>Loading user information...</div>
   }
 
   return (
@@ -214,15 +221,19 @@ export default function InventoryDetail() {
                 <Text strong style={{ fontSize: 15 }}>{item.name}</Text>
               </Descriptions.Item>
               <Descriptions.Item label="Category">
-                {item.category}
+                {typeof item.categoryId === 'object' ? item.categoryId?.name : item.categoryId || '-'}
               </Descriptions.Item>
               <Descriptions.Item label="Organization">
-                <div>
-                  <div>{item.organizationId.name}</div>
-                  <Text type="secondary" style={{ fontSize: 11 }}>
-                    {item.organizationId.category.replace(/_/g, ' ')}
-                  </Text>
-                </div>
+                {item.organizationId ? (
+                  <div>
+                    <div>{item.organizationId.name}</div>
+                    <Text type="secondary" style={{ fontSize: 11 }}>
+                      {item.organizationId.category ? item.organizationId.category.replace(/_/g, ' ') : '-'}
+                    </Text>
+                  </div>
+                ) : (
+                  <Text type="secondary">-</Text>
+                )}
               </Descriptions.Item>
               <Descriptions.Item label="Quantity">
                 <Text strong style={{ fontSize: 15 }}>
@@ -234,12 +245,12 @@ export default function InventoryDetail() {
               </Descriptions.Item>
               <Descriptions.Item label="Status">
                 <Tag color={getStatusColor(item.status)}>
-                  {item.status}
+                  {item.status || '-'}
                 </Tag>
               </Descriptions.Item>
               <Descriptions.Item label="Condition">
                 <Tag color={getConditionColor(item.condition)}>
-                  {item.condition.replace(/_/g, ' ')}
+                  {item.condition ? item.condition.replace(/_/g, ' ') : '-'}
                 </Tag>
               </Descriptions.Item>
               <Descriptions.Item label="Available From">
@@ -256,7 +267,7 @@ export default function InventoryDetail() {
                   : '-'}
               </Descriptions.Item>
               <Descriptions.Item label="Created By">
-                {item.createdBy.name}
+                {item.createdBy?.name || '-'}
               </Descriptions.Item>
               <Descriptions.Item label="Created At">
                 {dayjs(item.createdAt).format('DD MMM YYYY, HH:mm')}
@@ -264,7 +275,7 @@ export default function InventoryDetail() {
               {item.updatedBy && (
                 <>
                   <Descriptions.Item label="Last Updated By">
-                    {item.updatedBy.name}
+                    {item.updatedBy?.name || '-'}
                   </Descriptions.Item>
                   <Descriptions.Item label="Last Updated At">
                     {dayjs(item.updatedAt).format('DD MMM YYYY, HH:mm')}

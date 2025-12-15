@@ -849,3 +849,13 @@ body {
     padding-right: 4px;
   }
 }
+
+/* Ensure form and filter placeholders are clearly visible */
+.ant-input::placeholder,
+.ant-input-affix-wrapper input::placeholder,
+.ant-select-single .ant-select-selector .ant-select-selection-placeholder,
+.ant-select-single .ant-select-selector .ant-select-selection-item,
+.ant-picker-input > input::placeholder {
+  color: rgba(0, 0, 0, 0.45) !important;
+}
+

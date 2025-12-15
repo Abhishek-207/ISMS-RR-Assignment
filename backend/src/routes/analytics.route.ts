@@ -12,4 +12,12 @@ router.get('/transfers', AnalyticsController.getTransfers);
 
 router.get('/conditions', AnalyticsController.getConditions);
 
+router.get('/categories', AnalyticsController.getCategories);
+
+router.get('/statuses', AnalyticsController.getStatuses);
+
+router.get('/dashboard', AnalyticsController.getDashboard);
+
+router.get('/export', AnalyticsController.exportReport);
+
 export default router;

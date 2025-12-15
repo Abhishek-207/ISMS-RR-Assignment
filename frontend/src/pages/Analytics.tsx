@@ -28,9 +28,7 @@ import {
   ResponsiveContainer,
   PieChart,
   Pie,
-  Cell,
-  LineChart,
-  Line
+  Cell
 } from 'recharts'
 import dayjs from 'dayjs'
 import { api } from '../lib/api'
@@ -54,12 +52,13 @@ export default function Analytics() {
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>(undefined)
   const [selectedCondition, setSelectedCondition] = useState<string | undefined>(undefined)
   const [selectedStatus, setSelectedStatus] = useState<string | undefined>(undefined)
+  const [categories, setCategories] = useState<any[]>([])
 
   const [availabilityData, setAvailabilityData] = useState<any[]>([])
   const [procurementData, setProcurementData] = useState<any[]>([])
   const [conditionData, setConditionData] = useState<any[]>([])
   const [categoryData, setCategoryData] = useState<any[]>([])
-  const [surplusData, setSurplusData] = useState<any[]>([])
+  const [statusData, setStatusData] = useState<any[]>([])
   const [stats, setStats] = useState({
     totalInventory: 0,
     availableItems: 0,
@@ -68,59 +67,123 @@ export default function Analytics() {
     costAvoided: 0
   })
 
+  // Fetch categories for filter dropdown
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await api.get('/analytics/categories')
+        setCategories(response.data.data)
+      } catch (error) {
+        console.error('Failed to fetch categories:', error)
+      }
+    }
+    fetchCategories()
+  }, [])
+
   const fetchAnalytics = async () => {
     setLoading(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 800))
+      const params = new URLSearchParams()
+      
+      if (dateRange[0]) {
+        params.append('fromDate', dateRange[0].format('YYYY-MM-DD'))
+      }
+      if (dateRange[1]) {
+        params.append('toDate', dateRange[1].format('YYYY-MM-DD'))
+      }
+      if (selectedCategory) {
+        params.append('categoryId', selectedCategory)
+      }
+      if (selectedCondition) {
+        params.append('condition', selectedCondition)
+      }
+      if (selectedStatus) {
+        params.append('status', selectedStatus)
+      }
 
+      // Fetch dashboard data
+      const dashboardResponse = await api.get(`/analytics/dashboard?${params.toString()}`)
+      const dashboardData = dashboardResponse.data.data
+
+      // Fetch categories data
+      const categoriesResponse = await api.get('/analytics/categories')
+      const categories = categoriesResponse.data.data
+
+      // Fetch statuses data
+      const statusesResponse = await api.get('/analytics/statuses')
+      const statuses = statusesResponse.data.data
+
+      // Fetch availability data
+      const availabilityResponse = await api.get(`/analytics/availability?${params.toString()}`)
+      const availability = availabilityResponse.data.data
+
+      // Fetch transfers data
+      const transfersResponse = await api.get(`/analytics/transfers?${params.toString()}`)
+      const transfers = transfersResponse.data.data
+
+      // Fetch conditions data
+      const conditionsResponse = await api.get(`/analytics/conditions?${params.toString()}`)
+      const conditions = conditionsResponse.data.data
+
+      // Set stats from dashboard data
       setStats({
-        totalInventory: 1250,
-        availableItems: 450,
-        surplusItems: 180,
-        procurementRequests: 45,
-        costAvoided: 2450000
+        totalInventory: dashboardData.overall?.totalMaterials || 0,
+        availableItems: dashboardData.overall?.availableMaterials || 0,
+        surplusItems: dashboardData.overall?.surplusMaterials || 0,
+        procurementRequests: dashboardData.transfers?.reduce((acc: number, t: any) => acc + t.count, 0) || 0,
+        costAvoided: dashboardData.overall?.totalEstimatedValue || 0
       })
 
-      setAvailabilityData([
-        { '_id': { 'status': 'AVAILABLE' }, 'totalQuantity': 450, 'count': 120 },
-        { '_id': { 'status': 'RESERVED' }, 'totalQuantity': 320, 'count': 85 },
-        { '_id': { 'status': 'TRANSFERRED' }, 'totalQuantity': 180, 'count': 45 },
-        { '_id': { 'status': 'ARCHIVED' }, 'totalQuantity': 100, 'count': 25 }
-      ])
+      // Set availability data
+      const availabilityChartData = availability.summary ? [
+        { '_id': { 'status': 'AVAILABLE' }, 'totalQuantity': availability.summary.availableMaterials, 'count': availability.summary.availableMaterials },
+        { '_id': { 'status': 'RESERVED' }, 'totalQuantity': availability.summary.reservedMaterials, 'count': availability.summary.reservedMaterials },
+        { '_id': { 'status': 'SURPLUS' }, 'totalQuantity': availability.summary.surplusMaterials, 'count': availability.summary.surplusMaterials }
+      ] : []
+      setAvailabilityData(availabilityChartData)
 
-      setConditionData([
-        { '_id': { 'condition': 'NEW' }, 'totalQuantity': 380, 'count': 95 },
-        { '_id': { 'condition': 'GOOD' }, 'totalQuantity': 520, 'count': 130 },
-        { '_id': { 'condition': 'SLIGHTLY_DAMAGED' }, 'totalQuantity': 180, 'count': 45 },
-        { '_id': { 'condition': 'NEEDS_REPAIR' }, 'totalQuantity': 70, 'count': 18 },
-        { '_id': { 'condition': 'SCRAP' }, 'totalQuantity': 30, 'count': 8 }
-      ])
+      // Set procurement data (transfers by month)
+      const procurementChartData = transfers.details?.map((t: any) => ({
+        '_id': { 'month': t._id.month },
+        'approved': t._id.status === 'APPROVED' ? t.count : 0,
+        'pending': t._id.status === 'PENDING' ? t.count : 0,
+        'rejected': t._id.status === 'REJECTED' ? t.count : 0,
+        'completed': t._id.status === 'COMPLETED' ? t.count : 0
+      })) || []
+      
+      // Group by month
+      const groupedProcurement = procurementChartData.reduce((acc: any, curr: any) => {
+        const month = curr._id.month
+        if (!acc[month]) {
+          acc[month] = { '_id': { 'month': month }, 'approved': 0, 'pending': 0, 'rejected': 0, 'completed': 0 }
+        }
+        acc[month].approved += curr.approved
+        acc[month].pending += curr.pending
+        acc[month].rejected += curr.rejected
+        acc[month].completed += curr.completed
+        return acc
+      }, {})
+      setProcurementData(Object.values(groupedProcurement))
 
-      setProcurementData([
-        { '_id': { 'month': '2024-07' }, 'approved': 12, 'pending': 3, 'rejected': 2 },
-        { '_id': { 'month': '2024-08' }, 'approved': 15, 'pending': 5, 'rejected': 1 },
-        { '_id': { 'month': '2024-09' }, 'approved': 10, 'pending': 2, 'rejected': 3 },
-        { '_id': { 'month': '2024-10' }, 'approved': 18, 'pending': 4, 'rejected': 2 },
-        { '_id': { 'month': '2024-11' }, 'approved': 11, 'pending': 6, 'rejected': 1 },
-        { '_id': { 'month': '2024-12' }, 'approved': 16, 'pending': 8, 'rejected': 2 }
-      ])
+      // Set condition data
+      setConditionData(conditions || [])
 
-      setCategoryData([
-        { '_id': { 'category': 'Electronics' }, 'totalQuantity': 320, 'count': 85 },
-        { '_id': { 'category': 'Furniture' }, 'totalQuantity': 280, 'count': 75 },
-        { '_id': { 'category': 'Raw Materials' }, 'totalQuantity': 250, 'count': 65 },
-        { '_id': { 'category': 'Equipment' }, 'totalQuantity': 200, 'count': 55 },
-        { '_id': { 'category': 'Office Supplies' }, 'totalQuantity': 180, 'count': 45 }
-      ])
+      // Set category data
+      const categoryChartData = categories.map((cat: any) => ({
+        '_id': { 'category': cat.name },
+        'totalQuantity': cat.totalQuantity || 0,
+        'count': cat.materialsCount || 0,
+        'totalValue': cat.totalEstimatedValue || 0
+      }))
+      setCategoryData(categoryChartData)
 
-      setSurplusData([
-        { '_id': { 'month': '2024-07' }, 'markedSurplus': 25, 'procured': 18 },
-        { '_id': { 'month': '2024-08' }, 'markedSurplus': 32, 'procured': 22 },
-        { '_id': { 'month': '2024-09' }, 'markedSurplus': 28, 'procured': 20 },
-        { '_id': { 'month': '2024-10' }, 'markedSurplus': 35, 'procured': 28 },
-        { '_id': { 'month': '2024-11' }, 'markedSurplus': 30, 'procured': 24 },
-        { '_id': { 'month': '2024-12' }, 'markedSurplus': 38, 'procured': 30 }
-      ])
+      // Set status data
+      const statusChartData = statuses.map((status: any) => ({
+        '_id': { 'status': status.name },
+        'count': status.materialsCount || 0,
+        'totalQuantity': status.totalQuantity || 0
+      }))
+      setStatusData(statusChartData)
 
     } catch (error) {
       console.error('Failed to fetch analytics:', error)
@@ -240,11 +303,9 @@ export default function Analytics() {
                   allowClear
                   style={{ width: '100%', height: 36 }}
                 >
-                  <Option value="electronics">Electronics</Option>
-                  <Option value="furniture">Furniture</Option>
-                  <Option value="raw-materials">Raw Materials</Option>
-                  <Option value="equipment">Equipment</Option>
-                  <Option value="office-supplies">Office Supplies</Option>
+                  {categories.map((cat) => (
+                    <Option key={cat._id} value={cat._id}>{cat.name}</Option>
+                  ))}
                 </Select>
               </div>
             </Col>
@@ -540,29 +601,17 @@ export default function Analytics() {
           </Col>
 
           <Col xs={24}>
-            <Card title="Surplus Activity Trends">
+            <Card title="Material Statuses Overview">
               <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={surplusData}>
+                <BarChart data={statusData}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="_id.month" />
+                  <XAxis dataKey="_id.status" />
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                  <Line 
-                    type="monotone" 
-                    dataKey="markedSurplus" 
-                    stroke="#fa8c16" 
-                    name="Marked as Surplus"
-                    strokeWidth={2}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="procured" 
-                    stroke="#52c41a" 
-                    name="Procured by Others"
-                    strokeWidth={2}
-                  />
-                </LineChart>
+                  <Bar dataKey="count" fill="#fa8c16" name="Material Count" />
+                  <Bar dataKey="totalQuantity" fill="#52c41a" name="Total Quantity" />
+                </BarChart>
               </ResponsiveContainer>
             </Card>
           </Col>

@@ -97,8 +97,10 @@ export default function Profile() {
     try {
       setLoading(true)
       const values = await form.validateFields()
-      
-      const updatedUser = { ...user, ...values }
+
+      // Only allow updating editable fields (e.g., name). Email stays unchanged.
+      const { name } = values
+      const updatedUser = { ...user, name }
       setUser(updatedUser as User)
       
       localStorage.setItem('user', JSON.stringify(updatedUser))
@@ -259,12 +261,9 @@ export default function Profile() {
           <Form.Item
             name="email"
             label="Email Address"
-            rules={[
-              { required: true, message: 'Please enter your email' },
-              { type: 'email', message: 'Please enter a valid email' }
-            ]}
+            rules={[]}
           >
-            <Input placeholder="Enter your email address" />
+            <Input placeholder="Enter your email address" disabled />
           </Form.Item>
         </Form>
       </Modal>

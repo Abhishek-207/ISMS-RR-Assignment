@@ -13,15 +13,17 @@ import {
   Modal,
   message,
   Form,
-  Popconfirm
+  Dropdown
 } from 'antd'
 import { 
   PlusOutlined, 
   SearchOutlined, 
   ReloadOutlined,
   EditOutlined,
-  DeleteOutlined,
-  UserOutlined
+  UserOutlined,
+  MoreOutlined,
+  CheckCircleOutlined,
+  StopOutlined
 } from '@ant-design/icons'
 import { api } from '../lib/api'
 import { isPlatformAdmin, isOrgAdmin } from '../lib/auth'
@@ -109,16 +111,6 @@ export default function Users() {
     setModalVisible(true)
   }
 
-  const handleDelete = async (userId: string) => {
-    try {
-      await api.delete(`/users/${userId}`)
-      message.success('User deleted successfully')
-      fetchUsers()
-    } catch (error: any) {
-      message.error(error.response?.data?.message || 'Failed to delete user')
-    }
-  }
-
   const handleSubmit = async (values: any) => {
     try {
       if (editingUser) {
@@ -133,6 +125,17 @@ export default function Users() {
       fetchUsers()
     } catch (error: any) {
       message.error(error.response?.data?.message || 'Failed to save user')
+    }
+  }
+
+  const handleToggleStatus = async (user: User) => {
+    try {
+      const action = user.isActive ? 'deactivate' : 'activate'
+      await api.patch(`/users/${user._id}/toggle-status`)
+      message.success(`User ${action}d successfully`)
+      fetchUsers()
+    } catch (error: any) {
+      message.error(error.response?.data?.message || 'Failed to toggle user status')
     }
   }
 
@@ -230,29 +233,32 @@ export default function Users() {
       fixed: 'right' as const,
       render: (record: User) => (
         canManage ? (
-          <Space size="small">
+          <Dropdown
+            trigger={['click']}
+            placement="bottomRight"
+            menu={{
+              items: [
+                {
+                  key: 'edit',
+                  label: 'Edit User',
+                  icon: <EditOutlined />,
+                  onClick: () => handleEdit(record)
+                },
+                {
+                  key: 'toggleStatus',
+                  label: record.isActive ? 'Deactivate' : 'Activate',
+                  icon: record.isActive ? <StopOutlined /> : <CheckCircleOutlined />,
+                  onClick: () => handleToggleStatus(record)
+                }
+              ]
+            }}
+          >
             <Button
               type="text"
               size="small"
-              icon={<EditOutlined />}
-              onClick={() => handleEdit(record)}
+              icon={<MoreOutlined />}
             />
-            <Popconfirm
-              title="Delete User"
-              description="Are you sure you want to delete this user?"
-              onConfirm={() => handleDelete(record._id)}
-              okText="Delete"
-              okType="danger"
-              cancelText="Cancel"
-            >
-              <Button
-                type="text"
-                size="small"
-                danger
-                icon={<DeleteOutlined />}
-              />
-            </Popconfirm>
-          </Space>
+          </Dropdown>
         ) : (
           <span style={{ color: '#999', fontSize: 12 }}>-</span>
         )

@@ -3,12 +3,28 @@ import { ApiError } from './apiError.js';
 import { ErrorCodes } from './ErrorCodes.js';
 import streamifier from 'streamifier';
 
-// Configure Cloudinary
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+// Delay configuration until first use
+let isConfigured = false;
+
+function ensureConfigured() {
+  if (!isConfigured) {
+    // Configure Cloudinary
+    cloudinary.config({
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET,
+    });
+
+    // Log configuration status (without secrets)
+    console.log('Cloudinary Configuration:', {
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'NOT SET',
+      api_key: process.env.CLOUDINARY_API_KEY ? 'SET' : 'NOT SET',
+      api_secret: process.env.CLOUDINARY_API_SECRET ? 'SET' : 'NOT SET',
+    });
+
+    isConfigured = true;
+  }
+}
 
 export interface CloudinaryUploadOptions {
   folder?: string;
@@ -39,6 +55,12 @@ class CloudinaryService {
     options: CloudinaryUploadOptions = {}
   ): Promise<CloudinaryUploadResult> {
     try {
+   
+      ensureConfigured();
+      
+      console.log('uploadBuffer called with buffer size:', buffer?.length || 'undefined');
+      console.log('Upload options:', options);
+      
       const defaultOptions = {
         folder: options.folder || 'uploads',
         resource_type: options.resource_type || 'auto',
@@ -50,13 +72,15 @@ class CloudinaryService {
           { ...defaultOptions, ...options },
           (error, result) => {
             if (error) {
+              console.error('Cloudinary upload_stream error:', error);
               reject(
                 ApiError.internal(
-                  'Failed to upload file to Cloudinary',
+                  `Failed to upload file to Cloudinary: ${error.message}`,
                   ErrorCodes.FILE_UPLOAD_ERROR.code
                 )
               );
             } else {
+              console.log('Cloudinary upload successful:', result?.public_id);
               resolve(result as CloudinaryUploadResult);
             }
           }
@@ -64,10 +88,10 @@ class CloudinaryService {
 
         streamifier.createReadStream(buffer).pipe(uploadStream);
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Cloudinary upload error:', error);
       throw ApiError.internal(
-        'Failed to upload file to Cloudinary',
+        `Failed to upload file to Cloudinary: ${error.message || 'Unknown error'}`,
         ErrorCodes.FILE_UPLOAD_ERROR.code
       );
     }

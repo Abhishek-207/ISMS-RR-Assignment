@@ -10,12 +10,14 @@ import {
   message,
   Popconfirm,
   Collapse,
-  Switch
+  Switch,
+  Dropdown
 } from 'antd'
 import { 
   EditOutlined, 
   DeleteOutlined,
-  ReloadOutlined
+  ReloadOutlined,
+  MoreOutlined
 } from '@ant-design/icons'
 import { api } from '../lib/api'
 import { fetchMaterialCategories, fetchMaterialStatuses } from '../lib/masters'
@@ -37,8 +39,8 @@ export default function Masters() {
     setLoading(true)
     try {
       const [categoriesRes, statusesRes] = await Promise.all([
-        fetchMaterialCategories(),
-        fetchMaterialStatuses()
+        fetchMaterialCategories({ includeInactive: true }),
+        fetchMaterialStatuses({ includeInactive: true })
       ])
 
       // Ensure we always store arrays to avoid runtime errors when accessing .length
@@ -103,7 +105,12 @@ export default function Masters() {
       {
         title: 'Name',
         dataIndex: 'name',
-        key: 'name'
+        key: 'name',
+        render: (text: string, record: any) => (
+          <span style={{ color: record.isActive ? undefined : '#999' }}>
+            {text}
+          </span>
+        )
       },
       {
         title: 'Active',
@@ -120,23 +127,41 @@ export default function Masters() {
         title: 'Actions',
         key: 'actions',
         render: (record: any) => (
-          <Space>
+          <Dropdown
+            trigger={['click']}
+            placement="bottomRight"
+            menu={{
+              items: [
+                {
+                  key: 'edit',
+                  label: 'Edit',
+                  icon: <EditOutlined />,
+                  onClick: () => handleEdit(record, type)
+                },
+                {
+                  key: 'delete',
+                  label: 'Delete',
+                  icon: <DeleteOutlined />,
+                  danger: true,
+                  onClick: () => {
+                    Modal.confirm({
+                      title: 'Delete Item',
+                      content: 'Are you sure you want to delete this item?',
+                      okText: 'Delete',
+                      okType: 'danger',
+                      cancelText: 'Cancel',
+                      onOk: () => handleDelete(record._id, type)
+                    })
+                  }
+                }
+              ]
+            }}
+          >
             <Button 
               type="text" 
-              icon={<EditOutlined />} 
-              onClick={() => handleEdit(record, type)}
+              icon={<MoreOutlined />} 
             />
-            <Popconfirm
-              title="Are you sure you want to delete this item?"
-              onConfirm={() => handleDelete(record._id, type)}
-            >
-              <Button 
-                type="text" 
-                danger 
-                icon={<DeleteOutlined />}
-              />
-            </Popconfirm>
-          </Space>
+          </Dropdown>
         )
       }
     ]

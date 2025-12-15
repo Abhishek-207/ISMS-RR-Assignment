@@ -57,7 +57,7 @@ export default function MaterialCreate() {
         headers: { 'Content-Type': 'multipart/form-data' }
       })
       
-      setAttachments(prev => [...prev, response.data.id])
+      setAttachments(prev => [...prev, response.data.data.id])
       message.success('File uploaded successfully')
       return false
     } catch (error) {

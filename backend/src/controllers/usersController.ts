@@ -205,6 +205,57 @@ export class UsersController {
   }
 
   /**
+   * Org user status (activate/deactivate)
+   */
+  static async toggleStatus(req: AuthRequest, res: Response) {
+    try {
+      const userId = req.params.id;
+      
+      // Find the user to toggle
+      const user = await User.findById(userId).lean();
+      
+      if (!user) {
+        throw ApiError.notFound('User not found', ErrorCodes.USER_NOT_FOUND.code);
+      }
+
+      // Check if the user belongs to the same organization
+      if (user.organizationId.toString() !== req.auth?.organizationId) {
+        throw ApiError.forbidden('You can only manage users in your organization');
+      }
+
+      // Prevent self-deactivation
+      if (userId === req.auth?.userId) {
+        throw ApiError.badRequest('You cannot deactivate your own account');
+      }
+
+      // Toggle the status
+      const newStatus = !user.isActive;
+      
+      const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        { isActive: newStatus },
+        { new: true, runValidators: true }
+      )
+        .populate('organizationId', 'name category')
+        .lean();
+
+      const { passwordHash, ...userWithoutPassword } = updatedUser as any;
+
+      return ApiResponse.updated(
+        res, 
+        userWithoutPassword, 
+        `User ${newStatus ? 'activated' : 'deactivated'} successfully`
+      );
+    } catch (error) {
+      if (error instanceof ApiError) {
+        return ApiResponse.error(res, error.message, error.statusCode, undefined, error.errorCode);
+      }
+      console.error('Toggle user status error:', error);
+      return ApiResponse.error(res, 'Failed to toggle user status', 500, undefined, ErrorCodes.INTERNAL_SERVER_ERROR.code);
+    }
+  }
+
+  /**
    * Delete user
    */
   static async delete(req: Request, res: Response) {

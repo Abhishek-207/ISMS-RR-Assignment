@@ -86,7 +86,19 @@ export class AuthController {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        throw ApiError.validationError('Validation failed', errors.array());
+        const formattedErrors = errors.array().map(err => ({
+          field: err.type === 'field' ? (err as any).path : err.type,
+          message: err.msg,
+          value: err.type === 'field' ? (err as any).value : undefined
+        }));
+        
+        return ApiResponse.error(
+          res, 
+          'Validation failed: ' + formattedErrors.map(e => e.message).join(', '), 
+          422, 
+          formattedErrors, 
+          ErrorCodes.VALIDATION_ERROR.code
+        );
       }
 
       const { 
@@ -108,6 +120,11 @@ export class AuthController {
       let organization;
 
       if (organizationId) {
+        // Joining existing organization - role must be ORG_USER
+        if (role !== 'ORG_USER') {
+          throw ApiError.badRequest('Role must be ORG_USER when joining an existing organization');
+        }
+
         organization = await Organization.findById(organizationId);
         if (!organization) {
           throw ApiError.notFound('Organization not found', ErrorCodes.ORGANIZATION_NOT_FOUND.code);
@@ -117,6 +134,11 @@ export class AuthController {
           throw ApiError.badRequest('Organization category does not match');
         }
       } else {
+        // Creating new organization - role must be ORG_ADMIN
+        if (role !== 'ORG_ADMIN') {
+          throw ApiError.badRequest('Role must be ORG_ADMIN when creating a new organization');
+        }
+
         if (!organizationName) {
           throw ApiError.badRequest('Organization name is required when creating a new organization');
         }
@@ -237,6 +259,48 @@ export class AuthController {
       }
       console.error('Get user error:', error);
       return ApiResponse.error(res, 'Failed to get user', 500, undefined, ErrorCodes.INTERNAL_SERVER_ERROR.code);
+    }
+  }
+
+  /**
+   * Get organizations by category (public endpoint for signup)
+   */
+  static async getOrganizationsByCategory(req: AuthRequest, res: Response) {
+    try {
+      const { category } = req.query;
+      
+      if (!category) {
+        throw ApiError.badRequest('Category is required');
+      }
+
+      const validCategories = [
+        'ENTERPRISE',
+        'MANUFACTURING_CLUSTER',
+        'EDUCATIONAL_INSTITUTION',
+        'HEALTHCARE_NETWORK',
+        'INFRASTRUCTURE_CONSTRUCTION'
+      ];
+
+      if (!validCategories.includes(String(category))) {
+        throw ApiError.badRequest('Invalid category');
+      }
+
+      const organizations = await Organization.find({ 
+        category, 
+        isActive: true 
+      })
+        .select('_id name category description')
+        .sort({ name: 1 })
+        .limit(100)
+        .lean();
+
+      return ApiResponse.success(res, organizations);
+    } catch (error) {
+      if (error instanceof ApiError) {
+        return ApiResponse.error(res, error.message, error.statusCode, undefined, error.errorCode);
+      }
+      console.error('Get organizations error:', error);
+      return ApiResponse.error(res, 'Failed to fetch organizations', 500, undefined, ErrorCodes.INTERNAL_SERVER_ERROR.code);
     }
   }
 

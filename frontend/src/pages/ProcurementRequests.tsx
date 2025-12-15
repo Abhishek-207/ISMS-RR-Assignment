@@ -13,16 +13,16 @@ import {
   Modal,
   message,
   Form,
-  Tooltip
+  Tooltip,
+  Dropdown
 } from 'antd'
 import { 
   SearchOutlined, 
   ReloadOutlined,
-  CheckOutlined,
-  CloseOutlined,
   EyeOutlined,
-  StopOutlined,
-  ShoppingCartOutlined
+  ShoppingCartOutlined,
+  MoreOutlined,
+  DownloadOutlined
 } from '@ant-design/icons'
 import { api } from '../lib/api'
 import { getCurrentUser, isOrgAdmin } from '../lib/auth'
@@ -60,6 +60,7 @@ export default function ProcurementRequests() {
   const user = getCurrentUser()
   const [requests, setRequests] = useState<ProcurementRequest[]>([])
   const [loading, setLoading] = useState(false)
+  const [exportLoading, setExportLoading] = useState(false)
   const [pagination, setPagination] = useState({ current: 1, pageSize: 20, total: 0 })
   const [filters, setFilters] = useState({
     search: '',
@@ -180,6 +181,39 @@ export default function ProcurementRequests() {
     return request.requestedBy._id === user?._id && request.status === 'PENDING'
   }
 
+  const handleExportReport = async () => {
+    setExportLoading(true)
+    try {
+      const params = new URLSearchParams()
+      
+      if (filters.search) params.append('q', filters.search)
+      if (filters.status) params.append('status', filters.status)
+      if (filters.direction === 'incoming') params.append('incoming', 'true')
+      if (filters.direction === 'outgoing') params.append('outgoing', 'true')
+      
+      const response = await api.get(`/analytics/export?${params.toString()}`, {
+        responseType: 'blob'
+      })
+      
+      const blob = new Blob([response.data], { type: 'text/csv;charset=utf-8;' })
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+      link.setAttribute('href', url)
+      link.setAttribute('download', `procurement-requests-${dayjs().format('YYYY-MM-DD-HH-mm-ss')}.csv`)
+      link.style.visibility = 'hidden'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      message.success('Report exported successfully')
+      
+    } catch (error) {
+      console.error('Failed to export report:', error)
+      message.error('Failed to export report')
+    } finally {
+      setExportLoading(false)
+    }
+  }
+
   const columns = [
     {
       title: 'Material',
@@ -283,83 +317,51 @@ export default function ProcurementRequests() {
       width: 150,
       fixed: 'right' as const,
       render: (record: ProcurementRequest) => (
-        <Space size="small">
-          <Tooltip title="View Details">
-            <Button
-              type="text"
-              size="small"
-              icon={<EyeOutlined />}
-              onClick={() => {
-                Modal.info({
-                  title: 'Procurement Request Details',
-                  width: 600,
-                  content: (
-                    <div style={{ marginTop: 16 }}>
-                      <Space direction="vertical" size="small" style={{ width: '100%' }}>
-                        <div><Text strong>Material:</Text> {record.materialId.name}</div>
-                        <div><Text strong>Condition:</Text> <Tag color={getConditionColor(record.materialId.condition)}>{record.materialId.condition.replace(/_/g, ' ')}</Tag></div>
-                        <div><Text strong>From:</Text> {record.fromOrganizationId.name}</div>
-                        <div><Text strong>To:</Text> {record.toOrganizationId.name}</div>
-                        <div><Text strong>Quantity:</Text> {record.requestedQuantity} {record.materialId.unit}</div>
-                        <div><Text strong>Purpose:</Text> {record.purpose}</div>
-                        <div><Text strong>Status:</Text> <Tag color={getStatusColor(record.status)}>{record.status}</Tag></div>
-                        <div><Text strong>Requested By:</Text> {record.requestedBy.name}</div>
-                        <div><Text strong>Requested On:</Text> {dayjs(record.createdAt).format('DD MMM YYYY, HH:mm')}</div>
-                        {record.approvedBy && (
-                          <>
-                            <div><Text strong>Approved By:</Text> {record.approvedBy.name}</div>
-                            <div><Text strong>Approved On:</Text> {dayjs(record.approvedAt).format('DD MMM YYYY, HH:mm')}</div>
-                          </>
-                        )}
-                        {record.rejectedBy && (
-                          <>
-                            <div><Text strong>Rejected By:</Text> {record.rejectedBy.name}</div>
-                            <div><Text strong>Rejected On:</Text> {dayjs(record.rejectedAt).format('DD MMM YYYY, HH:mm')}</div>
-                          </>
-                        )}
-                        {record.comments && (
-                          <div><Text strong>Comments:</Text> {record.comments}</div>
-                        )}
-                      </Space>
-                    </div>
-                  )
-                })
-              }}
-            />
-          </Tooltip>
-          
-          {canApprove(record) && (
-            <>
-              <Tooltip title="Approve">
-                <Button
-                  type="primary"
-                  size="small"
-                  icon={<CheckOutlined />}
-                  onClick={() => openActionModal(record, 'approve')}
-                />
-              </Tooltip>
-              <Tooltip title="Reject">
-                <Button
-                  danger
-                  size="small"
-                  icon={<CloseOutlined />}
-                  onClick={() => openActionModal(record, 'reject')}
-                />
-              </Tooltip>
-            </>
-          )}
-
-          {canCancel(record) && (
-            <Tooltip title="Cancel Request">
-              <Button
-                danger
-                size="small"
-                icon={<StopOutlined />}
-                onClick={() => openActionModal(record, 'cancel')}
-              />
-            </Tooltip>
-          )}
-        </Space>
+        <Dropdown
+          trigger={['click']}
+          placement="bottomRight"
+          menu={{
+            items: [
+              {
+                key: 'view',
+                label: 'View Details',
+                icon: <EyeOutlined />,
+                onClick: () => navigate(`/procurement/${record._id}`)
+              },
+              ...(canApprove(record)
+                ? [
+                    {
+                      key: 'approve',
+                      label: 'Approve',
+                      onClick: () => openActionModal(record, 'approve')
+                    },
+                    {
+                      key: 'reject',
+                      label: 'Reject',
+                      onClick: () => openActionModal(record, 'reject'),
+                      danger: true
+                    }
+                  ]
+                : []),
+              ...(canCancel(record)
+                ? [
+                    {
+                      key: 'cancel',
+                      label: 'Cancel Request',
+                      onClick: () => openActionModal(record, 'cancel'),
+                      danger: true
+                    }
+                  ]
+                : [])
+            ]
+          }}
+        >
+          <Button
+            type="text"
+            size="small"
+            icon={<MoreOutlined />}
+          />
+        </Dropdown>
       )
     }
   ]
@@ -375,13 +377,22 @@ export default function ProcurementRequests() {
             Manage surplus material procurement across organizations
           </Paragraph>
         </div>
-        <Button 
-          type="primary"
-          icon={<ShoppingCartOutlined />}
-          onClick={() => navigate('/surplus')}
-        >
-          Browse Surplus
-        </Button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <Button 
+            icon={<DownloadOutlined />}
+            onClick={handleExportReport}
+            loading={exportLoading}
+          >
+            Export Report
+          </Button>
+          <Button 
+            type="primary"
+            icon={<ShoppingCartOutlined />}
+            onClick={() => navigate('/surplus')}
+          >
+            Browse Surplus
+          </Button>
+        </div>
       </div>
 
       <Card>
@@ -401,8 +412,8 @@ export default function ProcurementRequests() {
               style={{ width: '100%' }}
               value={filters.status}
               onChange={(value) => handleFilterChange('status', value)}
-              allowClear
             >
+              <Select.Option value="">All Statuses</Select.Option>
               <Select.Option value="PENDING">Pending</Select.Option>
               <Select.Option value="APPROVED">Approved</Select.Option>
               <Select.Option value="REJECTED">Rejected</Select.Option>

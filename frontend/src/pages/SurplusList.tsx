@@ -17,7 +17,8 @@ import {
   SearchOutlined, 
   ShoppingOutlined,
   ReloadOutlined,
-  InfoCircleOutlined
+  InfoCircleOutlined,
+  DownloadOutlined
 } from '@ant-design/icons'
 import { api } from '../lib/api'
 import { getOrganizationCategory } from '../lib/auth'
@@ -46,6 +47,7 @@ export default function SurplusList() {
   
   const [materials, setMaterials] = useState<Material[]>([])
   const [loading, setLoading] = useState(false)
+  const [exportLoading, setExportLoading] = useState(false)
   const [pagination, setPagination] = useState({ current: 1, pageSize: 20, total: 0 })
   const [filters, setFilters] = useState({
     search: '',
@@ -129,9 +131,9 @@ export default function SurplusList() {
     try {
       await api.post('/transfers', {
         materialId: selectedMaterial._id,
-        requestedQuantity: values.requestedQuantity,
+        quantityRequested: parseFloat(values.requestedQuantity),
         purpose: values.purpose,
-        fromOrganizationId: selectedMaterial.organizationId._id
+        comment: values.comment
       })
 
       message.success('Procurement request submitted successfully!')
@@ -154,6 +156,43 @@ export default function SurplusList() {
       'SCRAP': 'red'
     }
     return colors[condition] || 'default'
+  }
+
+  const handleExportReport = async () => {
+    setExportLoading(true)
+    try {
+      const params = new URLSearchParams()
+      
+      params.append('isSurplus', 'true')
+      if (filters.search) params.append('q', filters.search)
+      if (filters.categoryId) params.append('categoryId', filters.categoryId)
+      if (filters.condition) params.append('condition', filters.condition)
+      if (filters.dateRange) {
+        params.append('fromDate', filters.dateRange[0].format('YYYY-MM-DD'))
+        params.append('toDate', filters.dateRange[1].format('YYYY-MM-DD'))
+      }
+      
+      const response = await api.get(`/analytics/export?${params.toString()}`, {
+        responseType: 'blob'
+      })
+      
+      const blob = new Blob([response.data], { type: 'text/csv;charset=utf-8;' })
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+      link.setAttribute('href', url)
+      link.setAttribute('download', `surplus-materials-${dayjs().format('YYYY-MM-DD-HH-mm-ss')}.csv`)
+      link.style.visibility = 'hidden'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      message.success('Report exported successfully')
+      
+    } catch (error) {
+      console.error('Failed to export report:', error)
+      message.error('Failed to export report')
+    } finally {
+      setExportLoading(false)
+    }
   }
 
   const columns = [
@@ -247,13 +286,22 @@ export default function SurplusList() {
 
   return (
     <div>
-      <div style={{ marginBottom: 16 }}>
-        <Title level={4} style={{ margin: 0, marginBottom: 8 }}>
-          Available Surplus ({orgCategory?.replace(/_/g, ' ')})
-        </Title>
-        <Paragraph type="secondary" style={{ margin: 0 }}>
-          Discover surplus materials from other organizations in your category. Submit procurement requests to acquire materials.
-        </Paragraph>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
+        <div>
+          <Title level={4} style={{ margin: 0, marginBottom: 8 }}>
+            Available Surplus ({orgCategory?.replace(/_/g, ' ')})
+          </Title>
+          <Paragraph type="secondary" style={{ margin: 0 }}>
+            Discover surplus materials from other organizations in your category. Submit procurement requests to acquire materials.
+          </Paragraph>
+        </div>
+        <Button 
+          icon={<DownloadOutlined />}
+          onClick={handleExportReport}
+          loading={exportLoading}
+        >
+          Export Report
+        </Button>
       </div>
 
       <Card>
@@ -291,8 +339,8 @@ export default function SurplusList() {
               style={{ width: '100%' }}
               value={filters.categoryId}
               onChange={(value) => handleFilterChange('categoryId', value)}
-              allowClear
             >
+              <Select.Option value="">All Categories</Select.Option>
               {categories.map((category: any) => (
                 <Select.Option key={category._id} value={category._id}>
                   {category.name}
@@ -306,8 +354,8 @@ export default function SurplusList() {
               style={{ width: '100%' }}
               value={filters.condition}
               onChange={(value) => handleFilterChange('condition', value)}
-              allowClear
             >
+              <Select.Option value="">All Conditions</Select.Option>
               <Select.Option value="NEW">New</Select.Option>
               <Select.Option value="GOOD">Good</Select.Option>
               <Select.Option value="SLIGHTLY_DAMAGED">Slightly Damaged</Select.Option>

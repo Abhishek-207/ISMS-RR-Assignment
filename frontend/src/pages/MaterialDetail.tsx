@@ -66,7 +66,7 @@ export default function MaterialDetail() {
     setLoading(true)
     try {
       const response = await api.get(`/materials/${id}`)
-      setMaterial(response.data)
+      setMaterial(response.data.data)
     } catch (error) {
       message.error('Failed to fetch material details')
       navigate('/materials')

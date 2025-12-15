@@ -22,7 +22,8 @@ import {
   DeleteOutlined,
   ReloadOutlined,
   MoreOutlined,
-  ShareAltOutlined
+  ShareAltOutlined,
+  DownloadOutlined
 } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../lib/api'
@@ -56,6 +57,7 @@ export default function MaterialsList() {
   const user = getUser()
   const [materials, setMaterials] = useState<Material[]>([])
   const [loading, setLoading] = useState(false)
+  const [exportLoading, setExportLoading] = useState(false)
   const [pagination, setPagination] = useState({ current: 1, pageSize: 20, total: 0 })
   const [filters, setFilters] = useState({
     search: '',
@@ -185,6 +187,44 @@ export default function MaterialsList() {
 
   const canEditMaterial = (materialCreatorId: string) => {
     return user?._id === materialCreatorId || isOrgAdmin()
+  }
+
+  const handleExportReport = async () => {
+    setExportLoading(true)
+    try {
+      const params = new URLSearchParams()
+      
+      if (filters.search) params.append('q', filters.search)
+      if (filters.categoryId) params.append('categoryId', filters.categoryId)
+      if (filters.status) params.append('status', filters.status)
+      if (filters.condition) params.append('condition', filters.condition)
+      if (filters.isSurplus !== '') params.append('isSurplus', filters.isSurplus)
+      if (filters.dateRange) {
+        params.append('fromDate', filters.dateRange[0].format('YYYY-MM-DD'))
+        params.append('toDate', filters.dateRange[1].format('YYYY-MM-DD'))
+      }
+      
+      const response = await api.get(`/analytics/export?${params.toString()}`, {
+        responseType: 'blob'
+      })
+      
+      const blob = new Blob([response.data], { type: 'text/csv;charset=utf-8;' })
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+      link.setAttribute('href', url)
+      link.setAttribute('download', `inventory-report-${dayjs().format('YYYY-MM-DD-HH-mm-ss')}.csv`)
+      link.style.visibility = 'hidden'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      message.success('Report exported successfully')
+      
+    } catch (error) {
+      console.error('Failed to export report:', error)
+      message.error('Failed to export report')
+    } finally {
+      setExportLoading(false)
+    }
   }
 
   const columns = [
@@ -334,100 +374,113 @@ export default function MaterialsList() {
         <Title level={4} style={{ margin: 0 }}>
           My Inventory
         </Title>
-        <Button 
-          type="primary" 
-          icon={<PlusOutlined />}
-          onClick={() => navigate('/inventory/new')}
-        >
-          Add Item
-        </Button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <Button 
+            icon={<DownloadOutlined />}
+            onClick={handleExportReport}
+            loading={exportLoading}
+          >
+            Export Report
+          </Button>
+          <Button 
+            type="primary" 
+            icon={<PlusOutlined />}
+            onClick={() => navigate('/inventory/new')}
+          >
+            Add Item
+          </Button>
+        </div>
       </div>
 
       <Card>
-        <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-          <Col xs={24} sm={12} md={6}>
-            <Input
-              placeholder="Search materials..."
-              prefix={<SearchOutlined />}
-              value={filters.search}
-              onChange={(e) => handleFilterChange('search', e.target.value)}
-              allowClear
-            />
-          </Col>
-          <Col xs={24} sm={12} md={5}>
-            <Select
-              placeholder="Category"
-              style={{ width: '100%' }}
-              value={filters.categoryId}
-              onChange={(value) => handleFilterChange('categoryId', value)}
-              allowClear
-            >
-              {categories.map((category: any) => (
-                <Select.Option key={category._id} value={category._id}>
-                  {category.name}
-                </Select.Option>
-              ))}
-            </Select>
-          </Col>
-          <Col xs={24} sm={12} md={4}>
-            <Select
-              placeholder="Status"
-              style={{ width: '100%' }}
-              value={filters.status}
-              onChange={(value) => handleFilterChange('status', value)}
-              allowClear
-            >
-              <Select.Option value="AVAILABLE">Available</Select.Option>
-              <Select.Option value="RESERVED">Reserved</Select.Option>
-              <Select.Option value="TRANSFERRED">Transferred</Select.Option>
-              <Select.Option value="ARCHIVED">Archived</Select.Option>
-            </Select>
-          </Col>
-          <Col xs={24} sm={12} md={4}>
-            <Select
-              placeholder="Condition"
-              style={{ width: '100%' }}
-              value={filters.condition}
-              onChange={(value) => handleFilterChange('condition', value)}
-              allowClear
-            >
-              <Select.Option value="NEW">New</Select.Option>
-              <Select.Option value="GOOD">Good</Select.Option>
-              <Select.Option value="SLIGHTLY_DAMAGED">Slightly Damaged</Select.Option>
-              <Select.Option value="NEEDS_REPAIR">Needs Repair</Select.Option>
-              <Select.Option value="SCRAP">Scrap</Select.Option>
-            </Select>
-          </Col>
-          <Col xs={24} sm={12} md={5}>
-            <Select
-              placeholder="Surplus Status"
-              style={{ width: '100%' }}
-              value={filters.isSurplus}
-              onChange={(value) => handleFilterChange('isSurplus', value)}
-              allowClear
-            >
-              <Select.Option value="true">Surplus Only</Select.Option>
-              <Select.Option value="false">Non-Surplus Only</Select.Option>
-            </Select>
-          </Col>
-          <Col xs={24} sm={12} md={8}>
-            <RangePicker
-              style={{ width: '100%' }}
-              value={filters.dateRange}
-              onChange={(dates) => handleFilterChange('dateRange', dates)}
-            />
-          </Col>
-          <Col xs={24} sm={12} md={4}>
-            <Button 
-              icon={<ReloadOutlined />} 
-              onClick={fetchMaterials}
-              loading={loading}
-              block
-            >
-              Refresh
-            </Button>
-          </Col>
-        </Row>
+        <div style={{ marginBottom: 24 }}>
+          <Row gutter={[16, 16]} style={{ marginBottom: 8 }}>
+            <Col xs={24} sm={12} md={8}>
+              <Input
+                placeholder="Search materials..."
+                prefix={<SearchOutlined />}
+                value={filters.search}
+                onChange={(e) => handleFilterChange('search', e.target.value)}
+                allowClear
+              />
+            </Col>
+            <Col xs={24} sm={12} md={8}>
+              <RangePicker
+                style={{ width: '100%' }}
+                value={filters.dateRange}
+                onChange={(dates) => handleFilterChange('dateRange', dates)}
+              />
+            </Col>
+            <Col xs={24} sm={12} md={8}>
+              <Select
+                placeholder="Category"
+                style={{ width: '100%' }}
+                value={filters.categoryId}
+                onChange={(value) => handleFilterChange('categoryId', value)}
+              >
+                <Select.Option value="">All Categories</Select.Option>
+                {categories.map((category: any) => (
+                  <Select.Option key={category._id} value={category._id}>
+                    {category.name}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Col>
+          </Row>
+          <Row gutter={[16, 16]}>
+            <Col xs={24} sm={12} md={5}>
+              <Select
+                placeholder="Status"
+                style={{ width: '100%' }}
+                value={filters.status}
+                onChange={(value) => handleFilterChange('status', value)}
+              >
+                <Select.Option value="">All Statuses</Select.Option>
+                <Select.Option value="AVAILABLE">Available</Select.Option>
+                <Select.Option value="RESERVED">Reserved</Select.Option>
+                <Select.Option value="TRANSFERRED">Transferred</Select.Option>
+                <Select.Option value="ARCHIVED">Archived</Select.Option>
+              </Select>
+            </Col>
+            <Col xs={24} sm={12} md={5}>
+              <Select
+                placeholder="Condition"
+                style={{ width: '100%' }}
+                value={filters.condition}
+                onChange={(value) => handleFilterChange('condition', value)}
+              >
+                <Select.Option value="">All Conditions</Select.Option>
+                <Select.Option value="NEW">New</Select.Option>
+                <Select.Option value="GOOD">Good</Select.Option>
+                <Select.Option value="SLIGHTLY_DAMAGED">Slightly Damaged</Select.Option>
+                <Select.Option value="NEEDS_REPAIR">Needs Repair</Select.Option>
+                <Select.Option value="SCRAP">Scrap</Select.Option>
+              </Select>
+            </Col>
+            <Col xs={24} sm={12} md={5}>
+              <Select
+                placeholder="Items"
+                style={{ width: '100%' }}
+                value={filters.isSurplus}
+                onChange={(value) => handleFilterChange('isSurplus', value)}
+              >
+                <Select.Option value="">All Items</Select.Option>
+                <Select.Option value="true">Surplus Only</Select.Option>
+                <Select.Option value="false">Non-Surplus Only</Select.Option>
+              </Select>
+            </Col>
+            <Col xs={24} sm={12} md={3}>
+              <Button 
+                icon={<ReloadOutlined />} 
+                onClick={fetchMaterials}
+                loading={loading}
+                block
+              >
+                Refresh
+              </Button>
+            </Col>
+          </Row>
+        </div>
 
         {loading && materials.length === 0 ? (
           <div>

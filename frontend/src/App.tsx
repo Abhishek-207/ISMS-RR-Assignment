@@ -8,8 +8,10 @@ import Landing from './pages/Landing'
 import MaterialsList from './pages/MaterialsList'
 import InventoryCreate from './pages/InventoryCreate'
 import InventoryDetail from './pages/InventoryDetail'
+import InventoryEdit from './pages/InventoryEdit'
 import SurplusList from './pages/SurplusList'
 import ProcurementRequests from './pages/ProcurementRequests'
+import ProcurementDetail from './pages/ProcurementDetail'
 import Masters from './pages/Masters'
 import Analytics from './pages/Analytics'
 import Signup from './pages/Signup'
@@ -18,7 +20,7 @@ import Notifications from './pages/Notifications'
 import NotFound from './pages/NotFound'
 import Unauthorized from './pages/Unauthorized'
 import Users from './pages/Users'
-import { isAdmin, isPlatformAdmin, isOrgAdmin, getCurrentUser, getToken, clearAuth } from './lib/auth'
+import { isAdmin, getCurrentUser, getToken, clearAuth } from './lib/auth'
 import { api } from './lib/api'
 import { storage } from './lib/storage'
 
@@ -258,12 +260,34 @@ export default function App() {
 
   const mobileMenu = (
     <Menu mode="inline" selectable={false} style={{ borderRight: 'none' }}>
-      <Menu.Item key="home-m" icon={<HomeOutlined />}><Link to="/">Home</Link></Menu.Item>
-      {user && <Menu.Item key="inventory-m" icon={<InboxOutlined />}><Link to="/inventory">My Inventory</Link></Menu.Item>}
-      {user && <Menu.Item key="surplus-m" icon={<ShopOutlined />}><Link to="/surplus">Browse Surplus</Link></Menu.Item>}
-      {user && <Menu.Item key="procurement-m" icon={<ShoppingCartOutlined />}><Link to="/procurement">Procurement</Link></Menu.Item>}
-      {user && <Menu.Item key="analytics-m" icon={<BarChartOutlined />}><Link to="/analytics">Analytics</Link></Menu.Item>}
-      {user && isAdmin() && <Menu.Item key="masters-m" icon={<SettingOutlined />}><Link to="/masters">Configuration Settings</Link></Menu.Item>}
+      <Menu.Item key="home-m" icon={<HomeOutlined />}>
+        <Link to="/" onClick={() => setMobileMenuOpen(false)}>Home</Link>
+      </Menu.Item>
+      {user && (
+        <Menu.Item key="inventory-m" icon={<InboxOutlined />}>
+          <Link to="/inventory" onClick={() => setMobileMenuOpen(false)}>My Inventory</Link>
+        </Menu.Item>
+      )}
+      {user && (
+        <Menu.Item key="surplus-m" icon={<ShopOutlined />}>
+          <Link to="/surplus" onClick={() => setMobileMenuOpen(false)}>Browse Surplus</Link>
+        </Menu.Item>
+      )}
+      {user && (
+        <Menu.Item key="procurement-m" icon={<ShoppingCartOutlined />}>
+          <Link to="/procurement" onClick={() => setMobileMenuOpen(false)}>Procurement</Link>
+        </Menu.Item>
+      )}
+      {user && (
+        <Menu.Item key="analytics-m" icon={<BarChartOutlined />}>
+          <Link to="/analytics" onClick={() => setMobileMenuOpen(false)}>Analytics</Link>
+        </Menu.Item>
+      )}
+      {user && isAdmin() && (
+        <Menu.Item key="masters-m" icon={<SettingOutlined />}>
+          <Link to="/masters" onClick={() => setMobileMenuOpen(false)}>Configuration Settings</Link>
+        </Menu.Item>
+      )}
       {user ? (
         <Menu.Item key="org-m">
           <Dropdown
@@ -278,6 +302,7 @@ export default function App() {
                 if (key === 'logout') handleLogout()
                 if (key === 'profile') navigate('/profile')
                 if (key === 'notifications') navigate('/notifications')
+                setMobileMenuOpen(false)
               }
             }}
           >
@@ -291,17 +316,17 @@ export default function App() {
         <>
           {isLoginRoute && (
             <Menu.Item key="signup-m">
-              <Link to="/signup">Create account</Link>
+              <Link to="/signup" onClick={() => setMobileMenuOpen(false)}>Create account</Link>
             </Menu.Item>
           )}
           {isSignupRoute && (
             <Menu.Item key="login-m">
-              <Link to="/login">Sign In</Link>
+              <Link to="/login" onClick={() => setMobileMenuOpen(false)}>Sign In</Link>
             </Menu.Item>
           )}
           {!isAuthRoute && (
             <Menu.Item key="login-main">
-              <Link to="/login">Sign In</Link>
+              <Link to="/login" onClick={() => setMobileMenuOpen(false)}>Sign In</Link>
             </Menu.Item>
           )}
         </>
@@ -356,8 +381,10 @@ export default function App() {
               <Route path="/inventory" element={<RequireAuth><MaterialsList /></RequireAuth>} />
               <Route path="/inventory/new" element={<RequireAuth><InventoryCreate /></RequireAuth>} />
               <Route path="/inventory/:id" element={<RequireAuth><InventoryDetail /></RequireAuth>} />
+              <Route path="/inventory/:id/edit" element={<RequireAuth><InventoryEdit /></RequireAuth>} />
               <Route path="/surplus" element={<RequireAuth><SurplusList /></RequireAuth>} />
               <Route path="/procurement" element={<RequireAuth><ProcurementRequests /></RequireAuth>} />
+              <Route path="/procurement/:id" element={<RequireAuth><ProcurementDetail /></RequireAuth>} />
               <Route path="/materials" element={<Navigate to="/inventory" replace />} />
               <Route path="/materials/new" element={<Navigate to="/inventory/new" replace />} />
               <Route path="/materials/:id" element={<RequireAuth><InventoryDetail /></RequireAuth>} />

@@ -429,23 +429,41 @@ export default function MaterialsList() {
           </Col>
         </Row>
 
-        <Table
-          columns={columns}
-          dataSource={materials}
-          loading={loading}
-          rowKey="_id"
-          size="small"
-          pagination={{
-            ...pagination,
-            showSizeChanger: true,
-            showQuickJumper: true,
-            showTotal: (total, range) => 
-              `${range[0]}-${range[1]} of ${total} items`,
-            size: 'small'
-          }}
-          onChange={handleTableChange}
-          scroll={{ x: 1100 }}
-        />
+        {loading && materials.length === 0 ? (
+          <div>
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+              <div key={i} className="shimmer-table-row">
+                <div className="shimmer-table-cell">
+                  <div className="shimmer-wrapper" />
+                  <div className="shimmer-wrapper" />
+                </div>
+                <div className="shimmer-wrapper" />
+                <div className="shimmer-wrapper" />
+                <div className="shimmer-wrapper" />
+                <div className="shimmer-wrapper" />
+                <div className="shimmer-wrapper" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <Table
+            columns={columns}
+            dataSource={materials}
+            loading={loading && materials.length > 0}
+            rowKey="_id"
+            size="small"
+            pagination={{
+              ...pagination,
+              showSizeChanger: true,
+              showQuickJumper: true,
+              showTotal: (total, range) => 
+                `${range[0]}-${range[1]} of ${total} items`,
+              size: 'small'
+            }}
+            onChange={handleTableChange}
+            scroll={{ x: 1100 }}
+          />
+        )}
       </Card>
     </div>
   )

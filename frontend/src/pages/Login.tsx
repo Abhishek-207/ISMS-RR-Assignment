@@ -1,4 +1,4 @@
-import { Button, Card, Form, Input, Typography, message, Grid, Alert } from 'antd'
+import { Button, Card, Form, Input, Typography, Grid, Alert, App } from 'antd'
 import { useNavigate, Link } from 'react-router-dom'
 import { api } from '../lib/api'
 import { setAuth } from '../lib/auth'
@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react'
 const { Title } = Typography
 
 export default function Login() {
+  const { message } = App.useApp()
   const navigate = useNavigate()
   const [form] = Form.useForm()
   const screens = Grid.useBreakpoint()
@@ -24,8 +25,9 @@ export default function Login() {
   }, [])
 
   const onFinish = async (values: any) => {
+    setLoading(true)
+    
     try {
-      setLoading(true)
       const { data } = await api.post('/auth/login', values)
       setAuth(data.data)
       
@@ -38,35 +40,19 @@ export default function Login() {
       navigate('/')
     } catch (e: any) {
       console.error('Login error:', e)
+      console.error('Error response:', e?.response)
       
-      // Display specific error messages
-      const errorMessage = e?.response?.data?.message || 'Login failed. Please check your credentials.'
+      const errorMessage = e?.response?.data?.message || ''
+      console.log('Error message from backend:', errorMessage)
       
-      // Use setTimeout to ensure message shows after form validation
-      setTimeout(() => {
-        if (errorMessage.toLowerCase().includes('invalid') || errorMessage.toLowerCase().includes('credential')) {
-          message.error({
-            content: 'Invalid email or password. Please try again.',
-            duration: 4,
-            key: 'login-error'
-          })
-        } else if (errorMessage.toLowerCase().includes('not found') || errorMessage.toLowerCase().includes('does not exist')) {
-          message.error({
-            content: 'User does not exist. Please check your email or sign up.',
-            duration: 4,
-            key: 'login-error'
-          })
-        } else {
-          message.error({
-            content: errorMessage,
-            duration: 4,
-            key: 'login-error'
-          })
-        }
-      }, 100)
-      
-      // Do NOT reset the form - keep the user's input
-      // The form will retain the values automatically
+      // Show error message based on backend response
+      if (errorMessage.toLowerCase().includes('invalid') || errorMessage.toLowerCase().includes('credential')) {
+        message.error('Invalid email or password. Please try again.', 4)
+      } else if (errorMessage.toLowerCase().includes('not found') || errorMessage.toLowerCase().includes('does not exist')) {
+        message.error('User does not exist. Please check your email or sign up.', 4)
+      } else {
+        message.error(errorMessage || 'Login failed. Please check your credentials.', 4)
+      }
     } finally {
       setLoading(false)
     }

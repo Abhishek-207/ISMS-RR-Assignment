@@ -433,23 +433,41 @@ export default function ProcurementRequests() {
           </Col>
         </Row>
 
-        <Table
-          columns={columns}
-          dataSource={requests}
-          loading={loading}
-          rowKey="_id"
-          size="small"
-          pagination={{
-            ...pagination,
-            showSizeChanger: true,
-            showQuickJumper: true,
-            showTotal: (total, range) => 
-              `${range[0]}-${range[1]} of ${total} requests`,
-            size: 'small'
-          }}
-          onChange={handleTableChange}
-          scroll={{ x: 1200 }}
-        />
+        {loading && requests.length === 0 ? (
+          <div>
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+              <div key={i} className="shimmer-table-row">
+                <div className="shimmer-table-cell">
+                  <div className="shimmer-wrapper" />
+                  <div className="shimmer-wrapper" />
+                </div>
+                <div className="shimmer-wrapper" />
+                <div className="shimmer-wrapper" />
+                <div className="shimmer-wrapper" />
+                <div className="shimmer-wrapper" />
+                <div className="shimmer-wrapper" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <Table
+            columns={columns}
+            dataSource={requests}
+            loading={loading && requests.length > 0}
+            rowKey="_id"
+            size="small"
+            pagination={{
+              ...pagination,
+              showSizeChanger: true,
+              showQuickJumper: true,
+              showTotal: (total, range) => 
+                `${range[0]}-${range[1]} of ${total} requests`,
+              size: 'small'
+            }}
+            onChange={handleTableChange}
+            scroll={{ x: 1200 }}
+          />
+        )}
       </Card>
 
       <Modal

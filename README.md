@@ -1,4 +1,7 @@
-## Inventory & Surplus Management System (MERN)
+## Inventory & Surplus Management System (ISMS)
+
+Live demo (frontend): [`https://isms-app.netlify.app`](https://isms-app.netlify.app)  
+Backend API: [`https://route-isms-deploy-production.up.railway.app`](https://route-isms-deploy-production.up.railway.app)
 
 This repository contains a full‑stack **MERN** application that helps organizations manage their internal inventory, surplus materials, and procurement requests.  
 The system is built as a **final‑year project** and demonstrates authentication, authorization with roles, CRUD operations, analytics, and production‑ready deployment.
@@ -8,14 +11,16 @@ The system is built as a **final‑year project** and demonstrates authenticatio
 ## 1. Business Case & Overview
 
 Many large organizations have unused or surplus materials sitting idle in warehouses while other units buy the same materials again.  
+This is common in **large enterprises with multiple plants and departments**, **hospitals and healthcare networks** (wards, labs, diagnostic centres), **construction and infrastructure companies**, and **educational institutions / universities** with many campuses or colleges.
+
 This application provides:
 
-- A **central inventory** of materials per organization
-- A **surplus marketplace** where surplus items can be listed and discovered
-- **Procurement workflows** for requesting and approving transfers
+- A **central inventory** of materials per organization (and per plant / hospital / department / campus)
+- A **surplus marketplace** where surplus items can be listed and discovered across units
+- **Procurement workflows** for requesting and approving transfers between plants, departments, hospitals, or campuses
 - **Analytics dashboards** for utilization, surplus trends, and transfer history
 
-The app is multi‑tenant: multiple organizations can onboard to the platform and manage their own users and inventory.
+The app is multi‑tenant: multiple organizations (enterprises, hospital groups, construction companies, universities, etc.) can onboard to the platform and manage their own users and inventory.
 
 ---
 
@@ -44,27 +49,33 @@ Permissions are enforced:
 ## 3. Features (>= 6)
 
 - **Authentication & Authorization**
+
   - Email/password login and signup
   - JWT‑based auth with cookie / header support
   - Role‑based access for routes (admin vs normal user)
 
 - **Inventory Management**
+
   - Create, read, update, delete (CRUD) inventory materials
   - Track quantity, unit, condition, availability windows, and estimated cost
 
 - **Surplus Listing & Discovery**
+
   - Mark materials as surplus
   - Browse surplus items across the organization(s)
 
 - **Procurement & Transfer Requests**
+
   - Raise procurement/transfer requests for surplus items
   - Approve or reject requests (admins)
 
 - **User & Organization Management**
+
   - Manage organizations and their basic profile
   - Admin UI for managing users and configuration masters
 
 - **Analytics & Dashboards**
+
   - High‑level analytics view for inventory, surplus, and transfers
 
 - **Notifications & UX**
@@ -102,8 +113,8 @@ Permissions are enforced:
 
 ### 4.3 Deployment Targets
 
-- **Backend**: Render / Railway (Node + MongoDB)
-- **Frontend**: Vercel / Netlify (static build from Vite)
+- **Backend**: Railway (Node + MongoDB)
+- **Frontend**: Netlify (static build from Vite)
 
 ---
 
@@ -234,74 +245,49 @@ Protected routes are implemented using wrapper components in `App.tsx` (`Require
 
 ## 9. ERD & Flowcharts
 
-The documentation diagrams should be stored in a `docs/` folder (add these files to the repo):
+The documentation diagrams are stored in the `assets/` folder:
 
-- **Entity Relationship Diagram (ERD)** – `docs/erd.png`
-- **High‑Level Architecture Diagram** – `docs/architecture.png`
-- **Auth / Request Flow** – `docs/request-flow.png`
+- **Entity Relationship Diagram (ERD)** – `assets/ERD-chart.png`
+- **High‑Level Architecture Diagram** – `assets/Arch-Digram.png`
+- **Auth / Request Flow** – `assets/Auth-flow.png`
 
-Example references from the README:
+Embedded in this README:
 
-- ERD: ![ERD](docs/erd.png)
-- Architecture: ![Architecture](docs/architecture.png)
-- Request Flow: ![Request Flow](docs/request-flow.png)
-
-> If the actual filenames differ, update the links accordingly.
+- ERD: ![ERD](assets/ERD-chart.png)
+- Architecture: ![Architecture](assets/Arch-Digram.png)
+- Request Flow: ![Request Flow](assets/Auth-flow.png)
 
 ---
 
 ## 10. Deployment
 
-### 10.1 Backend Deployment (Render / Railway)
+### 10.1 Backend Deployment (Railway)
 
-General steps (example – adjust for chosen platform):
+Steps to deploy the backend API on **Railway**:
 
 1. Push this repository to a public GitHub repo.
-2. Create a new **Web Service** (Render) or **Service** (Railway) from the `backend/` directory.
-3. Set environment variables from section **6.2** (ensure `NODE_ENV=production` and correct `MONGODB_URI`).
+2. In Railway, create a new **Service** from the `backend/` directory of this repo.
+3. Set environment variables from section **6.2** (ensure `NODE_ENV=production` and correct `MONGODB_URI` pointing to your production MongoDB instance).
 4. Set build / start commands:
    - Build: `npm run build`
    - Start: `npm start`
-5. Note the deployed backend URL, e.g.:
-   - **Backend URL**: `https://your-backend.onrender.com`
+5. After deployment, confirm the backend URL:
+   - **Backend URL**: `https://route-isms-deploy-production.up.railway.app`
 
-Update `frontend/src/lib/api.ts` (or environment variables) to point to the deployed backend base URL.
+Update `frontend/src/lib/api.ts` (or environment variables) to point to the deployed backend base URL above.
 
-### 10.2 Frontend Deployment (Vercel / Netlify)
+### 10.2 Frontend Deployment (Netlify)
 
-1. Connect the GitHub repo to Vercel or Netlify.
-2. Use the `frontend/` subdirectory as the project root.
-3. Install dependencies automatically, build command:
+Steps to deploy the frontend on **Netlify**:
+
+1. Connect the GitHub repo to Netlify and select the `frontend/` folder as the project root.
+2. Use the build command:
    - `npm run build`
-4. Set environment variables if needed (e.g. `VITE_API_URL` for the backend).
-5. Note the deployed frontend URL, e.g.:
-   - **Frontend URL**: `https://your-frontend.netlify.app`
+3. Set environment variables if needed (for example `VITE_API_URL` with the Railway backend URL).
+4. After deployment, confirm the frontend URL:
+   - **Frontend URL**: `https://isms-app.netlify.app`
 
-### 10.3 Final Deployed URLs (to be filled after deployment)
+### 10.3 Final Deployed URLs
 
-- **Frontend (Vercel/Netlify)**: `<add-final-frontend-url-here>`
-- **Backend (Render/Railway)**: `<add-final-backend-url-here>`
-
----
-
-## 11. Submission Checklist
-
-- [ ] Public GitHub repository containing this codebase
-- [ ] `README.md` updated with:
-  - [ ] Overview and business case
-  - [ ] User roles & permissions
-  - [ ] Feature list (>= 6)
-  - [ ] Tech stack
-  - [ ] Setup & run instructions
-  - [ ] API summaries
-  - [ ] ERD & flowchart images
-  - [ ] Final deployed frontend & backend URLs
-- [ ] ERD and flow/architecture diagrams committed under `docs/`
-- [ ] Backend deployed on Render/Railway and reachable
-- [ ] Frontend deployed on Vercel/Netlify and integrated with backend
-- [ ] Loom video (5–10 min) explaining architecture, models, and demo
-  - [ ] Loom link added at the top of this README
-
-You can now use this README directly for your assignment and only need to update the diagram images and final URLs once deployment is complete.
-
-
+- **Frontend (Netlify)**: `https://isms-app.netlify.app`
+- **Backend (Railway)**: `https://route-isms-deploy-production.up.railway.app`

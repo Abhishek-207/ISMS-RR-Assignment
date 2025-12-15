@@ -36,7 +36,7 @@ export default function Profile() {
     const currentUser = getCurrentUser()
     setUser(currentUser)
     
-    // Fetch organization details including user count
+   
     if (currentUser?.organizationId) {
       fetchOrganizationDetails(currentUser)
     }
@@ -46,21 +46,33 @@ export default function Profile() {
     try {
       setOrganizationLoading(true)
       console.log('Fetching organization details for:', currentUser.organizationId)
-      const { data } = await api.get(`/organizations/${currentUser.organizationId}`)
-      console.log('Organization API response:', data)
       
-      if (data.success) {
+     
+      const { data } = await api.get('/users', {
+        params: {
+          page: 1,
+          pageSize: 1
+        }
+      })
+      console.log('Users API response:', data)
+      console.log('Users meta.total:', data?.meta?.total)
+      
+      
+      if (data && data.meta && typeof data.meta.total === 'number') {
         const updatedUser = {
           ...currentUser,
           organization: {
             _id: currentUser.organization?._id || currentUser.organizationId,
-            name: currentUser.organization?.name || data.data.name,
-            category: currentUser.organization?.category || data.data.category,
-            userCount: data.data.userCount
+            name: currentUser.organization?.name || '',
+            category: currentUser.organization?.category || currentUser.organizationCategory,
+            userCount: data.meta.total
           }
         }
-        console.log('Updated user with organization:', updatedUser)
+        console.log('Updated user with organization user count:', updatedUser)
+        console.log('User count set to:', updatedUser.organization.userCount)
         setUser(updatedUser)
+      } else {
+        console.error('No meta.total found in response')
       }
     } catch (error: any) {
       console.error('Failed to fetch organization details:', error)

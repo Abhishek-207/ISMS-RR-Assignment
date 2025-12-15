@@ -21,6 +21,118 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Smooth route transition */
+.ant-layout-content {
+  animation: fadeIn 0.2s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Route container with smooth transitions */
+.route-container {
+  animation: routeFadeIn 0.15s ease-out;
+  will-change: opacity;
+}
+
+@keyframes routeFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Shimmer loading animation */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.shimmer-wrapper {
+  animation: shimmer 2s infinite linear;
+  background: linear-gradient(
+    to right,
+    #f6f6f6 0%,
+    #f0f0f0 20%,
+    #e8e8e8 40%,
+    #f0f0f0 60%,
+    #f6f6f6 100%
+  );
+  background-size: 1000px 100%;
+  border-radius: 4px;
+}
+
+.shimmer-line {
+  height: 20px;
+  margin-bottom: 8px;
+  border-radius: 4px;
+}
+
+.shimmer-line.short {
+  width: 40%;
+}
+
+.shimmer-line.medium {
+  width: 60%;
+}
+
+.shimmer-line.long {
+  width: 80%;
+}
+
+.shimmer-line.full {
+  width: 100%;
+}
+
+.shimmer-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.shimmer-table-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr 0.5fr;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f5f5f5;
+  align-items: center;
+  background: #fff;
+}
+
+.shimmer-table-row .shimmer-wrapper {
+  height: 16px;
+}
+
+.shimmer-table-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.shimmer-table-cell .shimmer-wrapper:first-child {
+  height: 16px;
+  width: 85%;
+}
+
+.shimmer-table-cell .shimmer-wrapper:last-child {
+  height: 12px;
+  width: 60%;
+  opacity: 0.7;
+}
+
 .container {
   max-width: 1200px;
   margin: 0 auto;

@@ -325,23 +325,41 @@ export default function Users() {
           </Col>
         </Row>
 
-        <Table
-          columns={columns}
-          dataSource={users}
-          loading={loading}
-          rowKey="_id"
-          size="small"
-          pagination={{
-            ...pagination,
-            showSizeChanger: true,
-            showQuickJumper: true,
-            showTotal: (total, range) => 
-              `${range[0]}-${range[1]} of ${total} users`,
-            size: 'small'
-          }}
-          onChange={handleTableChange}
-          scroll={{ x: 1000 }}
-        />
+        {loading && users.length === 0 ? (
+          <div>
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+              <div key={i} className="shimmer-table-row">
+                <div className="shimmer-table-cell">
+                  <div className="shimmer-wrapper" />
+                  <div className="shimmer-wrapper" />
+                </div>
+                <div className="shimmer-wrapper" />
+                <div className="shimmer-wrapper" />
+                <div className="shimmer-wrapper" />
+                <div className="shimmer-wrapper" />
+                <div className="shimmer-wrapper" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <Table
+            columns={columns}
+            dataSource={users}
+            loading={loading && users.length > 0}
+            rowKey="_id"
+            size="small"
+            pagination={{
+              ...pagination,
+              showSizeChanger: true,
+              showQuickJumper: true,
+              showTotal: (total, range) => 
+                `${range[0]}-${range[1]} of ${total} users`,
+              size: 'small'
+            }}
+            onChange={handleTableChange}
+            scroll={{ x: 1000 }}
+          />
+        )}
       </Card>
 
       <Modal

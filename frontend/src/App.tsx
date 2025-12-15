@@ -31,14 +31,21 @@ export default function App() {
   const location = useLocation()
   const navigate = useNavigate()
 
+  // Auth check - only runs once on mount or when token changes
   useEffect(() => {
     const checkAuth = async () => {
       try {
         const response = await api.get('/auth/me')
+        console.log('Auth check response:', response.data)
 
-        const backendUser = response.data.user
+        // Handle both data.data.user and data.user response structures
+        const backendUser = response.data?.data?.user || response.data?.user
 
-        
+        if (!backendUser) {
+          console.error('No user data in response:', response.data)
+          throw new Error('No user data received')
+        }
+
         const mergedUser = {
           ...getCurrentUser(),
           ...backendUser,
@@ -77,7 +84,7 @@ export default function App() {
     if (getCurrentUser() || getToken()) {
       checkAuth()
     }
-  }, [location.pathname, navigate])
+  }, [navigate])
 
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
@@ -341,27 +348,29 @@ export default function App() {
           <div className="topnav hide-mobile">
             {horizontalMenu}
           </div>
-          <Routes>
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/" element={<Landing />} />
-            <Route path="/inventory" element={<RequireAuth><MaterialsList /></RequireAuth>} />
-            <Route path="/inventory/new" element={<RequireAuth><InventoryCreate /></RequireAuth>} />
-            <Route path="/inventory/:id" element={<RequireAuth><InventoryDetail /></RequireAuth>} />
-            <Route path="/surplus" element={<RequireAuth><SurplusList /></RequireAuth>} />
-            <Route path="/procurement" element={<RequireAuth><ProcurementRequests /></RequireAuth>} />
-            <Route path="/materials" element={<Navigate to="/inventory" replace />} />
-            <Route path="/materials/new" element={<Navigate to="/inventory/new" replace />} />
-            <Route path="/materials/:id" element={<RequireAuth><InventoryDetail /></RequireAuth>} />
-            <Route path="/transfers" element={<Navigate to="/procurement" replace />} />
-            <Route path="/users" element={<RequireAdmin><Users /></RequireAdmin>} />
-            <Route path="/masters" element={<RequireAdmin><Masters /></RequireAdmin>} />
-            <Route path="/analytics" element={<RequireAuth><Analytics /></RequireAuth>} />
-            <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
-            <Route path="/notifications" element={<RequireAuth><Notifications /></RequireAuth>} />
-            <Route path="/unauthorized" element={<Unauthorized />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <div className="route-container">
+            <Routes>
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/" element={<Landing />} />
+              <Route path="/inventory" element={<RequireAuth><MaterialsList /></RequireAuth>} />
+              <Route path="/inventory/new" element={<RequireAuth><InventoryCreate /></RequireAuth>} />
+              <Route path="/inventory/:id" element={<RequireAuth><InventoryDetail /></RequireAuth>} />
+              <Route path="/surplus" element={<RequireAuth><SurplusList /></RequireAuth>} />
+              <Route path="/procurement" element={<RequireAuth><ProcurementRequests /></RequireAuth>} />
+              <Route path="/materials" element={<Navigate to="/inventory" replace />} />
+              <Route path="/materials/new" element={<Navigate to="/inventory/new" replace />} />
+              <Route path="/materials/:id" element={<RequireAuth><InventoryDetail /></RequireAuth>} />
+              <Route path="/transfers" element={<Navigate to="/procurement" replace />} />
+              <Route path="/users" element={<RequireAdmin><Users /></RequireAdmin>} />
+              <Route path="/masters" element={<RequireAdmin><Masters /></RequireAdmin>} />
+              <Route path="/analytics" element={<RequireAuth><Analytics /></RequireAuth>} />
+              <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
+              <Route path="/notifications" element={<RequireAuth><Notifications /></RequireAuth>} />
+              <Route path="/unauthorized" element={<Unauthorized />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </div>
         </div>
       </Content>
       <div style={{ borderBottom: '7px solid #0891b2', background: '#fff' }}>

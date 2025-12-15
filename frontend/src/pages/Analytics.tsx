@@ -6,14 +6,12 @@ import {
   Typography, 
   DatePicker, 
   Statistic,
-  Spin,
   Select,
   Button
 } from 'antd'
 import { 
   InboxOutlined, 
   CheckCircleOutlined, 
-  ClockCircleOutlined, 
   ToolOutlined,
   DownloadOutlined,
   SwapOutlined,
@@ -429,7 +427,44 @@ export default function Analytics() {
         </Col>
       </Row>
 
-      <Spin spinning={loading}>
+      {loading ? (
+        <Row gutter={[24, 24]}>
+          <Col xs={24} lg={12}>
+            <Card title="Inventory by Status">
+              <div style={{ padding: '20px 0' }}>
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <div key={i} className="shimmer-wrapper" style={{ marginBottom: 10, height: 40, borderRadius: 6 }} />
+                ))}
+              </div>
+            </Card>
+          </Col>
+          <Col xs={24} lg={12}>
+            <Card title="Inventory by Condition">
+              <div style={{ padding: '20px 0', display: 'flex', justifyContent: 'center', alignItems: 'center', height: 300 }}>
+                <div className="shimmer-wrapper" style={{ width: 180, height: 180, borderRadius: '50%' }} />
+              </div>
+            </Card>
+          </Col>
+          <Col xs={24} lg={12}>
+            <Card title="Procurement Request Trends">
+              <div style={{ padding: '20px 0' }}>
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <div key={i} className="shimmer-wrapper" style={{ marginBottom: 10, height: 40, borderRadius: 6 }} />
+                ))}
+              </div>
+            </Card>
+          </Col>
+          <Col xs={24} lg={12}>
+            <Card title="Inventory by Category">
+              <div style={{ padding: '20px 0' }}>
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <div key={i} className="shimmer-wrapper" style={{ marginBottom: 10, height: 40, borderRadius: 6 }} />
+                ))}
+              </div>
+            </Card>
+          </Col>
+        </Row>
+      ) : (
         <Row gutter={[24, 24]}>
           <Col xs={24} lg={12}>
             <Card title="Inventory by Status">
@@ -532,7 +567,7 @@ export default function Analytics() {
             </Card>
           </Col>
         </Row>
-      </Spin>
+      )}
     </div>
   )
 }

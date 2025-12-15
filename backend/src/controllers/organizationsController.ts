@@ -2,6 +2,7 @@ import { Response } from 'express';
 import { validationResult } from 'express-validator';
 import { AuthRequest } from '../middleware/auth.js';
 import { Organization } from '../models/Organization.model.js';
+import { User } from '../models/User.model.js';
 import { ApiResponse } from '../utils/apiResponse.js';
 import { ApiError } from '../utils/apiError.js';
 import { ErrorCodes } from '../utils/ErrorCodes.js';
@@ -55,7 +56,16 @@ export class OrganizationsController {
         throw ApiError.forbidden('Access denied');
       }
 
-      return ApiResponse.success(res, organization);
+      // Count total users in this organization
+      const userCount = await User.countDocuments({ 
+        organizationId: organization._id,
+        isActive: true 
+      });
+
+      return ApiResponse.success(res, {
+        ...organization,
+        userCount
+      });
     } catch (error) {
       if (error instanceof ApiError) {
         return ApiResponse.error(res, error.message, error.statusCode, undefined, error.errorCode);

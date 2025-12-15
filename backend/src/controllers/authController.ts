@@ -48,18 +48,22 @@ export class AuthController {
       res.cookie('token', token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-        maxAge: 7 * 24 * 60 * 60 * 1000
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        maxAge: 24 * 60 * 60 * 1000 // 1 day
       });
 
       return ApiResponse.success(res, {
         token,
         user: {
+          _id: user._id,
           id: user._id,
           name: user.name,
           email: user.email,
           role: user.role,
+          organizationId: user.organizationId._id,
+          organizationCategory: (user.organizationId as any).category,
           organization: {
+            _id: user.organizationId._id,
             id: user.organizationId._id,
             name: (user.organizationId as any).name,
             category: (user.organizationId as any).category
@@ -134,7 +138,8 @@ export class AuthController {
         });
       }
 
-      const passwordHash = await bcrypt.hash(password, 12);
+      const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS || '12', 10);
+      const passwordHash = await bcrypt.hash(password, saltRounds);
 
       const user = await User.create({
         organizationId: organization._id,
@@ -160,18 +165,22 @@ export class AuthController {
       res.cookie('token', token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-        maxAge: 7 * 24 * 60 * 60 * 1000
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        maxAge: 24 * 60 * 60 * 1000 // 1 day
       });
 
       return ApiResponse.created(res, {
         token,
         user: {
+          _id: user._id,
           id: user._id,
           name: user.name,
           email: user.email,
           role: user.role,
+          organizationId: organization._id,
+          organizationCategory: organization.category,
           organization: {
+            _id: organization._id,
             id: organization._id,
             name: organization.name,
             category: organization.category
@@ -207,11 +216,15 @@ export class AuthController {
 
       return ApiResponse.success(res, {
         user: {
+          _id: user._id,
           id: user._id,
           name: user.name,
           email: user.email,
           role: user.role,
+          organizationId: user.organizationId._id,
+          organizationCategory: (user.organizationId as any).category,
           organization: {
+            _id: user.organizationId._id,
             id: user.organizationId._id,
             name: (user.organizationId as any).name,
             category: (user.organizationId as any).category

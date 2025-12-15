@@ -19,6 +19,7 @@ import {
 } from '@ant-design/icons'
 import { api } from '../lib/api'
 import { fetchMaterialCategories, fetchMaterialStatuses } from '../lib/masters'
+import Users from './Users'
 
 const { Title } = Typography
 
@@ -40,8 +41,9 @@ export default function Masters() {
         fetchMaterialStatuses()
       ])
 
-      setCategories(categoriesRes)
-      setStatuses(statusesRes)
+      // Ensure we always store arrays to avoid runtime errors when accessing .length
+      setCategories(Array.isArray(categoriesRes) ? categoriesRes : [])
+      setStatuses(Array.isArray(statusesRes) ? statusesRes : [])
     } catch (error) {
       message.error('Failed to fetch configuration data')
     } finally {
@@ -202,7 +204,15 @@ export default function Masters() {
         </Button>
       </div>
 
-      <Collapse defaultActiveKey={['material-categories']} size="small" accordion>
+      <Collapse defaultActiveKey={['users']} size="small" accordion>
+        {/* Users (managed as part of configuration) */}
+        <Collapse.Panel 
+          header="Users"
+          key="users"
+        >
+          <Users />
+        </Collapse.Panel>
+
         {/* Material Categories */}
         <Collapse.Panel 
           header={

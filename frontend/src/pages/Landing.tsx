@@ -130,7 +130,7 @@ export default function Landing() {
                 }}
               >
                 <Text strong style={{ color: '#fff' }}>
-                  {tenantName ? `Welcome to ${tenantName}` : 'Welcome'}
+                  {user?.organization?.name ? `Welcome to ${user?.organization?.name}` : 'Welcome'}
                 </Text>
               </Button>
               <Link to="/inventory/new" style={{ width: isMobile ? '100%' : 'auto' }}>

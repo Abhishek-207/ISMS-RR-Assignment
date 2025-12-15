@@ -16,7 +16,35 @@ import analyticsRoutes from './routes/analytics.route.js';
 
 const app = express();
 
-app.use(cors({ origin: true, credentials: true }));
+// Default allowed origins (local + deployed frontend)
+const defaultAllowedOrigins = [
+  'http://localhost:5173',
+  'https://isms-app.netlify.app'
+];
+
+
+const envOriginsRaw = process.env.CORS_ORIGIN || '';
+const envAllowedOrigins = envOriginsRaw
+  .split(',')
+  .map(origin => origin.trim())
+  .filter(origin => origin.length > 0);
+
+const allowedOrigins = Array.from(
+  new Set([...defaultAllowedOrigins, ...envAllowedOrigins])
+);
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl) or from allowed origins
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error('Not allowed by CORS'));
+    },
+    credentials: true
+  })
+);
 app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
 

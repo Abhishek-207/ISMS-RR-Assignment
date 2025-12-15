@@ -2,7 +2,7 @@ import React from 'react'
 import { Layout, Typography, Space, Menu, Button, Drawer, message, Dropdown } from 'antd'
 import { useState, useEffect } from 'react'
 import { Routes, Route, Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
-import { MenuOutlined, LogoutOutlined, UserOutlined, DownOutlined, BellOutlined, ShopOutlined, InboxOutlined, ShoppingCartOutlined } from '@ant-design/icons'
+import { MenuOutlined, LogoutOutlined, UserOutlined, DownOutlined, BellOutlined, ShopOutlined, InboxOutlined, ShoppingCartOutlined, HomeOutlined, BarChartOutlined, SettingOutlined } from '@ant-design/icons'
 import Login from './pages/Login'
 import Landing from './pages/Landing'
 import MaterialsList from './pages/MaterialsList'
@@ -15,9 +15,12 @@ import Analytics from './pages/Analytics'
 import Signup from './pages/Signup'
 import Profile from './pages/Profile'
 import Notifications from './pages/Notifications'
+import NotFound from './pages/NotFound'
+import Unauthorized from './pages/Unauthorized'
 import Users from './pages/Users'
 import { isAdmin, isPlatformAdmin, isOrgAdmin, getCurrentUser, getToken, clearAuth } from './lib/auth'
 import { api } from './lib/api'
+import { storage } from './lib/storage'
 
 const { Header, Content } = Layout
 const { Title, Text } = Typography
@@ -32,21 +35,49 @@ export default function App() {
     const checkAuth = async () => {
       try {
         const response = await api.get('/auth/me')
-        setUser(response.data.user)
+
+        const backendUser = response.data.user
+
         
-        if (response.data.user.organization) {
-          localStorage.setItem('organization', JSON.stringify(response.data.user.organization))
+        const mergedUser = {
+          ...getCurrentUser(),
+          ...backendUser,
         }
-      } catch (error) {
-        clearAuth()
-        setUser(null)
+
+        storage.setItem('user', JSON.stringify(mergedUser))
+        setUser(mergedUser)
+
+        if (backendUser.organization) {
+          localStorage.setItem('organization', JSON.stringify(backendUser.organization))
+        }
+      } catch (error: any) {
+        // Check if it's a token expiration error
+        const errorCode = error?.response?.data?.errorCode
+        const isExpired = error?.response?.data?.expired
+        
+        if (error?.response?.status === 401) {
+          // Set flag for session expired message if token expired
+          if (isExpired || errorCode === 1001) { // 1001 is TOKEN_EXPIRED code
+            sessionStorage.setItem('sessionExpired', 'true')
+          }
+          
+          clearAuth()
+          setUser(null)
+          
+          // Only redirect to login if not already on public pages
+          if (location.pathname !== '/login' && location.pathname !== '/signup') {
+            navigate('/login')
+          }
+        } else {
+          console.error('Auth check failed, keeping existing session:', error)
+        }
       }
     }
 
     if (getCurrentUser() || getToken()) {
       checkAuth()
     }
-  }, [])
+  }, [location.pathname, navigate])
 
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
@@ -94,7 +125,7 @@ export default function App() {
 
   const RequireAdmin = ({ children }: { children: React.ReactNode }) => {
     if (!user || !isAdmin()) {
-      return <Navigate to="/" replace />
+      return <Navigate to="/unauthorized" replace />
     }
     return <>{children}</>
   }
@@ -106,7 +137,8 @@ export default function App() {
   const menuItems = user ? [
     {
       key: '/',
-      label: 'Home'
+      label: 'Home',
+      icon: <HomeOutlined />
     },
     {
       key: '/inventory',
@@ -125,16 +157,14 @@ export default function App() {
     },
     {
       key: '/analytics',
-      label: 'Analytics'
+      label: 'Analytics',
+      icon: <BarChartOutlined />
     },
     ...(isAdmin() ? [
       {
-        key: '/users',
-        label: 'Users'
-      },
-      {
         key: '/masters',
-        label: 'Settings'
+        label: 'Configuration Settings',
+        icon: <SettingOutlined />
       }
     ] : [])
   ] : [
@@ -187,13 +217,6 @@ export default function App() {
       />
       {user ? (
         <Space>
-          <Button 
-            type="text" 
-            icon={<BellOutlined style={{ fontSize: '18px' }} />} 
-            style={{ color: '#0891b2', fontWeight: 500 }}
-            onClick={() => navigate('/notifications')}
-            title="Notifications"
-          />
           <Dropdown overlay={userMenu} placement="bottomRight">
             <Button type="text" style={{ color: '#0891b2', fontWeight: 700 }}>
               <Space>
@@ -228,13 +251,12 @@ export default function App() {
 
   const mobileMenu = (
     <Menu mode="inline" selectable={false} style={{ borderRight: 'none' }}>
-      <Menu.Item key="home-m"><Link to="/">Home</Link></Menu.Item>
-      {user && <Menu.Item key="inventory-m"><Link to="/inventory">My Inventory</Link></Menu.Item>}
-      {user && <Menu.Item key="surplus-m"><Link to="/surplus">Browse Surplus</Link></Menu.Item>}
-      {user && <Menu.Item key="procurement-m"><Link to="/procurement">Procurement</Link></Menu.Item>}
-      {user && <Menu.Item key="analytics-m"><Link to="/analytics">Analytics</Link></Menu.Item>}
-      {user && isAdmin() && <Menu.Item key="users-m"><Link to="/users">Users</Link></Menu.Item>}
-      {user && isAdmin() && <Menu.Item key="masters-m"><Link to="/masters">Settings</Link></Menu.Item>}
+      <Menu.Item key="home-m" icon={<HomeOutlined />}><Link to="/">Home</Link></Menu.Item>
+      {user && <Menu.Item key="inventory-m" icon={<InboxOutlined />}><Link to="/inventory">My Inventory</Link></Menu.Item>}
+      {user && <Menu.Item key="surplus-m" icon={<ShopOutlined />}><Link to="/surplus">Browse Surplus</Link></Menu.Item>}
+      {user && <Menu.Item key="procurement-m" icon={<ShoppingCartOutlined />}><Link to="/procurement">Procurement</Link></Menu.Item>}
+      {user && <Menu.Item key="analytics-m" icon={<BarChartOutlined />}><Link to="/analytics">Analytics</Link></Menu.Item>}
+      {user && isAdmin() && <Menu.Item key="masters-m" icon={<SettingOutlined />}><Link to="/masters">Configuration Settings</Link></Menu.Item>}
       {user ? (
         <Menu.Item key="org-m">
           <Dropdown
@@ -337,8 +359,8 @@ export default function App() {
             <Route path="/analytics" element={<RequireAuth><Analytics /></RequireAuth>} />
             <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
             <Route path="/notifications" element={<RequireAuth><Notifications /></RequireAuth>} />
-           
-            <Route path="*" element={<Navigate to="/" />} />
+            <Route path="/unauthorized" element={<Unauthorized />} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
       </Content>

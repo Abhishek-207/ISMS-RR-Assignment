@@ -1,3 +1,4 @@
+import { storage } from './storage'
 
 export interface User {
   _id: string
@@ -19,7 +20,7 @@ export interface AuthResponse {
 }
 
 export const getCurrentUser = (): User | null => {
-  const userStr = localStorage.getItem('user')
+  const userStr = storage.getItem('user')
   if (!userStr) return null
   
   try {
@@ -32,20 +33,20 @@ export const getCurrentUser = (): User | null => {
 export const getUser = getCurrentUser
 
 export const getToken = (): string | null => {
-  return localStorage.getItem('token')
+  return storage.getItem('token')
 }
 
 export const setAuth = (auth: AuthResponse): void => {
-  localStorage.setItem('token', auth.token)
-  localStorage.setItem('user', JSON.stringify(auth.user))
+  storage.setItem('token', auth.token)
+  storage.setItem('user', JSON.stringify(auth.user))
   
   window.dispatchEvent(new Event('auth-changed'))
 }
 
 export const clearAuth = (): void => {
-  localStorage.removeItem('token')
-  localStorage.removeItem('user')
-  localStorage.removeItem('organization')
+  storage.removeItem('token')
+  storage.removeItem('user')
+  storage.removeItem('organization')
   
   window.dispatchEvent(new Event('auth-changed'))
 }

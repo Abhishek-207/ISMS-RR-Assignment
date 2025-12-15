@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react'
-import { Card, Descriptions, Button, Typography, Grid, message, Form, Input, Modal, Tag, Divider } from 'antd'
+import { useState, useEffect } from 'react'
+import { Card, Descriptions, Button, Typography, Grid, message, Form, Input, Modal, Tag } from 'antd'
 import { EditOutlined, SaveOutlined, TeamOutlined, BankOutlined } from '@ant-design/icons'
 import { getCurrentUser } from '../lib/auth'
+import { api } from '../lib/api'
 
 const { Title, Text } = Typography
 const { useBreakpoint } = Grid
@@ -17,6 +18,7 @@ interface User {
     _id: string
     name: string
     category: string
+    userCount?: number
   }
 }
 
@@ -27,12 +29,47 @@ export default function Profile() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(false)
   const [editModalVisible, setEditModalVisible] = useState(false)
+  const [organizationLoading, setOrganizationLoading] = useState(false)
   const [form] = Form.useForm()
 
   useEffect(() => {
     const currentUser = getCurrentUser()
     setUser(currentUser)
+    
+    // Fetch organization details including user count
+    if (currentUser?.organizationId) {
+      fetchOrganizationDetails(currentUser)
+    }
   }, [])
+
+  const fetchOrganizationDetails = async (currentUser: User) => {
+    try {
+      setOrganizationLoading(true)
+      console.log('Fetching organization details for:', currentUser.organizationId)
+      const { data } = await api.get(`/organizations/${currentUser.organizationId}`)
+      console.log('Organization API response:', data)
+      
+      if (data.success) {
+        const updatedUser = {
+          ...currentUser,
+          organization: {
+            _id: currentUser.organization?._id || currentUser.organizationId,
+            name: currentUser.organization?.name || data.data.name,
+            category: currentUser.organization?.category || data.data.category,
+            userCount: data.data.userCount
+          }
+        }
+        console.log('Updated user with organization:', updatedUser)
+        setUser(updatedUser)
+      }
+    } catch (error: any) {
+      console.error('Failed to fetch organization details:', error)
+      console.error('Error response:', error?.response?.data)
+      message.error('Failed to load organization details')
+    } finally {
+      setOrganizationLoading(false)
+    }
+  }
 
   const handleEditProfile = () => {
     if (user) {
@@ -147,6 +184,7 @@ export default function Profile() {
           </span>
         }
         bodyStyle={{ padding: isMobile ? 12 : 16 }}
+        loading={organizationLoading}
       >
         <Descriptions
           column={isMobile ? 1 : 2}
@@ -159,11 +197,14 @@ export default function Profile() {
           </Descriptions.Item>
           <Descriptions.Item label="Category">
             <Tag color="blue">
-              {getCategoryLabel(user.organizationCategory || user.organization?.category)}
+              {getCategoryLabel(user.organizationCategory || user.organization?.category || '')}
             </Tag>
           </Descriptions.Item>
           <Descriptions.Item label="Organization ID">
             <Text code style={{ fontSize: 11 }}>{user.organizationId || user.organization?._id || '-'}</Text>
+          </Descriptions.Item>
+          <Descriptions.Item label="Total Users">
+            <Text strong>{user.organization?.userCount !== undefined ? user.organization.userCount : '-'}</Text>
           </Descriptions.Item>
         </Descriptions>
       </Card>

@@ -77,8 +77,8 @@ export default function SurplusList() {
       }
 
       const response = await api.get('/materials/surplus', { params })
-      setMaterials(response.data.items)
-      setPagination(prev => ({ ...prev, total: response.data.total }))
+      setMaterials(response.data.data)
+      setPagination(prev => ({ ...prev, total: response.data.meta.total }))
     } catch (error) {
       message.error('Failed to fetch surplus materials')
     } finally {
@@ -89,7 +89,7 @@ export default function SurplusList() {
   const fetchMasterData = async () => {
     try {
       const categoriesRes = await api.get('/masters/material-categories')
-      setCategories(categoriesRes.data.items || [])
+      setCategories(categoriesRes.data.data || [])
     } catch (error) {
       console.error('Failed to fetch material categories:', error)
     }
@@ -139,7 +139,7 @@ export default function SurplusList() {
       requestForm.resetFields()
       setSelectedMaterial(null)
     } catch (error: any) {
-      message.error(error.response?.data?.error || 'Failed to submit procurement request')
+      message.error(error.response?.data?.message || 'Failed to submit procurement request')
     } finally {
       setSubmitting(false)
     }

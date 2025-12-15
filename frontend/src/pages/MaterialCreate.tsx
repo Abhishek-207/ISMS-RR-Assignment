@@ -83,7 +83,7 @@ export default function MaterialCreate() {
       message.success('Inventory item created successfully!')
       navigate('/inventory')
     } catch (error: any) {
-      message.error(error.response?.data?.error || 'Failed to create inventory item')
+      message.error(error.response?.data?.message || 'Failed to create inventory item')
     } finally {
       setLoading(false)
     }

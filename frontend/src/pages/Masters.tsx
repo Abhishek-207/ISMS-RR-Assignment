@@ -82,7 +82,7 @@ export default function Masters() {
       setModalVisible(false)
       fetchData()
     } catch (error: any) {
-      message.error(error.response?.data?.error || 'Failed to save item')
+      message.error(error.response?.data?.message || 'Failed to save item')
     }
   }
 
@@ -228,7 +228,7 @@ export default function Masters() {
               message.success('Category created successfully')
               fetchData()
             } catch (error: any) {
-              message.error(error.response?.data?.error || 'Failed to create category')
+              message.error(error.response?.data?.message || 'Failed to create category')
             }
           }} style={{ width: '100%', marginBottom: 12 }}>
             <Form.Item name="name" rules={[{ required: true, whitespace: true, message: 'Please enter category name' }]} style={{ flex: 1 }}>
@@ -273,7 +273,7 @@ export default function Masters() {
               message.success('Status created successfully')
               fetchData()
             } catch (error: any) {
-              message.error(error.response?.data?.error || 'Failed to create status')
+              message.error(error.response?.data?.message || 'Failed to create status')
             }
           }} style={{ width: '100%', marginBottom: 12 }}>
             <Form.Item name="name" rules={[{ required: true, whitespace: true, message: 'Please enter status name' }]} style={{ flex: 1 }}>

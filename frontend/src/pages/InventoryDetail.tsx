@@ -104,7 +104,7 @@ export default function InventoryDetail() {
           message.success(`Item ${action}ed as surplus successfully`)
           fetchItem()
         } catch (error: any) {
-          message.error(error.response?.data?.error || `Failed to ${action} as surplus`)
+          message.error(error.response?.data?.message || `Failed to ${action} as surplus`)
         } finally {
           setToggleLoading(false)
         }
@@ -124,7 +124,7 @@ export default function InventoryDetail() {
           message.success('Item deleted successfully')
           navigate('/inventory')
         } catch (error: any) {
-          message.error(error.response?.data?.error || 'Failed to delete item')
+          message.error(error.response?.data?.message || 'Failed to delete item')
         }
       }
     })

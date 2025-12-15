@@ -34,7 +34,7 @@ export default function Signup() {
       setLoadingOrgs(true)
       try {
         const { data } = await api.get('/organizations', { params: { category: value, pageSize: 100 } })
-        setOrganizations(data.items || [])
+        setOrganizations(data.data || [])
       } catch (e) {
         message.error('Failed to load organizations')
       } finally {
@@ -50,7 +50,7 @@ export default function Signup() {
       setLoadingOrgs(true)
       try {
         const { data } = await api.get('/organizations', { params: { category, pageSize: 100 } })
-        setOrganizations(data.items || [])
+        setOrganizations(data.data || [])
       } catch (e) {
         message.error('Failed to load organizations')
       } finally {
@@ -76,16 +76,16 @@ export default function Signup() {
       }
 
       const { data } = await api.post('/auth/signup', payload)
-      setAuth(data)
+      setAuth(data.data)
       
-      if (data.user.organization) {
-        localStorage.setItem('organization', JSON.stringify(data.user.organization))
+      if (data.data.user.organization) {
+        localStorage.setItem('organization', JSON.stringify(data.data.user.organization))
       }
       
       message.success('Registration successful!')
       navigate('/')
     } catch (e: any) {
-      message.error(e?.response?.data?.error || 'Signup failed')
+      message.error(e?.response?.data?.message || 'Signup failed')
     }
   }
 

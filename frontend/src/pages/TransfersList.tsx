@@ -85,8 +85,8 @@ export default function TransfersList() {
       if (filters.direction === 'outgoing') params.outgoing = true
 
       const response = await api.get('/transfers', { params })
-      setTransfers(response.data.items)
-      setPagination(prev => ({ ...prev, total: response.data.total }))
+      setTransfers(response.data.data)
+      setPagination(prev => ({ ...prev, total: response.data.meta.total }))
     } catch (error) {
       message.error('Failed to fetch procurement requests')
     } finally {
@@ -139,7 +139,7 @@ export default function TransfersList() {
       actionForm.resetFields()
       fetchTransfers()
     } catch (error: any) {
-      message.error(error.response?.data?.error || `Failed to ${actionType} request`)
+      message.error(error.response?.data?.message || `Failed to ${actionType} request`)
     } finally {
       setSubmitting(false)
     }

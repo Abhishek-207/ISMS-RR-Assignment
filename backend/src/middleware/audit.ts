@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { AuditLog } from '../models/AuditLog.js';
+import { AuditLog } from '../models/AuditLog.model.js';
 import { AuthRequest } from './auth.js';
 
 export function audit(

@@ -87,8 +87,8 @@ export default function MaterialsList() {
       }
 
       const response = await api.get('/materials', { params })
-      setMaterials(response.data.items)
-      setPagination(prev => ({ ...prev, total: response.data.total }))
+      setMaterials(response.data.data)
+      setPagination(prev => ({ ...prev, total: response.data.meta.total }))
     } catch (error) {
       message.error('Failed to fetch inventory')
     } finally {
@@ -99,7 +99,7 @@ export default function MaterialsList() {
   const fetchMasterData = async () => {
     try {
       const categoriesRes = await api.get('/masters/material-categories')
-      setCategories(categoriesRes.data.items || [])
+      setCategories(categoriesRes.data.data || [])
     } catch (error) {
       console.error('Failed to fetch material categories:', error)
     }
@@ -138,7 +138,7 @@ export default function MaterialsList() {
           message.success('Material marked as surplus successfully')
           fetchMaterials()
         } catch (error: any) {
-          message.error(error.response?.data?.error || 'Failed to mark as surplus')
+          message.error(error.response?.data?.message || 'Failed to mark as surplus')
         }
       }
     })
@@ -156,7 +156,7 @@ export default function MaterialsList() {
           message.success('Material deleted successfully')
           fetchMaterials()
         } catch (error: any) {
-          message.error(error.response?.data?.error || 'Failed to delete material')
+          message.error(error.response?.data?.message || 'Failed to delete material')
         }
       }
     })

@@ -93,7 +93,7 @@ export default function MaterialDetail() {
           message.success('Material marked as surplus successfully')
           fetchMaterial()
         } catch (error: any) {
-          message.error(error.response?.data?.error || 'Failed to mark as surplus')
+          message.error(error.response?.data?.message || 'Failed to mark as surplus')
         }
       }
     })
@@ -111,7 +111,7 @@ export default function MaterialDetail() {
           message.success('Material deleted successfully')
           navigate('/materials')
         } catch (error: any) {
-          message.error(error.response?.data?.error || 'Failed to delete material')
+          message.error(error.response?.data?.message || 'Failed to delete material')
         }
       }
     })

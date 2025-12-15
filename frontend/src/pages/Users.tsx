@@ -70,8 +70,8 @@ export default function Users() {
       if (filters.isActive !== '') params.isActive = filters.isActive === 'true'
 
       const response = await api.get('/users', { params })
-      setUsers(response.data.items)
-      setPagination(prev => ({ ...prev, total: response.data.total }))
+      setUsers(response.data.data)
+      setPagination(prev => ({ ...prev, total: response.data.meta.total }))
     } catch (error) {
       message.error('Failed to fetch users')
     } finally {
@@ -115,7 +115,7 @@ export default function Users() {
       message.success('User deleted successfully')
       fetchUsers()
     } catch (error: any) {
-      message.error(error.response?.data?.error || 'Failed to delete user')
+      message.error(error.response?.data?.message || 'Failed to delete user')
     }
   }
 
@@ -132,7 +132,7 @@ export default function Users() {
       form.resetFields()
       fetchUsers()
     } catch (error: any) {
-      message.error(error.response?.data?.error || 'Failed to save user')
+      message.error(error.response?.data?.message || 'Failed to save user')
     }
   }
 

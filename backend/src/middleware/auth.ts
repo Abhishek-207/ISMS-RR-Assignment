@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { User, UserRole } from '../models/User.js';
-import { OrganizationCategory } from '../models/Organization.js';
+import { User, UserRole } from '../models/User.model.js';
+import { OrganizationCategory } from '../models/Organization.model.js';
 
 export interface AuthRequest extends Request {
   auth?: {

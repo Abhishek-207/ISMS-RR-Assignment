@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
-import { OrganizationCategory } from './Organization.js';
+import { OrganizationCategory } from './Organization.model.js';
 
 export type UserRole = 'PLATFORM_ADMIN' | 'ORG_ADMIN' | 'ORG_USER';
 

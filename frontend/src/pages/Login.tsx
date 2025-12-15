@@ -14,17 +14,17 @@ export default function Login() {
   const onFinish = async (values: any) => {
     try {
       const { data } = await api.post('/auth/login', values)
-      setAuth(data)
+      setAuth(data.data)
       
-      if (data.user.organization) {
-        localStorage.setItem('organization', JSON.stringify(data.user.organization))
-        console.log('Login: Organization -', data.user.organization.name, `(${data.user.organization.category})`)
+      if (data.data.user.organization) {
+        localStorage.setItem('organization', JSON.stringify(data.data.user.organization))
+        console.log('Login: Organization -', data.data.user.organization.name, `(${data.data.user.organization.category})`)
       }
       
-      message.success(`Welcome back, ${data.user.name}!`)
+      message.success(`Welcome back, ${data.data.user.name}!`)
       navigate('/')
     } catch (e: any) {
-      message.error(e?.response?.data?.error || 'Login failed')
+      message.error(e?.response?.data?.message || 'Login failed')
     }
   }
 

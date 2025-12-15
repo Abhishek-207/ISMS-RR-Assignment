@@ -375,8 +375,8 @@ export default function App() {
           </div>
           <div className="route-container">
             <Routes>
-              <Route path="/signup" element={<Signup />} />
-              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={user ? <Navigate to="/" replace /> : <Signup />} />
+              <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login />} />
               <Route path="/" element={<Landing />} />
               <Route path="/inventory" element={<RequireAuth><MaterialsList /></RequireAuth>} />
               <Route path="/inventory/new" element={<RequireAuth><InventoryCreate /></RequireAuth>} />

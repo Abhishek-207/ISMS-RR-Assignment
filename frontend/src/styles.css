@@ -1,0 +1,739 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300..900&family=Nunito:wght@300..900&family=Outfit:wght@300..900&display=swap");
+
+:root {
+  --app-font: "Nunito";
+  --primary-color: #0891b2;
+  --primary-light: #06b6d4;
+  --bg-light: #f0f9fa;
+  --uplift-duration: 1.35s;
+  --uplift-delay-step: 0.18s;
+  --uplift-ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--app-font, "Nunito"), system-ui, -apple-system, Segoe UI, Roboto, Inter, Outfit, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Sticky top nav under the header */
+.topnav {
+  position: sticky;
+  top: 64px; /* approx header height */
+  z-index: 999;
+  background: #fff;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 20px;
+}
+
+/* Adjust when header height changes on small screens */
+@media (max-width: 768px) {
+  .topnav { top: 56px; }
+}
+
+/* Header title responsive alignment */
+.header-title { 
+  text-align: left;
+  margin-top: 17px;
+}
+@media (max-width: 768px) {
+  .header-title {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    width: max-content;
+    margin-top: 12px;
+  }
+  @media (max-width: 480px) {
+    .header-title {
+      margin-top: 10px;
+    }
+  }
+}
+
+/* Hero gradient using the brand teal - matching screenshots */
+.hero {
+  background: linear-gradient(135deg, #0891b2 0%, #06b6d4 50%, #ffffff 100%);
+  color: #fff;
+  padding: 48px 24px;
+  border-radius: 16px;
+  box-shadow: 0 18px 40px rgba(8, 145, 178, 0.22), 0 8px 20px rgba(0, 0, 0, 0.10);
+}
+
+/* Mobile hero card treatment */
+.hero-mobile-card {
+  border-radius: 16px;
+  padding: 24px 18px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+  background: linear-gradient(180deg, #0c98bd 0%, #0796b6 45%, #0e96b3 100%);
+}
+
+.hero-mobile-primary {
+  width: 100%;
+  box-shadow: 0 10px 24px rgba(8, 145, 178, 0.35);
+}
+
+.hero-mobile-secondary {
+  width: 100%;
+  background: #fff !important;
+  color: #000 !important;
+  border-color: #fff !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+@keyframes liftReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(48px) scale(0.97);
+    filter: blur(14px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+/* Shared lift-in animation */
+.lift-reveal {
+  opacity: 0;
+  transform: translate3d(0, 48px, 0) scale(0.97);
+  transform-origin: center bottom;
+  filter: blur(14px);
+}
+
+.lift-reveal-visible {
+  animation: liftReveal var(--uplift-duration) var(--uplift-ease) forwards;
+  will-change: transform, opacity, filter;
+}
+
+/* Feature card hover effects */
+.feature-card {
+  transition: box-shadow 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+}
+.feature-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(8, 145, 178, 0.15);
+  border: 0.5px solid var(--primary-color) !important;
+  transform: translateY(-3px);
+}
+
+/* Sign-in button hover behavior */
+.signin-btn {
+  background: #fff !important;
+  color: #000 !important;
+  border-color: #fff !important;
+  font-weight: 500;
+}
+.signin-btn:hover, .signin-btn:focus, .signin-btn:active {
+  color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  background: #fff !important;
+}
+
+/* List Material button (logged-in) hover behavior */
+.list-material-btn {
+  background: #fff !important;
+  color: #000 !important;
+  border-color: #fff !important;
+  font-weight: 600;
+}
+.list-material-btn:hover,
+.list-material-btn:focus,
+.list-material-btn:active {
+  color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  background: #fff !important;
+}
+
+/* Responsive helpers */
+.hide-mobile { display: block; }
+.show-mobile { display: none; }
+
+/* Material status badges */
+.status-badge {
+  font-weight: 500;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.status-available {
+  background-color: #f6ffed;
+  color: #52c41a;
+  border: 1px solid #b7eb8f;
+}
+
+.status-reserved {
+  background-color: #fff7e6;
+  color: #fa8c16;
+  border: 1px solid #ffd591;
+}
+
+.status-in-use {
+  background-color: #e0f7fa;
+  color: #0891b2;
+  border: 1px solid #67e8f9;
+}
+
+.status-transferred {
+  background-color: #f9f0ff;
+  color: #722ed1;
+  border: 1px solid #d3adf7;
+}
+
+.status-archived {
+  background-color: #f5f5f5;
+  color: #8c8c8c;
+  border: 1px solid #d9d9d9;
+}
+
+/* Material condition badges */
+.condition-badge {
+  font-weight: 500;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.condition-new {
+  background-color: #f6ffed;
+  color: #52c41a;
+  border: 1px solid #b7eb8f;
+}
+
+.condition-good {
+  background-color: #e0f7fa;
+  color: #0891b2;
+  border: 1px solid #67e8f9;
+}
+
+.condition-slightly-damaged {
+  background-color: #fff7e6;
+  color: #fa8c16;
+  border: 1px solid #ffd591;
+}
+
+.condition-needs-repair {
+  background-color: #fff2e8;
+  color: #fa541c;
+  border: 1px solid #ffbb96;
+}
+
+.condition-scrap {
+  background-color: #fff1f0;
+  color: #f5222d;
+  border: 1px solid #ffccc7;
+}
+
+/* Auth (login / signup) pages */
+.auth-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+  padding: 40px 32px;
+  background: transparent;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.auth-card .ant-card-body {
+  padding: 24px 28px;
+}
+
+.auth-form {
+  width: 100%;
+}
+
+.auth-card--login {
+  max-width: 420px;
+}
+
+.auth-card--signup {
+  max-width: 520px;
+}
+
+@media (max-width: 768px) {
+  .auth-page {
+    align-items: center;
+    justify-content: center;
+
+    padding: 12px 2px 20px;
+  }
+
+  .auth-card {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+  }
+
+  .auth-card .ant-card-body {
+    padding: 20px 22px;
+  }
+
+  .auth-form {
+    /* Add comfortable inner padding on mobile without shrinking the form too much */
+    padding: 0 16px;
+  }
+
+  /* Slightly larger fields and text for auth forms on mobile */
+  .auth-form .ant-input,
+  .auth-form .ant-input-password,
+  .auth-form .ant-select-selector,
+  .auth-form .ant-input-textarea {
+    font-size: 16px;
+  }
+
+  .auth-page .ant-typography {
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-page {
+    /* Extra small devices: keep a thin but visible edge padding */
+    padding: 8px 1px 16px;
+  }
+
+  .auth-card {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    border-radius: 10px;
+  }
+
+  .auth-card .ant-card-body {
+    padding: 18px 20px;
+  }
+
+  .auth-form {
+    padding: 0 18px;
+  }
+}
+
+/* Auth footer links color */
+.auth-page a {
+  color: #0891b2;
+}
+
+.auth-page a:hover,
+.auth-page a:focus {
+  color: #067e9b;
+}
+
+/* Mobile-first responsive design */
+@media (max-width: 768px) {
+  .hide-mobile { display: none !important; }
+  .show-mobile { display: block !important; }
+  
+  /* Container adjustments */
+  .container { 
+    padding: 0 16px; 
+  }
+  
+  /* Hero section mobile optimization */
+  .hero { 
+    padding: 32px 20px; 
+    border-radius: 16px; 
+    margin: 0;
+  }
+  
+  /* Content padding adjustments */
+  .ant-layout-content {
+    padding: 16px !important;
+  }
+  
+  /* Form responsiveness */
+  .ant-form-inline .ant-form-item { 
+    flex: 1 1 100%; 
+    display: block; 
+    margin-bottom: 12px;
+  }
+  .ant-form-inline .ant-form-item .ant-form-item-control-input { 
+    width: 100%; 
+  }
+  
+  /* Button adjustments */
+  .ant-btn {
+    min-height: 44px;
+    font-size: 16px;
+  }
+  
+  /* Table responsiveness */
+  .ant-table-wrapper {
+    overflow-x: auto;
+  }
+  
+  /* Card adjustments */
+  .ant-card {
+    margin-bottom: 12px;
+  }
+  
+  /* Menu adjustments */
+  .ant-menu-horizontal {
+    font-size: 14px;
+  }
+  
+  /* Drawer adjustments */
+  .ant-drawer-body {
+    padding: 16px !important;
+  }
+  /* Drawer menu typography */
+  .ant-drawer .ant-menu {
+    font-size: 16px;
+  }
+  .ant-drawer .ant-menu-item,
+  .ant-drawer .ant-menu-submenu-title {
+    padding: 12px 16px;
+  }
+  .ant-drawer .ant-menu-item a {
+    font-size: 16px;
+  }
+  
+  /* Space component adjustments */
+  .ant-space-vertical {
+    width: 100%;
+  }
+  
+  /* Ensure form items have proper spacing on mobile */
+  .ant-form-item {
+    margin-bottom: 16px !important;
+  }
+  
+  /* Fix card body padding on mobile */
+  .ant-card-body {
+    padding: 12px !important;
+  }
+
+  /* Extra bottom padding inside auth cards for login/signup footer text on mobile */
+  .auth-card .ant-card-body {
+    padding: 12px 12px 24px !important;
+  }
+  
+  /* Ensure proper button sizing on mobile */
+  .ant-btn {
+    min-height: 44px !important;
+    font-size: 16px !important;
+  }
+}
+
+/* Tablet adjustments */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .container { 
+    padding: 0 24px; 
+  }
+  
+  .hero { 
+    padding: 40px 28px; 
+  }
+}
+
+/* Small mobile devices */
+@media (max-width: 480px) {
+  .container { 
+    padding: 0 12px; 
+  }
+  
+  .hero { 
+    padding: 28px 16px; 
+    border-radius: 12px;
+  }
+  
+  .ant-layout-content {
+    padding: 12px !important;
+  }
+  
+  /* Extra small mobile form adjustments */
+  .ant-card-body {
+    padding: 8px !important;
+  }
+
+  /* Extra bottom padding inside auth cards for login/signup footer text on very small devices */
+  .auth-card .ant-card-body {
+    padding: 8px 8px 20px !important;
+  }
+  
+  .ant-form-item {
+    margin-bottom: 12px !important;
+  }
+}
+
+/* Dashboard cards */
+.dashboard-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+}
+
+.dashboard-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+/* Analytics charts */
+.chart-container {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* Transfer request status */
+.transfer-status-pending {
+  color: #fa8c16;
+}
+
+.transfer-status-approved {
+  color: #52c41a;
+}
+
+.transfer-status-rejected {
+  color: #f5222d;
+}
+
+.transfer-status-completed {
+  color: #1890ff;
+}
+
+.transfer-status-cancelled {
+  color: #8c8c8c;
+}
+
+/* Desktop-only drop shadows */
+@media (min-width: 769px) {
+  .ant-layout-header {
+    box-shadow: 0 6px 14px rgba(8, 145, 178, 0.30);
+  }
+  .topnav {
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.20);
+  }
+}
+
+/* Global scrollbar styling */
+* {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: #0891b2 #e0f7fa; /* thumb color | track color */
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #e0f7fa;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #0891b2;
+  border-radius: 8px;
+  border: 2px solid #e0f7fa;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: #06b6d4;
+}
+
+/* Date picker font styling */
+.ant-picker-header-view {
+  font-family: var(--app-font, "Nunito"), system-ui, -apple-system, Segoe UI, Roboto, Inter, Outfit, Arial, sans-serif !important;
+}
+
+.ant-picker-month-btn,
+.ant-picker-year-btn {
+  font-family: var(--app-font, "Nunito"), system-ui, -apple-system, Segoe UI, Roboto, Inter, Outfit, Arial, sans-serif !important;
+}
+
+.ant-picker-header-super-prev-btn,
+.ant-picker-header-prev-btn,
+.ant-picker-header-next-btn,
+.ant-picker-header-super-next-btn {
+  font-family: var(--app-font, "Nunito"), system-ui, -apple-system, Segoe UI, Roboto, Inter, Outfit, Arial, sans-serif !important;
+}
+
+/* Mobile center buttons - center align on mobile, left align on desktop */
+@media (max-width: 768px) {
+  .mobile-center-buttons {
+    justify-content: center !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .mobile-center-buttons {
+    justify-content: flex-start !important;
+  }
+}
+
+/* Refresh button spinner animation */
+.refresh-icon.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Landing page specific styles */
+.landing-section {
+  padding: 48px 0;
+}
+
+@media (max-width: 768px) {
+  .landing-section {
+    padding: 32px 0;
+  }
+}
+
+
+
+
+/* Stats card gradient */
+.stats-card {
+  background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%);
+  border-radius: 20px;
+  padding: 32px;
+  color: #fff;
+  box-shadow: 0 8px 32px rgba(8, 145, 178, 0.3);
+}
+
+@media (max-width: 768px) {
+  .stats-card {
+    padding: 24px;
+    border-radius: 16px;
+  }
+}
+
+/* Section headings */
+.section-title {
+  color: var(--primary-color);
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.section-subtitle {
+  color: #666;
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+@media (max-width: 768px) {
+  .section-subtitle {
+    margin-bottom: 24px;
+  }
+}
+
+/* CTA section gradient */
+.cta-section {
+  background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%);
+  padding: 48px 0;
+}
+
+@media (max-width: 768px) {
+  .cta-section {
+    padding: 32px 0;
+  }
+}
+
+/* Benefit cards alternating background */
+.benefit-card {
+  border: 1px solid #e8f4f8;
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  transition: all 0.25s ease;
+}
+
+.benefit-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.benefit-card-light {
+  background: #e0f7fa;
+}
+
+.benefit-card-white {
+  background: #fff;
+}
+
+/* Step number circles */
+.step-number {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  box-shadow: 0 4px 12px rgba(8, 145, 178, 0.3);
+  color: #fff;
+  font-size: 26px;
+  font-weight: 700;
+}
+
+@media (max-width: 768px) {
+  .step-number {
+    width: 56px;
+    height: 56px;
+    font-size: 22px;
+  }
+}
+
+/* Footer */
+.landing-footer {
+  background: var(--bg-light);
+  padding: 20px 0;
+  text-align: center;
+}
+
+.landing-footer-text {
+  color: var(--primary-color);
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .landing-footer-text {
+    font-size: 13px;
+  }
+}
+
+/* Landing page tighter padding on mobile */
+.landing-mobile-tight {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+@media (max-width: 768px) {
+  .landing-mobile-tight {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .landing-mobile-tight {
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+}

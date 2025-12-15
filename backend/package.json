@@ -1,0 +1,50 @@
+{
+  "name": "lt-ISMS-backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/server.js",
+  "scripts": {
+    "start": "node dist/server.js",
+    "dev": "node --no-warnings ./node_modules/nodemon/bin/nodemon.js --exec \"node --no-warnings --loader=ts-node/esm\" src/server.ts --ignore uploads/",
+    "build": "tsc -p .",
+    "production": "NODE_ENV=production",
+    "lint": "echo 'no linter configured'",
+    "seed": "node --no-warnings --loader ts-node/esm ./src/seed.ts",
+    "add-allocation-history": "node --no-warnings --loader ts-node/esm ./src/scripts/addAllocationHistory.ts",
+    "add-allocation-history-js": "node ./src/scripts/addAllocationHistory.js"
+  },
+  "dependencies": {
+    "@types/pdf-parse": "^1.1.5",
+    "@types/pdfkit": "^0.17.3",
+    "axios": "^1.11.0",
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dayjs": "^1.11.11",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-validator": "^7.0.1",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.5.1",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.5-lts.1",
+    "pdf-parse": "^1.1.1",
+    "pdfkit": "^0.17.2",
+    "sharp": "^0.34.3"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cookie-parser": "^1.4.7",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/morgan": "^1.9.7",
+    "@types/multer": "^1.4.12",
+    "@types/node": "^20.11.30",
+    "@types/uuid": "^11.0.0",
+    "nodemon": "^3.1.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  }
+}

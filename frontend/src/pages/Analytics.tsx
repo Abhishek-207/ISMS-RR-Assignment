@@ -62,8 +62,11 @@ export default function Analytics() {
   const [stats, setStats] = useState({
     totalInventory: 0,
     availableItems: 0,
+    reservedItems: 0,
     surplusItems: 0,
     procurementRequests: 0,
+    pendingRequests: 0,
+    approvedRequests: 0,
     costAvoided: 0
   })
 
@@ -126,11 +129,18 @@ export default function Analytics() {
       const conditions = conditionsResponse.data.data
 
       // Set stats from dashboard data
+      const totalProcurementRequests = dashboardData.transfers?.reduce((acc: number, t: any) => acc + t.count, 0) || 0
+      const pendingRequests = dashboardData.transfers?.find((t: any) => t._id === 'PENDING')?.count || 0
+      const approvedRequests = dashboardData.transfers?.find((t: any) => t._id === 'APPROVED')?.count || 0
+      
       setStats({
         totalInventory: dashboardData.overall?.totalMaterials || 0,
         availableItems: dashboardData.overall?.availableMaterials || 0,
+        reservedItems: availability.summary?.reservedMaterials || 0,
         surplusItems: dashboardData.overall?.surplusMaterials || 0,
-        procurementRequests: dashboardData.transfers?.reduce((acc: number, t: any) => acc + t.count, 0) || 0,
+        procurementRequests: totalProcurementRequests,
+        pendingRequests: pendingRequests,
+        approvedRequests: approvedRequests,
         costAvoided: dashboardData.overall?.totalEstimatedValue || 0
       })
 
@@ -267,16 +277,15 @@ export default function Analytics() {
             )}
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
+            <Button onClick={clearAllFilters}>
+              Clear Filters
+            </Button>
             <Button 
-              onClick={handleExportReport} 
-              type="primary" 
+              onClick={handleExportReport}
               icon={<DownloadOutlined />}
               loading={exportLoading}
             >
               Export Report
-            </Button>
-            <Button onClick={clearAllFilters} type="default">
-              Clear Filters
             </Button>
           </div>
         </div>

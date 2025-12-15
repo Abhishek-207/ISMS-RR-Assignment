@@ -32,7 +32,11 @@ export class TransfersController {
 
       const [items, total] = await Promise.all([
         TransferRequest.find(filter)
-          .populate('materialId', 'name quantity unit condition')
+          .populate({
+            path: 'materialId',
+            select: 'name quantity unit condition attachments',
+            populate: { path: 'attachments' }
+          })
           .populate('fromOrganizationId', 'name category')
           .populate('toOrganizationId', 'name category')
           .populate('requestedBy', 'name email')
@@ -58,7 +62,10 @@ export class TransfersController {
   static async getById(req: Request, res: Response) {
     try {
       const transferRequest = await TransferRequest.findById(req.params.id)
-        .populate('materialId')
+        .populate({
+          path: 'materialId',
+          populate: { path: 'attachments' }
+        })
         .populate('fromOrganizationId', 'name category')
         .populate('toOrganizationId', 'name category')
         .populate('requestedBy', 'name email')
@@ -141,7 +148,11 @@ export class TransfersController {
       });
 
       const populatedRequest = await TransferRequest.findById(procurementRequest._id)
-        .populate('materialId', 'name quantity unit condition')
+        .populate({
+          path: 'materialId',
+          select: 'name quantity unit condition attachments',
+          populate: { path: 'attachments' }
+        })
         .populate('fromOrganizationId', 'name category')
         .populate('toOrganizationId', 'name category')
         .populate('requestedBy', 'name email')
@@ -232,7 +243,11 @@ export class TransfersController {
       }
 
       const populatedRequest = await TransferRequest.findById(procurementRequest._id)
-        .populate('materialId', 'name quantity unit condition')
+        .populate({
+          path: 'materialId',
+          select: 'name quantity unit condition attachments',
+          populate: { path: 'attachments' }
+        })
         .populate('fromOrganizationId', 'name category')
         .populate('toOrganizationId', 'name category')
         .populate('requestedBy', 'name email')
@@ -284,7 +299,11 @@ export class TransfersController {
       await procurementRequest.save();
 
       const populatedRequest = await TransferRequest.findById(procurementRequest._id)
-        .populate('materialId', 'name quantity unit condition')
+        .populate({
+          path: 'materialId',
+          select: 'name quantity unit condition attachments',
+          populate: { path: 'attachments' }
+        })
         .populate('fromOrganizationId', 'name category')
         .populate('toOrganizationId', 'name category')
         .populate('requestedBy', 'name email')

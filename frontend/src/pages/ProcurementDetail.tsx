@@ -11,13 +11,16 @@ import {
   message,
   Modal,
   Form,
-  Input
+  Input,
+  Image
 } from 'antd'
 import { 
   ArrowLeftOutlined,
   CheckOutlined,
   CloseOutlined,
-  StopOutlined
+  StopOutlined,
+  EyeOutlined,
+  FileOutlined
 } from '@ant-design/icons'
 import { useParams, useNavigate } from 'react-router-dom'
 import { api } from '../lib/api'
@@ -26,6 +29,13 @@ import dayjs from 'dayjs'
 
 const { Title, Text } = Typography
 const { TextArea } = Input
+
+interface Attachment {
+  _id: string
+  path?: string
+  originalName?: string
+  size?: number
+}
 
 interface ProcurementRequest {
   _id: string
@@ -37,6 +47,7 @@ interface ProcurementRequest {
     condition: string 
     categoryId?: { name: string }
     estimatedCost?: number
+    attachments?: Attachment[]
   }
   fromOrganizationId: { _id: string; name: string; category: string }
   toOrganizationId: { _id: string; name: string; category: string }
@@ -265,14 +276,14 @@ export default function ProcurementDetail() {
                 </Text>
               </Descriptions.Item>
 
-              {request.materialId.estimatedCost && (
+              {typeof request.materialId.estimatedCost === 'number' ? (
                 <Descriptions.Item label="Estimated Value" span={2}>
-                  ₹{(request.materialId.estimatedCost * request.requestedQuantity).toLocaleString()}
+                  ₹{(request.materialId.estimatedCost * request.materialId.quantity).toLocaleString()}
                   <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>
-                    (₹{request.materialId.estimatedCost} per {request.materialId.unit})
+                    (₹{request.materialId.estimatedCost} per {request.materialId.unit}, using available qty)
                   </Text>
                 </Descriptions.Item>
-              )}
+              ) : null}
 
               <Descriptions.Item label="Purpose" span={2}>
                 {request.purpose}
@@ -372,6 +383,72 @@ export default function ProcurementDetail() {
               </div>
             </Space>
           </Card>
+
+          {request.materialId.attachments && request.materialId.attachments.length > 0 && (
+            <Card
+              title={`Attachments (${request.materialId.attachments.length})`}
+              size="small"
+              style={{ marginTop: 16 }}
+            >
+              <Space direction="vertical" style={{ width: '100%' }}>
+                {request.materialId.attachments.map((attachment) => (
+                  <Card key={attachment._id} size="small" style={{ background: '#fafafa' }}>
+                    {attachment.path ? (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <Image
+                          src={attachment.path}
+                          alt={attachment.originalName || 'Attachment'}
+                          style={{
+                            width: 120,
+                            height: 120,
+                            objectFit: 'cover',
+                            borderRadius: 8,
+                            border: '1px solid #d9d9d9'
+                          }}
+                          preview={{
+                            mask: <EyeOutlined />,
+                          }}
+                        />
+                        <div style={{ flex: 1 }}>
+                          <div>
+                            <Text strong>{attachment.originalName || 'Attachment'}</Text>
+                          </div>
+                          {typeof attachment.size === 'number' && (
+                            <div>
+                              <Text type="secondary" style={{ fontSize: 12 }}>
+                                {(attachment.size / 1024).toFixed(2)} KB
+                              </Text>
+                            </div>
+                          )}
+                          <div style={{ marginTop: 4 }}>
+                            <Button
+                              type="link"
+                              size="small"
+                              icon={<FileOutlined />}
+                              onClick={() => window.open(attachment.path!, '_blank')}
+                              style={{ padding: 0, height: 'auto' }}
+                            >
+                              Open in new tab
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <Button
+                        type="link"
+                        size="small"
+                        icon={<FileOutlined />}
+                        onClick={() => window.open(`/api/files/${attachment._id}`, '_blank')}
+                        style={{ padding: 0, height: 'auto' }}
+                      >
+                        {attachment.originalName || 'Attachment'}
+                      </Button>
+                    )}
+                  </Card>
+                ))}
+              </Space>
+            </Card>
+          )}
 
           <Card 
             title="Request Type" 

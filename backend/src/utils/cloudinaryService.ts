@@ -140,6 +140,7 @@ class CloudinaryService {
    */
   async deleteFile(publicId: string, resourceType: 'image' | 'video' | 'raw' = 'image'): Promise<void> {
     try {
+      ensureConfigured();
       await cloudinary.uploader.destroy(publicId, { resource_type: resourceType });
     } catch (error) {
       console.error('Cloudinary delete error:', error);
@@ -152,6 +153,7 @@ class CloudinaryService {
    */
   async deleteFiles(publicIds: string[], resourceType: 'image' | 'video' | 'raw' = 'image'): Promise<void> {
     try {
+      ensureConfigured();
       await cloudinary.api.delete_resources(publicIds, { resource_type: resourceType });
     } catch (error) {
       console.error('Cloudinary bulk delete error:', error);
@@ -164,6 +166,7 @@ class CloudinaryService {
    */
   async getFileDetails(publicId: string, resourceType: 'image' | 'video' | 'raw' = 'image'): Promise<any> {
     try {
+      ensureConfigured();
       return await cloudinary.api.resource(publicId, { resource_type: resourceType });
     } catch (error) {
       console.error('Cloudinary get file details error:', error);
@@ -184,6 +187,7 @@ class CloudinaryService {
       format?: string;
     } = {}
   ): string {
+    ensureConfigured();
     return cloudinary.url(publicId, {
       ...options,
       fetch_format: 'auto',
@@ -195,6 +199,7 @@ class CloudinaryService {
    * Generate thumbnail URL
    */
   getThumbnailUrl(publicId: string, width = 200, height = 200): string {
+    ensureConfigured();
     return cloudinary.url(publicId, {
       width,
       height,

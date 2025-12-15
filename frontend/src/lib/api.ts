@@ -31,6 +31,12 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       const errorCode = error.response?.data?.errorCode
       const isExpired = error.response?.data?.expired
+      const currentPath = window.location.pathname
+      
+      // Don't intercept 401 errors on login/signup pages (these are expected authentication failures)
+      if (currentPath === '/login' || currentPath === '/signup') {
+        return Promise.reject(error)
+      }
       
       // Clear storage on any 401
       storage.removeItem('token')

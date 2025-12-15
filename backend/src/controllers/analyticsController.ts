@@ -408,10 +408,24 @@ export class AnalyticsController {
   static async getDashboard(req: AuthRequest, res: Response) {
     try {
       const organizationId = req.auth?.organizationId;
+      const { fromDate, toDate, categoryId, condition, status } = req.query;
+
+      // Build match stage with filters
+      const materialMatchStage: any = { organizationId: new mongoose.Types.ObjectId(organizationId) };
+      
+      if (categoryId) materialMatchStage.categoryId = new mongoose.Types.ObjectId(categoryId as string);
+      if (condition) materialMatchStage.condition = condition;
+      if (status) materialMatchStage.status = status;
+      
+      if (fromDate || toDate) {
+        materialMatchStage.availableFrom = {};
+        if (fromDate) materialMatchStage.availableFrom.$gte = new Date(fromDate as string);
+        if (toDate) materialMatchStage.availableFrom.$lte = new Date(toDate as string);
+      }
 
       // Overall statistics
       const overallStats = await Material.aggregate([
-        { $match: { organizationId: new mongoose.Types.ObjectId(organizationId) } },
+        { $match: materialMatchStage },
         {
           $group: {
             _id: null,
@@ -421,6 +435,9 @@ export class AnalyticsController {
             availableMaterials: {
               $sum: { $cond: [{ $eq: ['$status', 'AVAILABLE'] }, 1, 0] }
             },
+            reservedMaterials: {
+              $sum: { $cond: [{ $eq: ['$status', 'RESERVED'] }, 1, 0] }
+            },
             surplusMaterials: {
               $sum: { $cond: ['$isSurplus', 1, 0] }
             }
@@ -428,9 +445,18 @@ export class AnalyticsController {
         }
       ]);
 
+      // Build transfer match stage with filters
+      const transferMatchStage: any = { organizationId: new mongoose.Types.ObjectId(organizationId) };
+      
+      if (fromDate || toDate) {
+        transferMatchStage.createdAt = {};
+        if (fromDate) transferMatchStage.createdAt.$gte = new Date(fromDate as string);
+        if (toDate) transferMatchStage.createdAt.$lte = new Date(toDate as string);
+      }
+
       // Transfer statistics
       const transferStats = await TransferRequest.aggregate([
-        { $match: { organizationId: new mongoose.Types.ObjectId(organizationId) } },
+        { $match: transferMatchStage },
         {
           $group: {
             _id: '$status',
@@ -442,7 +468,7 @@ export class AnalyticsController {
 
       // Materials by condition
       const conditionStats = await Material.aggregate([
-        { $match: { organizationId: new mongoose.Types.ObjectId(organizationId) } },
+        { $match: materialMatchStage },
         {
           $group: {
             _id: '$condition',
@@ -454,7 +480,7 @@ export class AnalyticsController {
 
       // Top categories
       const topCategories = await Material.aggregate([
-        { $match: { organizationId: new mongoose.Types.ObjectId(organizationId) } },
+        { $match: materialMatchStage },
         {
           $lookup: {
             from: 'materialcategories',
@@ -494,13 +520,33 @@ export class AnalyticsController {
   static async exportReport(req: AuthRequest, res: Response) {
     try {
       const organizationId = req.auth?.organizationId;
-      const { fromDate, toDate, categoryId, condition, status } = req.query;
+      const { fromDate, toDate, categoryId, condition, status, isSurplus } = req.query;
 
-      const matchStage: any = { organizationId: new mongoose.Types.ObjectId(organizationId) };
+      const matchStage: any = {};
+      
+      // Handle surplus materials (from other organizations)
+      if (isSurplus === 'true') {
+        matchStage.isSurplus = true;
+        matchStage.status = 'AVAILABLE';
+        
+        // Get organizations in the same category
+        const sameCategOrgs = await Organization.find({ 
+          category: req.auth?.organizationCategory,
+          isActive: true 
+        }).select('_id').lean();
+        
+        matchStage.organizationId = { 
+          $in: sameCategOrgs.map(o => o._id),
+          $ne: new mongoose.Types.ObjectId(organizationId)
+        };
+      } else {
+        // Regular materials from user's organization
+        matchStage.organizationId = new mongoose.Types.ObjectId(organizationId);
+      }
       
       if (categoryId) matchStage.categoryId = new mongoose.Types.ObjectId(categoryId as string);
       if (condition) matchStage.condition = condition;
-      if (status) matchStage.status = status;
+      if (status && isSurplus !== 'true') matchStage.status = status;
       
       if (fromDate || toDate) {
         matchStage.availableFrom = {};
@@ -528,16 +574,26 @@ export class AnalyticsController {
           }
         },
         {
+          $lookup: {
+            from: 'organizations',
+            localField: 'organizationId',
+            foreignField: '_id',
+            as: 'organization'
+          }
+        },
+        {
           $project: {
             name: 1,
             category: { $arrayElemAt: ['$category.name', 0] },
             materialStatus: { $arrayElemAt: ['$materialStatus.name', 0] },
+            organization: { $arrayElemAt: ['$organization.name', 0] },
             quantity: 1,
             unit: 1,
             status: 1,
             condition: 1,
             isSurplus: 1,
             estimatedCost: 1,
+            location: 1,
             availableFrom: 1,
             availableUntil: 1,
             notes: 1,
@@ -551,6 +607,7 @@ export class AnalyticsController {
       const csvHeaders = [
         'Material Name',
         'Category',
+        'Organization',
         'Status',
         'Material Status',
         'Condition',
@@ -558,6 +615,7 @@ export class AnalyticsController {
         'Unit',
         'Is Surplus',
         'Estimated Cost',
+        'Location',
         'Available From',
         'Available Until',
         'Notes',
@@ -568,6 +626,7 @@ export class AnalyticsController {
         return [
           `"${material.name || ''}"`,
           `"${material.category || ''}"`,
+          `"${material.organization || ''}"`,
           `"${material.status || ''}"`,
           `"${material.materialStatus || ''}"`,
           `"${material.condition || ''}"`,
@@ -575,6 +634,7 @@ export class AnalyticsController {
           `"${material.unit || ''}"`,
           material.isSurplus ? 'Yes' : 'No',
           material.estimatedCost || 0,
+          `"${material.location || ''}"`,
           material.availableFrom ? new Date(material.availableFrom).toISOString().split('T')[0] : '',
           material.availableUntil ? new Date(material.availableUntil).toISOString().split('T')[0] : '',
           `"${(material.notes || '').replace(/"/g, '""')}"`,

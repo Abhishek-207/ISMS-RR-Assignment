@@ -11,13 +11,15 @@ import {
   Timeline,
   message,
   Modal,
-  Switch
+  Switch,
+  Image
 } from 'antd'
 import { 
   EditOutlined, 
   DeleteOutlined, 
   ArrowLeftOutlined,
-  FileOutlined
+  FileOutlined,
+  EyeOutlined
 } from '@ant-design/icons'
 import { useParams, useNavigate } from 'react-router-dom'
 import { api } from '../lib/api'
@@ -262,8 +264,15 @@ export default function InventoryDetail() {
                   : 'Not specified'}
               </Descriptions.Item>
               <Descriptions.Item label="Estimated Cost">
-                {item.estimatedCost 
-                  ? `₹${item.estimatedCost.toLocaleString()}` 
+                {typeof item.estimatedCost === 'number'
+                  ? (
+                    <>
+                      ₹{(item.estimatedCost * item.quantity).toLocaleString()}
+                      <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>
+                        (₹{item.estimatedCost} per {item.unit}, using available qty)
+                      </Text>
+                    </>
+                  )
                   : '-'}
               </Descriptions.Item>
               <Descriptions.Item label="Created By">
@@ -353,18 +362,60 @@ export default function InventoryDetail() {
 
           {item.attachments && item.attachments.length > 0 && (
             <Card title="Attachments" size="small" style={{ marginTop: 16 }}>
-              {item.attachments.map((attachment: any, index: number) => (
-                <div key={index} style={{ marginBottom: 8 }}>
-                  <Button 
-                    type="link" 
-                    icon={<FileOutlined />}
-                    onClick={() => window.open(`/api/files/${attachment._id}`, '_blank')}
-                    style={{ padding: 0 }}
-                  >
-                    {attachment.originalName || `Attachment ${index + 1}`}
-                  </Button>
-                </div>
-              ))}
+              <Space direction="vertical" style={{ width: '100%' }}>
+                {item.attachments.map((attachment: any, index: number) => (
+                  <div key={index} style={{ marginBottom: 8 }}>
+                    {attachment.path ? (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <Image
+                          src={attachment.path}
+                          alt={attachment.originalName || `Attachment ${index + 1}`}
+                          style={{ 
+                            width: 120, 
+                            height: 120, 
+                            objectFit: 'cover',
+                            borderRadius: 8,
+                            border: '1px solid #d9d9d9'
+                          }}
+                          preview={{
+                            mask: <EyeOutlined />,
+                          }}
+                        />
+                        <div>
+                          <div>
+                            <Text strong>{attachment.originalName || `Attachment ${index + 1}`}</Text>
+                          </div>
+                          <div>
+                            <Text type="secondary" style={{ fontSize: 12 }}>
+                              {attachment.size ? `${(attachment.size / 1024).toFixed(2)} KB` : 'Unknown size'}
+                            </Text>
+                          </div>
+                          <div>
+                            <Button 
+                              type="link" 
+                              size="small"
+                              icon={<FileOutlined />}
+                              onClick={() => window.open(attachment.path, '_blank')}
+                              style={{ padding: 0, height: 'auto' }}
+                            >
+                              Open in new tab
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <Button 
+                        type="link" 
+                        icon={<FileOutlined />}
+                        onClick={() => window.open(`/api/files/${attachment._id}`, '_blank')}
+                        style={{ padding: 0 }}
+                      >
+                        {attachment.originalName || `Attachment ${index + 1}`}
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </Space>
             </Card>
           )}
         </Col>

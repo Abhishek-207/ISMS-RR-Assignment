@@ -4,6 +4,7 @@ import {
   Card, 
   Button, 
   Input, 
+  InputNumber,
   Select, 
   Tag, 
   Typography, 
@@ -11,14 +12,22 @@ import {
   Col,
   Modal,
   message,
-  Form
+  Form,
+  Descriptions,
+  Image,
+  Space,
+  Divider,
+  Dropdown
 } from 'antd'
 import { 
   SearchOutlined, 
   ShoppingOutlined,
   ReloadOutlined,
   InfoCircleOutlined,
-  DownloadOutlined
+  DownloadOutlined,
+  EyeOutlined,
+  FileOutlined,
+  MoreOutlined
 } from '@ant-design/icons'
 import { api } from '../lib/api'
 import { getOrganizationCategory } from '../lib/auth'
@@ -40,6 +49,10 @@ interface Material {
   estimatedCost?: number
   location?: string
   notes?: string
+  attachments?: any[]
+  createdBy?: { _id: string; name: string }
+  createdAt?: string
+  updatedAt?: string
 }
 
 export default function SurplusList() {
@@ -58,6 +71,7 @@ export default function SurplusList() {
 
   const [categories, setCategories] = useState<any[]>([])
   const [requestModalVisible, setRequestModalVisible] = useState(false)
+  const [detailModalVisible, setDetailModalVisible] = useState(false)
   const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null)
   const [requestForm] = Form.useForm()
   const [submitting, setSubmitting] = useState(false)
@@ -112,6 +126,11 @@ export default function SurplusList() {
   const handleFilterChange = (key: string, value: any) => {
     setFilters(prev => ({ ...prev, [key]: value }))
     setPagination(prev => ({ ...prev, current: 1 }))
+  }
+
+  const openDetailModal = (material: Material) => {
+    setSelectedMaterial(material)
+    setDetailModalVisible(true)
   }
 
   const openRequestModal = (material: Material) => {
@@ -195,6 +214,16 @@ export default function SurplusList() {
     }
   }
 
+  const clearAllFilters = () => {
+    setFilters({
+      search: '',
+      categoryId: '',
+      condition: '',
+      dateRange: null
+    })
+    setPagination(prev => ({ ...prev, current: 1 }))
+  }
+
   const columns = [
     {
       title: 'Material',
@@ -272,14 +301,32 @@ export default function SurplusList() {
       width: 100,
       fixed: 'right' as const,
       render: (record: Material) => (
-        <Button
-          type="primary"
-          size="small"
-          icon={<ShoppingOutlined />}
-          onClick={() => openRequestModal(record)}
+        <Dropdown
+          trigger={['click']}
+          placement="bottomRight"
+          menu={{
+            items: [
+              {
+                key: 'view',
+                label: 'View Details',
+                icon: <EyeOutlined />,
+                onClick: () => openDetailModal(record)
+              },
+              {
+                key: 'request',
+                label: 'Request',
+                icon: <ShoppingOutlined />,
+                onClick: () => openRequestModal(record)
+              }
+            ]
+          }}
         >
-          Request
-        </Button>
+          <Button
+            type="text"
+            size="small"
+            icon={<MoreOutlined />}
+          />
+        </Dropdown>
       )
     }
   ]
@@ -295,13 +342,18 @@ export default function SurplusList() {
             Discover surplus materials from other organizations in your category. Submit procurement requests to acquire materials.
           </Paragraph>
         </div>
-        <Button 
-          icon={<DownloadOutlined />}
-          onClick={handleExportReport}
-          loading={exportLoading}
-        >
-          Export Report
-        </Button>
+        <Space>
+          <Button onClick={clearAllFilters}>
+            Clear Filters
+          </Button>
+          <Button 
+            icon={<DownloadOutlined />}
+            onClick={handleExportReport}
+            loading={exportLoading}
+          >
+            Export Report
+          </Button>
+        </Space>
       </div>
 
       <Card>
@@ -413,6 +465,206 @@ export default function SurplusList() {
       </Card>
 
       <Modal
+        title={
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <InfoCircleOutlined style={{ color: '#1890ff' }} />
+            <span>Material Details</span>
+          </div>
+        }
+        open={detailModalVisible}
+        onCancel={() => {
+          setDetailModalVisible(false)
+          setSelectedMaterial(null)
+        }}
+        footer={[
+          <Button key="close" onClick={() => {
+            setDetailModalVisible(false)
+            setSelectedMaterial(null)
+          }}>
+            Close
+          </Button>,
+          <Button 
+            key="request" 
+            type="primary" 
+            icon={<ShoppingOutlined />}
+            onClick={() => {
+              setDetailModalVisible(false)
+              openRequestModal(selectedMaterial!)
+            }}
+          >
+            Request Material
+          </Button>
+        ]}
+        width={800}
+      >
+        {selectedMaterial && (
+          <div>
+            {/* Basic Information */}
+            <Descriptions 
+              bordered 
+              size="small" 
+              column={2}
+              style={{ marginBottom: 16 }}
+            >
+              <Descriptions.Item label="Material Name" span={2}>
+                <Text strong style={{ fontSize: 15 }}>{selectedMaterial.name}</Text>
+              </Descriptions.Item>
+              
+              <Descriptions.Item label="Category">
+                {selectedMaterial.categoryId.name}
+              </Descriptions.Item>
+              
+              <Descriptions.Item label="Condition">
+                <Tag color={getConditionColor(selectedMaterial.condition)}>
+                  {selectedMaterial.condition.replace(/_/g, ' ')}
+                </Tag>
+              </Descriptions.Item>
+
+              <Descriptions.Item label="Available Quantity" span={2}>
+                <Text strong style={{ fontSize: 15 }}>
+                  {selectedMaterial.quantity} {selectedMaterial.unit}
+                </Text>
+              </Descriptions.Item>
+
+              <Descriptions.Item label="Estimated Cost">
+                {typeof selectedMaterial.estimatedCost === 'number'
+                  ? (
+                    <>
+                      ₹{(selectedMaterial.estimatedCost * selectedMaterial.quantity).toLocaleString()}
+                      <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>
+                        (₹{selectedMaterial.estimatedCost} per {selectedMaterial.unit}, using available qty)
+                      </Text>
+                    </>
+                  )
+                  : 'Not specified'}
+              </Descriptions.Item>
+
+              <Descriptions.Item label="Location">
+                {selectedMaterial.location || 'Not specified'}
+              </Descriptions.Item>
+
+              <Descriptions.Item label="Available From">
+                {selectedMaterial.availableFrom 
+                  ? dayjs(selectedMaterial.availableFrom).format('DD MMM YYYY') 
+                  : '-'}
+              </Descriptions.Item>
+
+              <Descriptions.Item label="Available Until">
+                {selectedMaterial.availableUntil 
+                  ? dayjs(selectedMaterial.availableUntil).format('DD MMM YYYY') 
+                  : 'Not specified'}
+              </Descriptions.Item>
+            </Descriptions>
+
+            <Divider orientation="left" style={{ marginTop: 16, marginBottom: 16 }}>
+              Source Organization
+            </Divider>
+            
+            <Descriptions bordered size="small" column={2}>
+              <Descriptions.Item label="Organization Name" span={2}>
+                <Text strong>{selectedMaterial.organizationId.name}</Text>
+              </Descriptions.Item>
+              
+              <Descriptions.Item label="Category" span={2}>
+                {selectedMaterial.organizationId.category.replace(/_/g, ' ')}
+              </Descriptions.Item>
+            </Descriptions>
+
+            {selectedMaterial.notes && (
+              <>
+                <Divider orientation="left" style={{ marginTop: 16, marginBottom: 16 }}>
+                  Additional Notes
+                </Divider>
+                <Card size="small" style={{ background: '#fafafa' }}>
+                  <Text>{selectedMaterial.notes}</Text>
+                </Card>
+              </>
+            )}
+
+            {selectedMaterial.attachments && selectedMaterial.attachments.length > 0 && (
+              <>
+                <Divider orientation="left" style={{ marginTop: 16, marginBottom: 16 }}>
+                  Attachments ({selectedMaterial.attachments.length})
+                </Divider>
+                <Space direction="vertical" style={{ width: '100%' }}>
+                  {selectedMaterial.attachments.map((attachment: any, index: number) => (
+                    <Card key={index} size="small" style={{ background: '#fafafa' }}>
+                      {attachment.path ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                          <Image
+                            src={attachment.path}
+                            alt={attachment.originalName || `Attachment ${index + 1}`}
+                            style={{ 
+                              width: 100, 
+                              height: 100, 
+                              objectFit: 'cover',
+                              borderRadius: 8,
+                              border: '1px solid #d9d9d9'
+                            }}
+                            preview={{
+                              mask: <EyeOutlined />,
+                            }}
+                          />
+                          <div style={{ flex: 1 }}>
+                            <div>
+                              <Text strong>{attachment.originalName || `Attachment ${index + 1}`}</Text>
+                            </div>
+                            <div>
+                              <Text type="secondary" style={{ fontSize: 12 }}>
+                                {attachment.size ? `${(attachment.size / 1024).toFixed(2)} KB` : 'Unknown size'}
+                              </Text>
+                            </div>
+                            <div style={{ marginTop: 4 }}>
+                              <Button 
+                                type="link" 
+                                size="small"
+                                icon={<FileOutlined />}
+                                onClick={() => window.open(attachment.path, '_blank')}
+                                style={{ padding: 0, height: 'auto' }}
+                              >
+                                Open in new tab
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <Button 
+                          type="link" 
+                          icon={<FileOutlined />}
+                          onClick={() => window.open(`/api/files/${attachment._id}`, '_blank')}
+                          style={{ padding: 0 }}
+                        >
+                          {attachment.originalName || `Attachment ${index + 1}`}
+                        </Button>
+                      )}
+                    </Card>
+                  ))}
+                </Space>
+              </>
+            )}
+
+            {selectedMaterial.createdBy && (
+              <>
+                <Divider orientation="left" style={{ marginTop: 16, marginBottom: 16 }}>
+                  Record Information
+                </Divider>
+                <Descriptions bordered size="small" column={2}>
+                  <Descriptions.Item label="Created By">
+                    {selectedMaterial.createdBy.name}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Created At">
+                    {selectedMaterial.createdAt 
+                      ? dayjs(selectedMaterial.createdAt).format('DD MMM YYYY, HH:mm')
+                      : '-'}
+                  </Descriptions.Item>
+                </Descriptions>
+              </>
+            )}
+          </div>
+        )}
+      </Modal>
+
+      <Modal
         title="Submit Procurement Request"
         open={requestModalVisible}
         onCancel={() => {
@@ -459,11 +711,11 @@ export default function SurplusList() {
                   }
                 ]}
               >
-                <Input
-                  type="number"
+                <InputNumber
+                  style={{ width: '100%' }}
                   min={1}
                   max={selectedMaterial.quantity}
-                  suffix={selectedMaterial.unit}
+                  addonAfter={selectedMaterial.unit}
                   placeholder={`Max: ${selectedMaterial.quantity}`}
                 />
               </Form.Item>

@@ -300,8 +300,8 @@ export default function Users() {
               style={{ width: '100%' }}
               value={filters.role}
               onChange={(value) => handleFilterChange('role', value)}
-              allowClear
             >
+              <Select.Option value="">All Roles</Select.Option>
               <Select.Option value="PLATFORM_ADMIN">Platform Admin</Select.Option>
               <Select.Option value="ORG_ADMIN">Org Admin</Select.Option>
               <Select.Option value="ORG_USER">User</Select.Option>
@@ -313,8 +313,8 @@ export default function Users() {
               style={{ width: '100%' }}
               value={filters.isActive}
               onChange={(value) => handleFilterChange('isActive', value)}
-              allowClear
             >
+              <Select.Option value="">All Statuses</Select.Option>
               <Select.Option value="true">Active</Select.Option>
               <Select.Option value="false">Inactive</Select.Option>
             </Select>

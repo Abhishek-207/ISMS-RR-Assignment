@@ -52,6 +52,23 @@ router.patch('/:id', [
   return await Material.findById(req.params.id).lean();
 }), MaterialsController.update);
 
+router.put('/:id', [
+  body('name').optional().isLength({ min: 1 }),
+  body('categoryId').optional().isMongoId(),
+  body('quantity').optional().isNumeric().isFloat({ min: 0 }),
+  body('unit').optional().isLength({ min: 1 }),
+  body('status').optional().isIn(['AVAILABLE', 'RESERVED', 'TRANSFERRED', 'ARCHIVED']),
+  body('materialStatusId').optional().isMongoId(),
+  body('condition').optional().isIn(['NEW', 'GOOD', 'SLIGHTLY_DAMAGED', 'NEEDS_REPAIR', 'SCRAP']),
+  body('availableFrom').optional().isISO8601(),
+  body('availableUntil').optional().isISO8601(),
+  body('estimatedCost').optional().isNumeric().isFloat({ min: 0 })
+], audit('Material', 'UPDATE', async (req) => {
+  return await Material.findById(req.params.id).lean();
+}, async (req, result) => {
+  return await Material.findById(req.params.id).lean();
+}), MaterialsController.update);
+
 router.delete('/:id', audit('Material', 'DELETE', async (req) => {
   return await Material.findById(req.params.id).lean();
 }, () => null), MaterialsController.delete);

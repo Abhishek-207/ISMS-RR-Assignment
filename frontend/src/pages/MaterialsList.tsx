@@ -227,6 +227,18 @@ export default function MaterialsList() {
     }
   }
 
+  const clearAllFilters = () => {
+    setFilters({
+      search: '',
+      categoryId: '',
+      status: '',
+      condition: '',
+      isSurplus: '',
+      dateRange: null
+    })
+    setPagination(prev => ({ ...prev, current: 1 }))
+  }
+
   const columns = [
     {
       title: 'Material',
@@ -375,6 +387,9 @@ export default function MaterialsList() {
           My Inventory
         </Title>
         <div style={{ display: 'flex', gap: 8 }}>
+          <Button onClick={clearAllFilters}>
+            Clear Filters
+          </Button>
           <Button 
             icon={<DownloadOutlined />}
             onClick={handleExportReport}

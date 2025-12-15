@@ -134,9 +134,10 @@ export default function Signup() {
       
       // Handle specific error codes
       if (errorCode === 1301) {
-        message.error('An account with this email already exists. Please use a different email or login.')
+        message.error('An account with this email already exists. Please use a different email or login.', 5)
       } else if (errorCode === 1401) {
-        message.error('An organization with this name already exists in this category. Please choose a different name or join the existing organization.')
+        message.error('An organization with this name already exists in this category. Please choose a different name or join the existing organization.', 5)
+        setCurrentStep(0) // Go back to organization setup step
       } else if (errorCode === 1100) {
         // Validation errors with details
         const validationErrors = errorResponse?.errors
@@ -156,12 +157,22 @@ export default function Signup() {
           })
         } else {
           // Show the main error message if no detailed errors
-          message.error(errorResponse?.message || 'Validation failed. Please check your inputs.')
+          message.error(errorResponse?.message || 'Validation failed. Please check your inputs.', 5)
         }
       } else {
-        message.error(errorResponse?.message || 'Signup failed. Please try again.')
+        message.error(errorResponse?.message || 'Signup failed. Please try again.', 5)
       }
+      
+      // Keep form values intact after error - form.preserve={true} handles this
+      // but we explicitly ensure values are retained
+      const currentValues = form.getFieldsValue()
+      form.setFieldsValue(currentValues)
     }
+  }
+
+  const onFinishFailed = (errorInfo: any) => {
+    console.log('Form validation failed:', errorInfo)
+    message.error('Please check the form and fix any errors.', 3)
   }
 
   const nextStep = async () => {
@@ -224,7 +235,8 @@ export default function Signup() {
         <Form 
           form={form} 
           layout="vertical" 
-          onFinish={onFinish} 
+          onFinish={onFinish}
+          onFinishFailed={onFinishFailed}
           className="auth-form"
           preserve={true}
         >

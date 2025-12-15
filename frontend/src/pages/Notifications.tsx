@@ -1,7 +1,9 @@
-import React, { useState } from 'react'
-import { Card, List, Typography, Tag, Button, Empty, Space, Badge, Divider } from 'antd'
+import React, { useEffect, useState } from 'react'
+import { Card, List, Typography, Tag, Button, Empty, Space, Badge, message } from 'antd'
 import { BellOutlined, CheckOutlined, DeleteOutlined, InfoCircleOutlined, ExclamationCircleOutlined, CheckCircleOutlined } from '@ant-design/icons'
 import { Grid } from 'antd'
+import { api } from '../lib/api'
+import { getCurrentUser } from '../lib/auth'
 
 const { Title, Text } = Typography
 const { useBreakpoint } = Grid
@@ -20,62 +22,8 @@ export default function Notifications() {
   const screens = useBreakpoint()
   const isMobile = !screens.md
   
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: '1',
-      title: 'New Inventory Added',
-      message: 'Office Chairs (25 units) have been added to your organization\'s inventory.',
-      type: 'success',
-      timestamp: '2024-12-15T10:30:00Z',
-      read: false,
-      priority: 'medium'
-    },
-    {
-      id: '2',
-      title: 'Procurement Request Pending',
-      message: 'A procurement request for 10 Laptops from TechCorp Industries is awaiting your approval.',
-      type: 'warning',
-      timestamp: '2024-12-15T09:15:00Z',
-      read: false,
-      priority: 'high'
-    },
-    {
-      id: '3',
-      title: 'Low Stock Alert',
-      message: 'Printer Cartridges inventory is below minimum threshold. Consider restocking or marking as surplus.',
-      type: 'error',
-      timestamp: '2024-12-15T08:45:00Z',
-      read: true,
-      priority: 'high'
-    },
-    {
-      id: '5',
-      title: 'Procurement Completed',
-      message: 'Your procurement request for 15 Monitors has been approved and transferred to your inventory.',
-      type: 'success',
-      timestamp: '2024-12-14T14:30:00Z',
-      read: true,
-      priority: 'medium'
-    },
-    {
-      id: '7',
-      title: 'Surplus Item Procured',
-      message: 'Your surplus item "Steel Filing Cabinets" has been procured by Metro Healthcare Network.',
-      type: 'success',
-      timestamp: '2024-12-14T09:30:00Z',
-      read: true,
-      priority: 'medium'
-    },
-    {
-      id: '8',
-      title: 'New Surplus Available',
-      message: 'New surplus items matching your category are available from organizations in your network.',
-      type: 'info',
-      timestamp: '2024-12-13T15:45:00Z',
-      read: true,
-      priority: 'low'
-    }
-  ])
+  const [notifications, setNotifications] = useState<Notification[]>([])
+  const [loading, setLoading] = useState(false)
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
@@ -114,6 +62,68 @@ export default function Notifications() {
       return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   }
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      setLoading(true)
+      try {
+        const user = getCurrentUser()
+        const response = await api.get('/transfers', {
+          params: {
+            page: 1,
+            pageSize: 20
+          }
+        })
+
+        const orgId = user?.organizationId
+        const items = response.data?.data || []
+
+        const mapped: Notification[] = items.map((item: any) => {
+          const status: string = item.status || 'PENDING'
+          const materialName = item.materialId?.name || 'Material'
+          const quantityRequested = item.quantityRequested ?? item.requestedQuantity
+          const unit = item.materialId?.unit || ''
+          const fromOrg = item.fromOrganizationId?.name || 'Unknown'
+          const toOrg = item.toOrganizationId?.name || 'Unknown'
+          const createdAt = item.createdAt
+          const approvedAt = item.approvedAt
+          const isOrgInvolved =
+            orgId && (item.fromOrganizationId?._id === orgId || item.toOrganizationId?._id === orgId)
+
+          let type: Notification['type'] = 'info'
+          if (status === 'APPROVED') type = 'success'
+          else if (status === 'PENDING') type = 'warning'
+          else if (status === 'REJECTED' || status === 'CANCELLED') type = 'error'
+
+          const priority: Notification['priority'] =
+            status === 'PENDING' ? 'high' : status === 'APPROVED' ? 'medium' : 'low'
+
+          const title = `Procurement ${status === 'PENDING' ? 'request pending' : status.toLowerCase()}`
+
+          const messageText = `${materialName} • ${quantityRequested} ${unit} • ${fromOrg} → ${toOrg}`
+
+          return {
+            id: item._id,
+            title,
+            message: messageText,
+            type,
+            timestamp: approvedAt || createdAt,
+            read: !isOrgInvolved ? true : status !== 'PENDING',
+            priority
+          }
+        })
+
+        setNotifications(mapped)
+      } catch (error) {
+        console.error('Failed to load notifications', error)
+        message.error('Failed to load notifications')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchNotifications()
+  }, [])
 
   const markAsRead = (id: string) => {
     setNotifications(prev => 
@@ -169,6 +179,7 @@ export default function Notifications() {
         <Card bodyStyle={{ padding: isMobile ? 12 : 16 }}>
           <List
             dataSource={notifications}
+            loading={loading}
             renderItem={(notification) => (
               <List.Item
                 style={{

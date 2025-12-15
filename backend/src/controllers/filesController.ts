@@ -1,5 +1,4 @@
 import { Response } from 'express';
-import fs from 'fs';
 import { AuthRequest } from '../middleware/auth.js';
 import { File } from '../models/File.model.js';
 import { ApiResponse } from '../utils/apiResponse.js';
@@ -96,15 +95,9 @@ export class FilesController {
         throw ApiError.notFound('File not found', ErrorCodes.FILE_NOT_FOUND.code);
       }
 
-      if (!fs.existsSync(file.path)) {
-        throw ApiError.notFound('File not found on disk', ErrorCodes.FILE_NOT_FOUND.code);
-      }
-
-      res.setHeader('Content-Type', file.mimeType);
-      res.setHeader('Content-Disposition', `inline; filename="${file.originalName}"`);
-      
-      const fileStream = fs.createReadStream(file.path);
-      fileStream.pipe(res);
+      // Since files are stored on Cloudinary, redirect to the Cloudinary URL
+      // The file.path contains the secure_url from Cloudinary
+      return res.redirect(file.path);
     } catch (error) {
       if (error instanceof ApiError) {
         return ApiResponse.error(res, error.message, error.statusCode, undefined, error.errorCode);

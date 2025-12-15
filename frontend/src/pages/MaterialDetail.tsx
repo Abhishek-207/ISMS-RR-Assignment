@@ -246,8 +246,15 @@ export default function MaterialDetail() {
                   : 'Not specified'}
               </Descriptions.Item>
               <Descriptions.Item label="Estimated Cost">
-                {material.estimatedCost 
-                  ? `₹${material.estimatedCost.toLocaleString()}` 
+                {typeof material.estimatedCost === 'number'
+                  ? (
+                    <>
+                      ₹{(material.estimatedCost * material.quantity).toLocaleString()}
+                      <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>
+                        (₹{material.estimatedCost} per {material.unit}, using available qty)
+                      </Text>
+                    </>
+                  )
                   : '-'}
               </Descriptions.Item>
               <Descriptions.Item label="Surplus Status">

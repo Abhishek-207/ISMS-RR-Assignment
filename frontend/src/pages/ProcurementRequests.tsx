@@ -214,6 +214,15 @@ export default function ProcurementRequests() {
     }
   }
 
+  const clearAllFilters = () => {
+    setFilters({
+      search: '',
+      status: '',
+      direction: 'all'
+    })
+    setPagination(prev => ({ ...prev, current: 1 }))
+  }
+
   const columns = [
     {
       title: 'Material',
@@ -377,7 +386,10 @@ export default function ProcurementRequests() {
             Manage surplus material procurement across organizations
           </Paragraph>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <Space>
+          <Button onClick={clearAllFilters}>
+            Clear Filters
+          </Button>
           <Button 
             icon={<DownloadOutlined />}
             onClick={handleExportReport}
@@ -392,7 +404,7 @@ export default function ProcurementRequests() {
           >
             Browse Surplus
           </Button>
-        </div>
+        </Space>
       </div>
 
       <Card>

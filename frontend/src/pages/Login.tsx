@@ -26,6 +26,7 @@ export default function Login() {
 
   const onFinish = async (values: any) => {
     setLoading(true)
+    setShowSessionExpired(false) // Hide session expired alert on new login attempt
     
     try {
       const { data } = await api.post('/auth/login', values)
@@ -53,9 +54,17 @@ export default function Login() {
       } else {
         message.error(errorMessage || 'Login failed. Please check your credentials.', 4)
       }
+      
+      // Keep form values intact after error
+      form.setFieldsValue(values)
     } finally {
       setLoading(false)
     }
+  }
+
+  const onFinishFailed = (errorInfo: any) => {
+    console.log('Form validation failed:', errorInfo)
+    message.error('Please check the form and fix any errors.', 3)
   }
 
   return (
@@ -83,12 +92,20 @@ export default function Login() {
         <Form 
           form={form} 
           layout="vertical" 
-          onFinish={onFinish} 
+          onFinish={onFinish}
+          onFinishFailed={onFinishFailed}
           className="auth-form"
           preserve={true}
-          validateTrigger="onSubmit"
+          validateTrigger={["onSubmit", "onBlur"]}
         >
-          <Form.Item name="email" label="Email" rules={[{ required: true, type: 'email', message: 'Please enter a valid email' }]}>
+          <Form.Item 
+            name="email" 
+            label="Email" 
+            rules={[
+              { required: true, message: 'Please enter your email' },
+              { type: 'email', message: 'Please enter a valid email address' }
+            ]}
+          >
             <Input 
               placeholder="you@example.com" 
               size={isMobile ? 'middle' : undefined} 
@@ -96,7 +113,14 @@ export default function Login() {
               autoComplete="email"
             />
           </Form.Item>
-          <Form.Item name="password" label="Password" rules={[{ required: true, min: 6, message: 'Password must be at least 6 characters' }]}>
+          <Form.Item 
+            name="password" 
+            label="Password" 
+            rules={[
+              { required: true, message: 'Please enter your password' },
+              { min: 6, message: 'Password must be at least 6 characters' }
+            ]}
+          >
             <Input.Password 
               placeholder="••••••••" 
               size={isMobile ? 'middle' : undefined} 

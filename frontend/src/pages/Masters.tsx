@@ -216,7 +216,7 @@ export default function Masters() {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15, flexWrap: 'wrap', gap: 8 }}>
         <Title level={4} style={{ margin: 0 }}>
           Configuration Settings
         </Title>
@@ -225,7 +225,8 @@ export default function Masters() {
           onClick={fetchData}
           loading={loading}
         >
-          Refresh All
+          <span className="hide-on-mobile">Refresh All</span>
+          <span className="show-on-mobile">Refresh</span>
         </Button>
       </div>
 
@@ -265,11 +266,11 @@ export default function Masters() {
             } catch (error: any) {
               message.error(error.response?.data?.message || 'Failed to create category')
             }
-          }} style={{ width: '100%', marginBottom: 12 }}>
-            <Form.Item name="name" rules={[{ required: true, whitespace: true, message: 'Please enter category name' }]} style={{ flex: 1 }}>
+          }} style={{ width: '100%', marginBottom: 12, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            <Form.Item name="name" rules={[{ required: true, whitespace: true, message: 'Please enter category name' }]} style={{ flex: 1, minWidth: '200px', marginRight: 0 }}>
               <Input placeholder="Enter category name" />
             </Form.Item>
-            <Form.Item>
+            <Form.Item style={{ marginRight: 0 }}>
               <Button type="primary" htmlType="submit">Add</Button>
             </Form.Item>
           </Form>
@@ -310,11 +311,11 @@ export default function Masters() {
             } catch (error: any) {
               message.error(error.response?.data?.message || 'Failed to create status')
             }
-          }} style={{ width: '100%', marginBottom: 12 }}>
-            <Form.Item name="name" rules={[{ required: true, whitespace: true, message: 'Please enter status name' }]} style={{ flex: 1 }}>
+          }} style={{ width: '100%', marginBottom: 12, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            <Form.Item name="name" rules={[{ required: true, whitespace: true, message: 'Please enter status name' }]} style={{ flex: 1, minWidth: '200px', marginRight: 0 }}>
               <Input placeholder="Enter status name" />
             </Form.Item>
-            <Form.Item>
+            <Form.Item style={{ marginRight: 0 }}>
               <Button type="primary" htmlType="submit">Add</Button>
             </Form.Item>
           </Form>

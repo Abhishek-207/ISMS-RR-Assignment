@@ -333,8 +333,8 @@ export default function SurplusList() {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
-        <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
+        <div style={{ flex: 1, minWidth: '250px' }}>
           <Title level={4} style={{ margin: 0, marginBottom: 8 }}>
             Available Surplus ({orgCategory?.replace(/_/g, ' ')})
           </Title>
@@ -342,16 +342,18 @@ export default function SurplusList() {
             Discover surplus materials from other organizations in your category. Submit procurement requests to acquire materials.
           </Paragraph>
         </div>
-        <Space>
+        <Space wrap>
           <Button onClick={clearAllFilters}>
-            Clear Filters
+            <span className="hide-on-mobile">Clear Filters</span>
+            <span className="show-on-mobile">Clear</span>
           </Button>
           <Button 
             icon={<DownloadOutlined />}
             onClick={handleExportReport}
             loading={exportLoading}
           >
-            Export Report
+            <span className="hide-on-mobile">Export Report</span>
+            <span className="show-on-mobile">Export</span>
           </Button>
         </Space>
       </div>
@@ -503,7 +505,7 @@ export default function SurplusList() {
             <Descriptions 
               bordered 
               size="small" 
-              column={2}
+              column={{ xs: 1, sm: 2 }}
               style={{ marginBottom: 16 }}
             >
               <Descriptions.Item label="Material Name" span={2}>
@@ -560,7 +562,7 @@ export default function SurplusList() {
               Source Organization
             </Divider>
             
-            <Descriptions bordered size="small" column={2}>
+            <Descriptions bordered size="small" column={{ xs: 1, sm: 2 }}>
               <Descriptions.Item label="Organization Name" span={2}>
                 <Text strong>{selectedMaterial.organizationId.name}</Text>
               </Descriptions.Item>

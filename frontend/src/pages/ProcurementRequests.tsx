@@ -377,8 +377,8 @@ export default function ProcurementRequests() {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 }}>
-        <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15, flexWrap: 'wrap', gap: 12 }}>
+        <div style={{ flex: 1, minWidth: '250px' }}>
           <Title level={4} style={{ margin: 0, marginBottom: 4 }}>
             Procurement Requests
           </Title>
@@ -386,23 +386,26 @@ export default function ProcurementRequests() {
             Manage surplus material procurement across organizations
           </Paragraph>
         </div>
-        <Space>
+        <Space wrap>
           <Button onClick={clearAllFilters}>
-            Clear Filters
+            <span className="hide-on-mobile">Clear Filters</span>
+            <span className="show-on-mobile">Clear</span>
           </Button>
           <Button 
             icon={<DownloadOutlined />}
             onClick={handleExportReport}
             loading={exportLoading}
           >
-            Export Report
+            <span className="hide-on-mobile">Export Report</span>
+            <span className="show-on-mobile">Export</span>
           </Button>
           <Button 
             type="primary"
             icon={<ShoppingCartOutlined />}
             onClick={() => navigate('/surplus')}
           >
-            Browse Surplus
+            <span className="hide-on-mobile">Browse Surplus</span>
+            <span className="show-on-mobile">Browse</span>
           </Button>
         </Space>
       </div>

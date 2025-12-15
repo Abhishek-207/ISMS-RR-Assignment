@@ -193,19 +193,21 @@ export default function ProcurementDetail() {
 
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: 24 }}>
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 8 }}>
         <Button 
           type="text" 
           icon={<ArrowLeftOutlined />} 
           onClick={() => navigate('/procurement')}
-          style={{ marginRight: 16 }}
+          style={{ marginRight: 8 }}
         >
-          Back to Procurement
+          <span className="hide-on-mobile">Back to Procurement</span>
+          <span className="show-on-mobile">Back</span>
         </Button>
-        <Title level={4} style={{ margin: 0 }}>
-          Procurement Request Details
+        <Title level={4} style={{ margin: 0, flex: 1, minWidth: 'fit-content' }}>
+          <span className="hide-on-mobile">Procurement Request Details</span>
+          <span className="show-on-mobile">Request Details</span>
         </Title>
-        <div style={{ marginLeft: 'auto' }}>
+        <div style={{ marginLeft: 'auto', display: 'flex', flexWrap: 'wrap', gap: 8 }}>
           <Space>
             {canApprove() && (
               <>
@@ -214,14 +216,14 @@ export default function ProcurementDetail() {
                   icon={<CheckOutlined />}
                   onClick={() => openActionModal('approve')}
                 >
-                  Approve
+                  <span className="hide-on-mobile">Approve</span>
                 </Button>
                 <Button 
                   danger
                   icon={<CloseOutlined />}
                   onClick={() => openActionModal('reject')}
                 >
-                  Reject
+                  <span className="hide-on-mobile">Reject</span>
                 </Button>
               </>
             )}
@@ -231,7 +233,8 @@ export default function ProcurementDetail() {
                 icon={<StopOutlined />}
                 onClick={() => openActionModal('cancel')}
               >
-                Cancel Request
+                <span className="hide-on-mobile">Cancel Request</span>
+                <span className="show-on-mobile">Cancel</span>
               </Button>
             )}
           </Space>
@@ -241,7 +244,7 @@ export default function ProcurementDetail() {
       <Row gutter={[24, 24]}>
         <Col xs={24} lg={16}>
           <Card title="Request Information">
-            <Descriptions column={2} bordered size="small">
+            <Descriptions column={{ xs: 1, sm: 2 }} bordered size="small">
               <Descriptions.Item label="Status" span={2}>
                 <Tag color={getStatusColor(request.status)} style={{ fontSize: 13 }}>
                   {request.status}

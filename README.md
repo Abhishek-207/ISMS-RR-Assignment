@@ -312,6 +312,8 @@ Some key screens of the ISMS web app (all images are in the `assets/` folder):
   - My Inventory list – `assets/SS-4.png`
   - Add items to inventory – `assets/SS-5.png`
   - Procurement / request creation – `assets/SS-6.png`
+  - Procurement material detail view – `assets/SS-16.png`
+  - Material detail within procurement / browse flow – `assets/SS-17.png`
 - **Analytics & Configuration**
   - Analytics dashboard – `assets/SS-7.png`
   - Configuration settings / masters – `assets/SS-8.png`
@@ -331,6 +333,8 @@ Embedded screenshots:
 ![My Inventory](assets/SS-4.png)
 ![Add Inventory Item](assets/SS-5.png)
 ![Procurement](assets/SS-6.png)
+![Procurement Material Detail](assets/SS-16.png)
+![Material Detail in Procurement/Browse](assets/SS-17.png)
 ![Analytics](assets/SS-7.png)
 ![Analytics (Detail)](assets/SS-15.png)
 ![Configuration Settings](assets/SS-8.png)

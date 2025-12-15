@@ -175,16 +175,17 @@ export default function InventoryDetail() {
 
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: 24 }}>
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 8 }}>
         <Button 
           type="text" 
           icon={<ArrowLeftOutlined />} 
           onClick={() => navigate('/inventory')}
-          style={{ marginRight: 16 }}
+          style={{ marginRight: 8 }}
         >
-          Back to Inventory
+          <span className="hide-on-mobile">Back to Inventory</span>
+          <span className="show-on-mobile">Back</span>
         </Button>
-        <Title level={4} style={{ margin: 0 }}>
+        <Title level={4} style={{ margin: 0, flex: 1, minWidth: 'fit-content' }}>
           {item.name}
           {item.isSurplus && (
             <Tag color="blue" style={{ marginLeft: 12, fontSize: 12 }}>
@@ -192,7 +193,7 @@ export default function InventoryDetail() {
             </Tag>
           )}
         </Title>
-        <div style={{ marginLeft: 'auto' }}>
+        <div style={{ marginLeft: 'auto', display: 'flex', flexWrap: 'wrap', gap: 8 }}>
           <Space>
             {canEditItem() && (
               <>
@@ -200,14 +201,14 @@ export default function InventoryDetail() {
                   icon={<EditOutlined />}
                   onClick={() => navigate(`/inventory/${id}/edit`)}
                 >
-                  Edit
+                  <span className="hide-on-mobile">Edit</span>
                 </Button>
                 <Button 
                   danger 
                   icon={<DeleteOutlined />}
                   onClick={handleDelete}
                 >
-                  Delete
+                  <span className="hide-on-mobile">Delete</span>
                 </Button>
               </>
             )}
@@ -218,7 +219,7 @@ export default function InventoryDetail() {
       <Row gutter={[24, 24]}>
         <Col xs={24} lg={16}>
           <Card title="Item Details">
-            <Descriptions column={2} bordered size="small">
+            <Descriptions column={{ xs: 1, sm: 2 }} bordered size="small">
               <Descriptions.Item label="Name" span={2}>
                 <Text strong style={{ fontSize: 15 }}>{item.name}</Text>
               </Descriptions.Item>

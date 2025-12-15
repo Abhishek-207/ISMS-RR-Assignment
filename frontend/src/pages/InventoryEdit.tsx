@@ -253,14 +253,14 @@ export default function InventoryEdit() {
 
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: 15 }}>
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: 15, flexWrap: 'wrap', gap: 8 }}>
         <Button 
           type="text" 
           icon={<ArrowLeftOutlined />} 
           onClick={() => navigate(`/inventory/${id}`)}
-          style={{ marginRight: 16 }}
+          style={{ marginRight: 8 }}
         >
-          Back
+          <span className="hide-on-mobile">Back</span>
         </Button>
         <Title level={4} style={{ margin: 0 }}>
           Edit Inventory Item

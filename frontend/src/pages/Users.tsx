@@ -410,7 +410,7 @@ export default function Users() {
               label="Password"
               rules={[
                 { required: true, message: 'Please enter password!' },
-                { min: 6, message: 'Password must be at least 6 characters!' }
+                { min: 8, message: 'Password must be at least 8 characters!' }
               ]}
             >
               <Input.Password placeholder="Enter password" />

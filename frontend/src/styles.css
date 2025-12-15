@@ -859,3 +859,88 @@ body {
   color: rgba(0, 0, 0, 0.45) !important;
 }
 
+/* Mobile Responsive Utilities */
+/* Hide text on mobile devices (screens smaller than 768px) */
+.hide-on-mobile {
+  display: inline;
+}
+
+@media (max-width: 767px) {
+  .hide-on-mobile {
+    display: none;
+  }
+}
+
+/* Show text only on mobile devices */
+.show-on-mobile {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .show-on-mobile {
+    display: inline;
+  }
+}
+
+/* Mobile responsive table - make it scrollable */
+@media (max-width: 767px) {
+  .ant-table-wrapper {
+    overflow-x: auto;
+  }
+  
+  .ant-table {
+    min-width: 600px;
+  }
+}
+
+/* Responsive spacing adjustments */
+@media (max-width: 767px) {
+  .ant-card {
+    margin-bottom: 12px;
+  }
+  
+  .ant-descriptions-item-label {
+    font-size: 12px;
+  }
+  
+  .ant-descriptions-item-content {
+    font-size: 13px;
+  }
+  
+  /* Make buttons more compact on mobile */
+  .ant-btn {
+    padding: 4px 12px;
+    font-size: 13px;
+  }
+  
+  .ant-btn-lg {
+    padding: 6px 15px;
+    font-size: 14px;
+  }
+  
+  /* Stack space items vertically on mobile */
+  .ant-space-horizontal {
+    flex-wrap: wrap;
+  }
+}
+
+/* Ensure charts are responsive */
+@media (max-width: 767px) {
+  .recharts-responsive-container {
+    width: 100% !important;
+    height: 250px !important;
+  }
+}
+
+/* Mobile-friendly modals */
+@media (max-width: 767px) {
+  .ant-modal {
+    max-width: calc(100vw - 32px);
+    margin: 16px auto;
+  }
+  
+  .ant-modal-body {
+    padding: 16px;
+  }
+}
+

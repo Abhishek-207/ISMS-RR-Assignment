@@ -204,7 +204,7 @@ export default function MaterialDetail() {
       <Row gutter={[24, 24]}>
         <Col xs={24} lg={16}>
           <Card title="Material Details">
-            <Descriptions column={2} bordered size="small">
+            <Descriptions column={{ xs: 1, sm: 2 }} bordered size="small">
               <Descriptions.Item label="Name" span={2}>
                 <Text strong style={{ fontSize: 15 }}>{material.name}</Text>
               </Descriptions.Item>

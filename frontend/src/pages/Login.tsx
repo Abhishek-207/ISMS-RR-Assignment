@@ -118,7 +118,7 @@ export default function Login() {
             label="Password" 
             rules={[
               { required: true, message: 'Please enter your password' },
-              { min: 6, message: 'Password must be at least 6 characters' }
+              
             ]}
           >
             <Input.Password 

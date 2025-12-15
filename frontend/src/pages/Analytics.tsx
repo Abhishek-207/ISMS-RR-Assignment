@@ -265,7 +265,7 @@ export default function Analytics() {
   return (
     <div>
       <div style={{ marginBottom: 24 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15, flexWrap: 'wrap', gap: 12 }}>
           <div>
             <Title level={4} style={{ margin: 0 }}>
               Analytics Dashboard
@@ -276,7 +276,7 @@ export default function Analytics() {
               </Text>
             )}
           </div>
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             <Button onClick={clearAllFilters}>
               Clear Filters
             </Button>
@@ -291,8 +291,8 @@ export default function Analytics() {
         </div>
         
         <Card size="small" style={{ marginBottom: 16 }}>
-          <Row gutter={[8, 0]} align="middle" style={{ minHeight: 60 }}>
-            <Col span={6}>
+          <Row gutter={[8, 8]} align="middle">
+            <Col xs={24} sm={12} md={6}>
               <div style={{ padding: '8px 0' }}>
                 <div style={{ fontSize: 12, color: '#666', marginBottom: 6 }}>Date Range</div>
                 <RangePicker
@@ -302,7 +302,7 @@ export default function Analytics() {
                 />
               </div>
             </Col>
-            <Col span={5}>
+            <Col xs={24} sm={12} md={5}>
               <div style={{ padding: '8px 0' }}>
                 <div style={{ fontSize: 12, color: '#666', marginBottom: 6 }}>Item Category</div>
                 <Select
@@ -318,7 +318,7 @@ export default function Analytics() {
                 </Select>
               </div>
             </Col>
-            <Col span={5}>
+            <Col xs={24} sm={12} md={5}>
               <div style={{ padding: '8px 0' }}>
                 <div style={{ fontSize: 12, color: '#666', marginBottom: 6 }}>Condition</div>
                 <Select
@@ -336,7 +336,7 @@ export default function Analytics() {
                 </Select>
               </div>
             </Col>
-            <Col span={5}>
+            <Col xs={24} sm={12} md={5}>
               <div style={{ padding: '8px 0' }}>
                 <div style={{ fontSize: 12, color: '#666', marginBottom: 6 }}>Status</div>
                 <Select
@@ -358,7 +358,7 @@ export default function Analytics() {
       </div>
 
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-        <Col xs={24} sm={12} md={4}>
+        <Col xs={24} sm={12} lg={8} xl={4}>
           <Card 
             hoverable
             style={{ 
@@ -385,7 +385,7 @@ export default function Analytics() {
             />
           </Card>
         </Col>
-        <Col xs={24} sm={12} md={4}>
+        <Col xs={24} sm={12} lg={8} xl={4}>
           <Card 
             hoverable
             style={{ 
@@ -412,7 +412,7 @@ export default function Analytics() {
             />
           </Card>
         </Col>
-        <Col xs={24} sm={12} md={4}>
+        <Col xs={24} sm={12} lg={8} xl={4}>
           <Card 
             hoverable
             style={{ 
@@ -439,7 +439,7 @@ export default function Analytics() {
             />
           </Card>
         </Col>
-        <Col xs={24} sm={12} md={4}>
+        <Col xs={24} sm={12} lg={8} xl={4}>
           <Card 
             hoverable
             style={{ 
@@ -466,7 +466,7 @@ export default function Analytics() {
             />
           </Card>
         </Col>
-        <Col xs={24} sm={24} md={8}>
+        <Col xs={24} sm={24} lg={16} xl={8}>
           <Card 
             hoverable
             style={{ 

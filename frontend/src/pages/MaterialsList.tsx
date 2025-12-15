@@ -382,27 +382,30 @@ export default function MaterialsList() {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15, flexWrap: 'wrap', gap: 8 }}>
         <Title level={4} style={{ margin: 0 }}>
           My Inventory
         </Title>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <Button onClick={clearAllFilters}>
-            Clear Filters
+            <span className="hide-on-mobile">Clear Filters</span>
+            <span className="show-on-mobile">Clear</span>
           </Button>
           <Button 
             icon={<DownloadOutlined />}
             onClick={handleExportReport}
             loading={exportLoading}
           >
-            Export Report
+            <span className="hide-on-mobile">Export Report</span>
+            <span className="show-on-mobile">Export</span>
           </Button>
           <Button 
             type="primary" 
             icon={<PlusOutlined />}
             onClick={() => navigate('/inventory/new')}
           >
-            Add Item
+            <span className="hide-on-mobile">Add Item</span>
+            <span className="show-on-mobile">Add</span>
           </Button>
         </div>
       </div>

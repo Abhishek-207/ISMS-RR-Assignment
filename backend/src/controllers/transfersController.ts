@@ -22,8 +22,8 @@ export class TransfersController {
       const filter: any = {};
       
       // Handle incoming/outgoing filter
-      const incoming = req.query.incoming === 'true' || req.query.incoming === true;
-      const outgoing = req.query.outgoing === 'true' || req.query.outgoing === true;
+      const incoming = String(req.query.incoming) === 'true';
+      const outgoing = String(req.query.outgoing) === 'true';
       
       if (incoming && outgoing) {
         // If both are true, show all (same as default behavior)

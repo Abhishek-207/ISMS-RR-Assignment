@@ -19,12 +19,31 @@ export class TransfersController {
       const page = Math.max(1, parseInt(String(req.query.page || '1'), 10));
       const pageSize = Math.min(100, Math.max(1, parseInt(String(req.query.pageSize || '20'), 10)));
       
-      const filter: any = {
-        $or: [
+      const filter: any = {};
+      
+      // Handle incoming/outgoing filter
+      const incoming = req.query.incoming === 'true' || req.query.incoming === true;
+      const outgoing = req.query.outgoing === 'true' || req.query.outgoing === true;
+      
+      if (incoming && outgoing) {
+        // If both are true, show all (same as default behavior)
+        filter.$or = [
           { fromOrganizationId: req.auth?.organizationId },
           { toOrganizationId: req.auth?.organizationId }
-        ]
-      };
+        ];
+      } else if (incoming) {
+        // Incoming: requests where user's org is the sender (needs to approve)
+        filter.fromOrganizationId = req.auth?.organizationId;
+      } else if (outgoing) {
+        // Outgoing: requests where user's org is the receiver (made the request)
+        filter.toOrganizationId = req.auth?.organizationId;
+      } else {
+        // Default: show all requests for the user's organization
+        filter.$or = [
+          { fromOrganizationId: req.auth?.organizationId },
+          { toOrganizationId: req.auth?.organizationId }
+        ];
+      }
       
       if (req.query.status) filter.status = req.query.status;
       if (req.query.materialId) filter.materialId = req.query.materialId;

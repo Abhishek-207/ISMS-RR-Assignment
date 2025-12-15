@@ -2,19 +2,21 @@ import React from 'react'
 import { Layout, Typography, Space, Menu, Button, Drawer, message, Dropdown } from 'antd'
 import { useState, useEffect } from 'react'
 import { Routes, Route, Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
-import { MenuOutlined, LogoutOutlined, UserOutlined, DownOutlined, BellOutlined } from '@ant-design/icons'
+import { MenuOutlined, LogoutOutlined, UserOutlined, DownOutlined, BellOutlined, ShopOutlined, InboxOutlined, ShoppingCartOutlined } from '@ant-design/icons'
 import Login from './pages/Login'
 import Landing from './pages/Landing'
 import MaterialsList from './pages/MaterialsList'
-import MaterialCreate from './pages/MaterialCreate'
-import MaterialDetail from './pages/MaterialDetail'
-import TransfersList from './pages/TransfersList'
+import InventoryCreate from './pages/InventoryCreate'
+import InventoryDetail from './pages/InventoryDetail'
+import SurplusList from './pages/SurplusList'
+import ProcurementRequests from './pages/ProcurementRequests'
 import Masters from './pages/Masters'
 import Analytics from './pages/Analytics'
 import Signup from './pages/Signup'
 import Profile from './pages/Profile'
 import Notifications from './pages/Notifications'
-import { isAdmin, getCurrentUser, getToken, clearAuth } from './lib/auth'
+import Users from './pages/Users'
+import { isAdmin, isPlatformAdmin, isOrgAdmin, getCurrentUser, getToken, clearAuth } from './lib/auth'
 import { api } from './lib/api'
 
 const { Header, Content } = Layout
@@ -32,15 +34,8 @@ export default function App() {
         const response = await api.get('/auth/me')
         setUser(response.data.user)
         
-        if (response.data.user.tenant) {
-          console.log('App: Storing tenant info from /auth/me:', response.data.user.tenant)
-          localStorage.setItem('tenant', response.data.user.tenant.id || 'default')
-          if (response.data.user.tenant.name) {
-            localStorage.setItem('tenantName', response.data.user.tenant.name)
-          }
-        } else {
-          console.log('App: No tenant info from /auth/me, setting default')
-          localStorage.setItem('tenant', 'default')
+        if (response.data.user.organization) {
+          localStorage.setItem('organization', JSON.stringify(response.data.user.organization))
         }
       } catch (error) {
         clearAuth()
@@ -114,16 +109,19 @@ export default function App() {
       label: 'Home'
     },
     {
-      key: '/materials/new',
-      label: 'List Material'
+      key: '/inventory',
+      label: 'My Inventory',
+      icon: <InboxOutlined />
     },
     {
-      key: '/materials',
-      label: 'All Materials'
+      key: '/surplus',
+      label: 'Browse Surplus',
+      icon: <ShopOutlined />
     },
     {
-      key: '/transfers',
-      label: 'Transfers'
+      key: '/procurement',
+      label: 'Procurement',
+      icon: <ShoppingCartOutlined />
     },
     {
       key: '/analytics',
@@ -131,8 +129,12 @@ export default function App() {
     },
     ...(isAdmin() ? [
       {
+        key: '/users',
+        label: 'Users'
+      },
+      {
         key: '/masters',
-        label: 'Configuration Settings'
+        label: 'Settings'
       }
     ] : [])
   ] : [
@@ -227,11 +229,12 @@ export default function App() {
   const mobileMenu = (
     <Menu mode="inline" selectable={false} style={{ borderRight: 'none' }}>
       <Menu.Item key="home-m"><Link to="/">Home</Link></Menu.Item>
-      {user && <Menu.Item key="new-m"><Link to="/materials/new">List Material</Link></Menu.Item>}
-      {user && <Menu.Item key="materials-m"><Link to="/materials">All Materials</Link></Menu.Item>}
-      {user && <Menu.Item key="transfers-m"><Link to="/transfers">Transfers</Link></Menu.Item>}
+      {user && <Menu.Item key="inventory-m"><Link to="/inventory">My Inventory</Link></Menu.Item>}
+      {user && <Menu.Item key="surplus-m"><Link to="/surplus">Browse Surplus</Link></Menu.Item>}
+      {user && <Menu.Item key="procurement-m"><Link to="/procurement">Procurement</Link></Menu.Item>}
       {user && <Menu.Item key="analytics-m"><Link to="/analytics">Analytics</Link></Menu.Item>}
-      {user && isAdmin() && <Menu.Item key="masters-m"><Link to="/masters">Configuration settings</Link></Menu.Item>}
+      {user && isAdmin() && <Menu.Item key="users-m"><Link to="/users">Users</Link></Menu.Item>}
+      {user && isAdmin() && <Menu.Item key="masters-m"><Link to="/masters">Settings</Link></Menu.Item>}
       {user ? (
         <Menu.Item key="org-m">
           <Dropdown
@@ -320,10 +323,16 @@ export default function App() {
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
             <Route path="/" element={<Landing />} />
-            <Route path="/materials" element={<RequireAuth><MaterialsList /></RequireAuth>} />
-            <Route path="/materials/new" element={<RequireAuth><MaterialCreate /></RequireAuth>} />
-            <Route path="/materials/:id" element={<RequireAuth><MaterialDetail /></RequireAuth>} />
-            <Route path="/transfers" element={<RequireAuth><TransfersList /></RequireAuth>} />
+            <Route path="/inventory" element={<RequireAuth><MaterialsList /></RequireAuth>} />
+            <Route path="/inventory/new" element={<RequireAuth><InventoryCreate /></RequireAuth>} />
+            <Route path="/inventory/:id" element={<RequireAuth><InventoryDetail /></RequireAuth>} />
+            <Route path="/surplus" element={<RequireAuth><SurplusList /></RequireAuth>} />
+            <Route path="/procurement" element={<RequireAuth><ProcurementRequests /></RequireAuth>} />
+            <Route path="/materials" element={<Navigate to="/inventory" replace />} />
+            <Route path="/materials/new" element={<Navigate to="/inventory/new" replace />} />
+            <Route path="/materials/:id" element={<RequireAuth><InventoryDetail /></RequireAuth>} />
+            <Route path="/transfers" element={<Navigate to="/procurement" replace />} />
+            <Route path="/users" element={<RequireAdmin><Users /></RequireAdmin>} />
             <Route path="/masters" element={<RequireAdmin><Masters /></RequireAdmin>} />
             <Route path="/analytics" element={<RequireAuth><Analytics /></RequireAuth>} />
             <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />

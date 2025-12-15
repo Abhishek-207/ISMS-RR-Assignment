@@ -6,7 +6,7 @@ export interface TransferRequestDocument extends Document {
   fromOrganizationId: mongoose.Types.ObjectId;
   toOrganizationId: mongoose.Types.ObjectId;
   quantityRequested: number;
-  purpose: string; // Mandatory: requester must explain why they need this item
+  purpose: string;
   status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'COMPLETED' | 'CANCELLED';
   comments: {
     comment: string;
@@ -29,7 +29,7 @@ const TransferRequestSchema = new Schema<TransferRequestDocument>(
     fromOrganizationId: { type: Schema.Types.ObjectId, ref: 'Organization', required: true },
     toOrganizationId: { type: Schema.Types.ObjectId, ref: 'Organization', required: true },
     quantityRequested: { type: Number, required: true, min: 0 },
-    purpose: { type: String, required: true, minlength: 10 }, // Mandatory: explain why needed
+    purpose: { type: String, required: true, minlength: 10 },
     status: { 
       type: String, 
       enum: ['PENDING', 'APPROVED', 'REJECTED', 'COMPLETED', 'CANCELLED'], 
@@ -55,7 +55,6 @@ const TransferRequestSchema = new Schema<TransferRequestDocument>(
   { timestamps: true }
 );
 
-// Indexes for performance (organization-centric)
 TransferRequestSchema.index({ organizationId: 1, materialId: 1 });
 TransferRequestSchema.index({ organizationId: 1, fromOrganizationId: 1 });
 TransferRequestSchema.index({ organizationId: 1, toOrganizationId: 1 });

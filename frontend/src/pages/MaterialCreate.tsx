@@ -59,7 +59,7 @@ export default function MaterialCreate() {
       
       setAttachments(prev => [...prev, response.data.id])
       message.success('File uploaded successfully')
-      return false // Prevent default upload behavior
+      return false
     } catch (error) {
       message.error('Failed to upload file')
       return false
@@ -76,13 +76,12 @@ export default function MaterialCreate() {
         availableFrom: values.availableFrom.format('YYYY-MM-DD'),
         availableUntil: values.availableUntil ? values.availableUntil.format('YYYY-MM-DD') : null,
         attachments,
-        // organizationId is automatically set by backend from authenticated user
         status: 'AVAILABLE'
       }
 
       await api.post('/materials', materialData)
       message.success('Inventory item created successfully!')
-      navigate('/materials')
+      navigate('/inventory')
     } catch (error: any) {
       message.error(error.response?.data?.error || 'Failed to create inventory item')
     } finally {

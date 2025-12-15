@@ -280,7 +280,7 @@ export default function MaterialsList() {
             key: 'view',
             label: 'View Details',
             icon: <EyeOutlined />,
-            onClick: () => navigate(`/materials/${record._id}`)
+            onClick: () => navigate(`/inventory/${record._id}`)
           }
         ]
 
@@ -299,7 +299,7 @@ export default function MaterialsList() {
               key: 'edit',
               label: 'Edit',
               icon: <EditOutlined />,
-              onClick: () => navigate(`/materials/${record._id}/edit`)
+              onClick: () => navigate(`/inventory/${record._id}/edit`)
             },
             {
               key: 'delete',
@@ -337,7 +337,7 @@ export default function MaterialsList() {
         <Button 
           type="primary" 
           icon={<PlusOutlined />}
-          onClick={() => navigate('/materials/new')}
+          onClick={() => navigate('/inventory/new')}
         >
           Add Item
         </Button>

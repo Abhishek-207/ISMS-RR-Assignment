@@ -8,7 +8,6 @@ import './styles.css'
 
 const queryClient = new QueryClient()
 
-// Resolve tenant from subdomain once at startup
 ;(() => {
   const host = window.location.host
   const parts = host.split('.')

@@ -8,7 +8,6 @@ const router = Router();
 
 router.use(requireAuthAndActive);
 
-// Get material availability overview
 router.get('/availability', async (req: AuthRequest, res: Response) => {
   try {
     const organizationId = req.auth?.organizationId;
@@ -74,7 +73,6 @@ router.get('/availability', async (req: AuthRequest, res: Response) => {
   }
 });
 
-// Get transfer trends
 router.get('/transfers', async (req: AuthRequest, res: Response) => {
   try {
     const organizationId = req.auth?.organizationId;
@@ -140,7 +138,6 @@ router.get('/transfers', async (req: AuthRequest, res: Response) => {
   }
 });
 
-// Get material condition distribution
 router.get('/conditions', async (req: AuthRequest, res: Response) => {
   try {
     const organizationId = req.auth?.organizationId;
@@ -182,7 +179,6 @@ router.get('/conditions', async (req: AuthRequest, res: Response) => {
   }
 });
 
-// Get site-wise material distribution
 router.get('/sites', async (req: AuthRequest, res: Response) => {
   try {
     const organizationId = req.auth?.organizationId;
@@ -226,7 +222,6 @@ router.get('/sites', async (req: AuthRequest, res: Response) => {
   }
 });
 
-// Get utilization trends
 router.get('/utilization', async (req: AuthRequest, res: Response) => {
   try {
     const organizationId = req.auth?.organizationId;
@@ -272,7 +267,6 @@ router.get('/utilization', async (req: AuthRequest, res: Response) => {
   }
 });
 
-// Export analytics report
 router.get('/export', async (req: AuthRequest, res: Response) => {
   try {
     const organizationId = req.auth?.organizationId;
@@ -285,7 +279,6 @@ router.get('/export', async (req: AuthRequest, res: Response) => {
       format = 'csv' 
     } = req.query;
 
-    // Build match stage for filtering
     const matchStage: any = { organizationId: new mongoose.Types.ObjectId(organizationId) };
     
     if (siteId) matchStage.siteId = new mongoose.Types.ObjectId(siteId as string);
@@ -298,9 +291,7 @@ router.get('/export', async (req: AuthRequest, res: Response) => {
       if (toDate) matchStage.createdAt.$lte = new Date(toDate as string);
     }
 
-    // Get comprehensive analytics data
     const [availabilityData, transferData, conditionData, siteData, utilizationData, statsData] = await Promise.all([
-      // Material availability by status
       Material.aggregate([
         { $match: matchStage },
         {
@@ -322,7 +313,6 @@ router.get('/export', async (req: AuthRequest, res: Response) => {
         }
       ]),
 
-      // Transfer trends
       TransferRequest.aggregate([
         { $match: { organizationId: new mongoose.Types.ObjectId(organizationId) } },
         {
@@ -337,7 +327,6 @@ router.get('/export', async (req: AuthRequest, res: Response) => {
         { $sort: { '_id.month': 1 as any } }
       ]),
 
-      // Material condition distribution
       Material.aggregate([
         { $match: matchStage },
         {
@@ -351,7 +340,6 @@ router.get('/export', async (req: AuthRequest, res: Response) => {
         }
       ]),
 
-      // Site-wise distribution
       Material.aggregate([
         { $match: { organizationId: new mongoose.Types.ObjectId(organizationId) } },
         {
@@ -373,7 +361,6 @@ router.get('/export', async (req: AuthRequest, res: Response) => {
         }
       ]),
 
-      // Utilization trends
       TransferRequest.aggregate([
         { $match: { organizationId: new mongoose.Types.ObjectId(organizationId) } },
         {
@@ -388,7 +375,6 @@ router.get('/export', async (req: AuthRequest, res: Response) => {
         { $sort: { '_id.month': 1 as any } }
       ]),
 
-      // Summary statistics
       Material.aggregate([
         { $match: { organizationId: new mongoose.Types.ObjectId(organizationId) } },
         {
@@ -411,7 +397,6 @@ router.get('/export', async (req: AuthRequest, res: Response) => {
       ])
     ]);
 
-    // Calculate summary stats
     const totalMaterials = statsData.reduce((sum: number, item: any) => sum + item.totalQuantity, 0);
     const availableMaterials = statsData.find((item: any) => item._id.status === 'AVAILABLE')?.totalQuantity || 0;
     const reservedMaterials = statsData.find((item: any) => item._id.status === 'RESERVED')?.totalQuantity || 0;
@@ -446,7 +431,6 @@ router.get('/export', async (req: AuthRequest, res: Response) => {
       res.setHeader('Content-Disposition', `attachment; filename="analytics-report-${new Date().toISOString().split('T')[0]}.json"`);
       res.json(exportData);
     } else {
-      // Generate CSV
       const csvContent = generateCSV(exportData);
       res.setHeader('Content-Type', 'text/csv');
       res.setHeader('Content-Disposition', `attachment; filename="analytics-report-${new Date().toISOString().split('T')[0]}.csv"`);
@@ -459,12 +443,10 @@ router.get('/export', async (req: AuthRequest, res: Response) => {
   }
 });
 
-// Helper function to generate CSV content
 function generateCSV(data: any): string {
   let csv = 'Analytics Report\n';
   csv += `Generated on: ${new Date(data.generatedAt).toLocaleString()}\n\n`;
   
-  // Summary Statistics
   csv += 'SUMMARY STATISTICS\n';
   csv += 'Metric,Value,Percentage\n';
   csv += `Total Materials,${data.stats.totalMaterials},100%\n`;
@@ -473,7 +455,6 @@ function generateCSV(data: any): string {
   csv += `In Use Materials,${data.stats.inUseMaterials},${data.stats.totalMaterials > 0 ? Math.round((data.stats.inUseMaterials / data.stats.totalMaterials) * 100) : 0}%\n`;
   csv += `Transferred Materials,${data.stats.transferredMaterials},${data.stats.totalMaterials > 0 ? Math.round((data.stats.transferredMaterials / data.stats.totalMaterials) * 100) : 0}%\n\n`;
   
-  // Material Availability by Status
   csv += 'MATERIAL AVAILABILITY BY STATUS\n';
   csv += 'Status,Total Quantity,Count\n';
   data.availabilityData.forEach((item: any) => {
@@ -481,7 +462,6 @@ function generateCSV(data: any): string {
   });
   csv += '\n';
   
-  // Material Condition Distribution
   csv += 'MATERIAL CONDITION DISTRIBUTION\n';
   csv += 'Condition,Total Quantity,Count\n';
   data.conditionData.forEach((item: any) => {
@@ -489,7 +469,6 @@ function generateCSV(data: any): string {
   });
   csv += '\n';
   
-  // Transfer Trends
   csv += 'TRANSFER TRENDS\n';
   csv += 'Month,Total Quantity,Count\n';
   data.transferData.forEach((item: any) => {
@@ -497,7 +476,6 @@ function generateCSV(data: any): string {
   });
   csv += '\n';
   
-  // Site-wise Distribution
   csv += 'SITE-WISE MATERIAL DISTRIBUTION\n';
   csv += 'Site,Total Quantity,Count\n';
   data.siteData.forEach((item: any) => {
@@ -505,7 +483,6 @@ function generateCSV(data: any): string {
   });
   csv += '\n';
   
-  // Utilization Trends
   csv += 'MATERIAL UTILIZATION TRENDS\n';
   csv += 'Month,Total Quantity,Count\n';
   data.utilizationData.forEach((item: any) => {

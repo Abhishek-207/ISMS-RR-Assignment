@@ -9,7 +9,6 @@ const router = Router();
 
 router.use(requireAuthAndActive);
 
-// Get users
 router.get('/', async (req: AuthRequest, res: Response) => {
   try {
     const page = Math.max(1, parseInt(String(req.query.page || '1'), 10));
@@ -23,8 +22,7 @@ router.get('/', async (req: AuthRequest, res: Response) => {
 
     const [items, total] = await Promise.all([
       User.find(filter)
-        .populate('sites', 'name')
-        .populate('projects', 'name')
+        .populate('organizationId', 'name category')
         .skip((page - 1) * pageSize)
         .limit(pageSize)
         .sort({ name: 1 })
@@ -32,7 +30,6 @@ router.get('/', async (req: AuthRequest, res: Response) => {
       User.countDocuments(filter)
     ]);
 
-    // Remove password hash from response
     const sanitizedItems = items.map(user => {
       const { passwordHash, ...userWithoutPassword } = user;
       return userWithoutPassword;
@@ -45,19 +42,16 @@ router.get('/', async (req: AuthRequest, res: Response) => {
   }
 });
 
-// Get single user
 router.get('/:id', async (req: Request, res) => {
   try {
     const user = await User.findById(req.params.id)
-      .populate('sites', 'name')
-      .populate('projects', 'name')
+      .populate('organizationId', 'name category')
       .lean();
 
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Remove password hash from response
     const { passwordHash, ...userWithoutPassword } = user;
 
     res.json(userWithoutPassword);
@@ -67,14 +61,11 @@ router.get('/:id', async (req: Request, res) => {
   }
 });
 
-// Create user (Admin only)
 router.post('/', requireAdmin, [
   body('name').isLength({ min: 2 }),
   body('email').isEmail().normalizeEmail(),
   body('password').isLength({ min: 6 }),
-  body('role').isIn(['ADMIN', 'PROJECT_MANAGER', 'SITE_ENGINEER']),
-  body('sites').optional().isArray(),
-  body('projects').optional().isArray()
+  body('role').isIn(['PLATFORM_ADMIN', 'ORG_ADMIN', 'ORG_USER'])
 ], audit('User', 'CREATE', () => null, (req, result) => result), async (req: AuthRequest, res: Response) => {
   try {
     const errors = validationResult(req);
@@ -82,9 +73,8 @@ router.post('/', requireAdmin, [
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { name, email, password, role, sites = [], projects = [] } = req.body;
+    const { name, email, password, role } = req.body;
 
-    // Check if user already exists
     const existingUser = await User.findOne({ email, organizationId: req.auth?.organizationId });
     if (existingUser) {
       return res.status(400).json({ error: 'User already exists' });
@@ -99,17 +89,13 @@ router.post('/', requireAdmin, [
       email,
       passwordHash,
       role,
-      sites,
-      projects,
       isActive: true
     });
 
     const populatedUser = await User.findById(user._id)
-      .populate('sites', 'name')
-      .populate('projects', 'name')
+      .populate('organizationId', 'name category')
       .lean();
 
-    // Remove password hash from response
     const { passwordHash: _, ...userWithoutPassword } = populatedUser as any;
 
     res.status(201).json(userWithoutPassword);
@@ -119,13 +105,10 @@ router.post('/', requireAdmin, [
   }
 });
 
-// Update user
 router.patch('/:id', [
   body('name').optional().isLength({ min: 2 }),
   body('email').optional().isEmail().normalizeEmail(),
-  body('role').optional().isIn(['ADMIN', 'PROJECT_MANAGER', 'SITE_ENGINEER']),
-  body('sites').optional().isArray(),
-  body('projects').optional().isArray(),
+  body('role').optional().isIn(['PLATFORM_ADMIN', 'ORG_ADMIN', 'ORG_USER']),
   body('isActive').optional().isBoolean()
 ], audit('User', 'UPDATE', async (req) => {
   return await User.findById(req.params.id).lean();
@@ -140,12 +123,10 @@ router.patch('/:id', [
 
     const updateData = { ...req.body };
 
-    // Check if user is trying to update their own role or if they're platform admin
     if (updateData.role && req.params.id !== req.auth?.userId && req.auth?.role !== 'PLATFORM_ADMIN') {
       return res.status(403).json({ error: 'Only platform admins can change user roles' });
     }
 
-    // Check if email is being changed and if it's already taken
     if (updateData.email) {
       const existingUser = await User.findOne({ 
         email: updateData.email, 
@@ -162,15 +143,13 @@ router.patch('/:id', [
       updateData,
       { new: true, runValidators: true }
     )
-      .populate('sites', 'name')
-      .populate('projects', 'name')
+      .populate('organizationId', 'name category')
       .lean();
 
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Remove password hash from response
     const { passwordHash, ...userWithoutPassword } = user;
 
     res.json(userWithoutPassword);
@@ -180,7 +159,6 @@ router.patch('/:id', [
   }
 });
 
-// Change password
 router.patch('/:id/password', [
   body('currentPassword').isLength({ min: 6 }),
   body('newPassword').isLength({ min: 6 })
@@ -193,7 +171,6 @@ router.patch('/:id/password', [
 
     const { currentPassword, newPassword } = req.body;
 
-    // Check if user is changing their own password or if they're platform admin
     if (req.params.id !== req.auth?.userId && req.auth?.role !== 'PLATFORM_ADMIN') {
       return res.status(403).json({ error: 'You can only change your own password' });
     }
@@ -218,7 +195,6 @@ router.patch('/:id/password', [
   }
 });
 
-// Delete user (Admin only)
 router.delete('/:id', requireAdmin, audit('User', 'DELETE', async (req) => {
   return await User.findById(req.params.id).lean();
 }, () => null), async (req: Request, res) => {

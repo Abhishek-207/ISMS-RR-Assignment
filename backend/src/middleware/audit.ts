@@ -13,23 +13,18 @@ export function audit(
       let before = null;
       let after = null;
 
-      // Read before state
       try {
         before = await readBefore(req);
       } catch (error) {
         console.warn('Failed to read before state for audit:', error);
       }
 
-      // Store original res.json
       const originalJson = res.json;
 
-      // Override res.json to capture the response
       res.json = function(body: any) {
-        // Read after state
         readAfter(req, body).then((afterData: any) => {
           after = afterData;
           
-          // Create audit log
           AuditLog.create({
             organizationId: req.auth?.organizationId,
             entity,

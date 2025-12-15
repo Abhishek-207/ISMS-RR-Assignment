@@ -45,9 +45,7 @@ const UserSchema = new Schema<UserDocument>(
   { timestamps: true }
 );
 
-// Unique email per organization
 UserSchema.index({ organizationId: 1, email: 1 }, { unique: true });
-// Fast category-based filtering
 UserSchema.index({ organizationCategory: 1, isActive: 1 });
 UserSchema.index({ role: 1 });
 

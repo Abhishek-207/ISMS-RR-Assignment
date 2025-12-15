@@ -118,7 +118,7 @@ export default function InventoryCreate() {
                 label="Item Name"
                 rules={[{ required: true, message: 'Please enter item name!' }]}
               >
-                <Input placeholder="e.g., Office Chairs, Laptops, Steel Pipes" size="large" />
+                <Input placeholder="e.g., Office Chairs, Laptops, Steel Pipes" size="middle" />
               </Form.Item>
             </Col>
             <Col xs={24} md={12}>
@@ -127,7 +127,7 @@ export default function InventoryCreate() {
                 label="Category"
                 rules={[{ required: true, message: 'Please enter category!' }]}
               >
-                <Input placeholder="e.g., Furniture, Electronics, Raw Materials" size="large" />
+                <Input placeholder="e.g., Furniture, Electronics, Raw Materials" size="middle" />
               </Form.Item>
             </Col>
           </Row>
@@ -150,7 +150,7 @@ export default function InventoryCreate() {
                 <InputNumber 
                   placeholder="Enter quantity" 
                   style={{ width: '100%' }}
-                  size="large"
+                  size="middle"
                   min={0}
                 />
               </Form.Item>
@@ -161,7 +161,7 @@ export default function InventoryCreate() {
                 label="Unit"
                 rules={[{ required: true, message: 'Please enter unit!' }]}
               >
-                <Input placeholder="e.g., pieces, kg, meters" size="large" />
+                <Input placeholder="e.g., pieces, kg, meters" size="middle" />
               </Form.Item>
             </Col>
             <Col xs={24} md={8}>
@@ -170,7 +170,7 @@ export default function InventoryCreate() {
                 label="Condition"
                 rules={[{ required: true, message: 'Please select condition!' }]}
               >
-                <Select placeholder="Select condition" size="large">
+                <Select placeholder="Select condition" size="middle">
                   <Select.Option value="NEW">New</Select.Option>
                   <Select.Option value="GOOD">Good</Select.Option>
                   <Select.Option value="SLIGHTLY_DAMAGED">Slightly Damaged</Select.Option>
@@ -195,7 +195,7 @@ export default function InventoryCreate() {
                 name="location"
                 label="Storage Location (Optional)"
               >
-                <Input placeholder="e.g., Warehouse A, Shelf 12" size="large" />
+                <Input placeholder="e.g., Warehouse A, Shelf 12" size="middle" />
               </Form.Item>
             </Col>
             <Col xs={24} md={12}>
@@ -207,7 +207,7 @@ export default function InventoryCreate() {
                 <InputNumber 
                   placeholder="Enter estimated cost"
                   style={{ width: '100%' }}
-                  size="large"
+                  size="middle"
                   min={0}
                   prefix="₹"
                 />
@@ -230,7 +230,7 @@ export default function InventoryCreate() {
                 label="Available From"
                 rules={[{ required: true, message: 'Please select available from date!' }]}
               >
-                <DatePicker style={{ width: '100%' }} size="large" />
+                <DatePicker style={{ width: '100%' }} size="middle" />
               </Form.Item>
             </Col>
             <Col xs={24} md={12}>
@@ -238,7 +238,7 @@ export default function InventoryCreate() {
                 name="availableUntil"
                 label="Available Until (Optional)"
               >
-                <DatePicker style={{ width: '100%' }} size="large" />
+                <DatePicker style={{ width: '100%' }} size="middle" />
               </Form.Item>
             </Col>
           </Row>
@@ -309,7 +309,7 @@ export default function InventoryCreate() {
                   accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
                   multiple
                 >
-                  <Button icon={<UploadOutlined />} loading={uploading} size="large">
+                  <Button icon={<UploadOutlined />} loading={uploading} size="middle">
                     Upload Files
                   </Button>
                 </Upload>
@@ -331,11 +331,11 @@ export default function InventoryCreate() {
                 htmlType="submit" 
                 loading={loading}
                 icon={<SaveOutlined />}
-                size="large"
+                size="middle"
               >
                 Add to Inventory
               </Button>
-              <Button onClick={() => navigate('/inventory')} size="large">
+              <Button onClick={() => navigate('/inventory')} size="middle">
                 Cancel
               </Button>
             </Space>

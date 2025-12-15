@@ -73,7 +73,6 @@ export function requireOrgAdminOrPlatformAdmin(req: AuthRequest, res: Response, 
   return requireRole(['PLATFORM_ADMIN', 'ORG_ADMIN'])(req, res, next);
 }
 
-// Backward compatibility aliases (deprecated)
 export function requireAdmin(req: AuthRequest, res: Response, next: NextFunction) {
   return requireOrgAdmin(req, res, next);
 }

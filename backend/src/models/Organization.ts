@@ -37,7 +37,6 @@ const OrganizationSchema = new Schema<OrganizationDocument>(
   { timestamps: true }
 );
 
-// Index for category-based filtering (critical for surplus visibility)
 OrganizationSchema.index({ category: 1, isActive: 1 });
 OrganizationSchema.index({ name: 1 });
 

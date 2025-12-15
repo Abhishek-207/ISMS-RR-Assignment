@@ -15,7 +15,9 @@ import {
   CheckCircleOutlined, 
   ClockCircleOutlined, 
   ToolOutlined,
-  DownloadOutlined
+  DownloadOutlined,
+  SwapOutlined,
+  DollarOutlined
 } from '@ant-design/icons'
 import { 
   BarChart, 
@@ -34,14 +36,16 @@ import {
 } from 'recharts'
 import dayjs from 'dayjs'
 import { api } from '../lib/api'
+import { getOrganizationCategory } from '../lib/auth'
 
-const { Title } = Typography
+const { Title, Text } = Typography
 const { RangePicker } = DatePicker
 const { Option } = Select
 
 const COLORS = ['#1890ff', '#52c41a', '#fa8c16', '#f5222d', '#722ed1']
 
 export default function Analytics() {
+  const orgCategory = getOrganizationCategory()
   const [loading, setLoading] = useState(false)
   const [exportLoading, setExportLoading] = useState(false)
   const [dateRange, setDateRange] = useState<[dayjs.Dayjs, dayjs.Dayjs]>([
@@ -49,83 +53,75 @@ export default function Analytics() {
     dayjs()
   ])
   
-  // Filter states
-  const [selectedSite, setSelectedSite] = useState<string | undefined>(undefined)
-  const [selectedMaterialType, setSelectedMaterialType] = useState<string | undefined>(undefined)
+  const [selectedCategory, setSelectedCategory] = useState<string | undefined>(undefined)
   const [selectedCondition, setSelectedCondition] = useState<string | undefined>(undefined)
   const [selectedStatus, setSelectedStatus] = useState<string | undefined>(undefined)
 
   const [availabilityData, setAvailabilityData] = useState<any[]>([])
-  const [transferData, setTransferData] = useState<any[]>([])
+  const [procurementData, setProcurementData] = useState<any[]>([])
   const [conditionData, setConditionData] = useState<any[]>([])
-  const [siteData, setSiteData] = useState<any[]>([])
-  const [utilizationData, setUtilizationData] = useState<any[]>([])
+  const [categoryData, setCategoryData] = useState<any[]>([])
+  const [surplusData, setSurplusData] = useState<any[]>([])
   const [stats, setStats] = useState({
-    totalMaterials: 0,
-    availableMaterials: 0,
-    reservedMaterials: 0,
-    inUseMaterials: 0,
-    transferredMaterials: 0
+    totalInventory: 0,
+    availableItems: 0,
+    surplusItems: 0,
+    procurementRequests: 0,
+    costAvoided: 0
   })
 
   const fetchAnalytics = async () => {
     setLoading(true)
     try {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      await new Promise(resolve => setTimeout(resolve, 800))
 
-      // Dummy data for stats
       setStats({
-        totalMaterials: 1250,
-        availableMaterials: 450,
-        reservedMaterials: 320,
-        inUseMaterials: 480,
-        transferredMaterials: 180
+        totalInventory: 1250,
+        availableItems: 450,
+        surplusItems: 180,
+        procurementRequests: 45,
+        costAvoided: 2450000
       })
 
-      // Dummy data for material availability by status
       setAvailabilityData([
         { '_id': { 'status': 'AVAILABLE' }, 'totalQuantity': 450, 'count': 120 },
         { '_id': { 'status': 'RESERVED' }, 'totalQuantity': 320, 'count': 85 },
-        { '_id': { 'status': 'IN_USE' }, 'totalQuantity': 480, 'count': 95 },
-        { '_id': { 'status': 'TRANSFERRED' }, 'totalQuantity': 180, 'count': 45 }
+        { '_id': { 'status': 'TRANSFERRED' }, 'totalQuantity': 180, 'count': 45 },
+        { '_id': { 'status': 'ARCHIVED' }, 'totalQuantity': 100, 'count': 25 }
       ])
 
-      // Dummy data for material condition distribution
       setConditionData([
-        { '_id': { 'condition': 'EXCELLENT' }, 'totalQuantity': 380, 'count': 95 },
+        { '_id': { 'condition': 'NEW' }, 'totalQuantity': 380, 'count': 95 },
         { '_id': { 'condition': 'GOOD' }, 'totalQuantity': 520, 'count': 130 },
-        { '_id': { 'condition': 'FAIR' }, 'totalQuantity': 280, 'count': 70 },
-        { '_id': { 'condition': 'POOR' }, 'totalQuantity': 70, 'count': 18 }
+        { '_id': { 'condition': 'SLIGHTLY_DAMAGED' }, 'totalQuantity': 180, 'count': 45 },
+        { '_id': { 'condition': 'NEEDS_REPAIR' }, 'totalQuantity': 70, 'count': 18 },
+        { '_id': { 'condition': 'SCRAP' }, 'totalQuantity': 30, 'count': 8 }
       ])
 
-      // Dummy data for transfer trends (last 6 months)
-      setTransferData([
-        { '_id': { 'month': '2024-01' }, 'totalQuantity': 45, 'count': 12 },
-        { '_id': { 'month': '2024-02' }, 'totalQuantity': 52, 'count': 15 },
-        { '_id': { 'month': '2024-03' }, 'totalQuantity': 38, 'count': 10 },
-        { '_id': { 'month': '2024-04' }, 'totalQuantity': 65, 'count': 18 },
-        { '_id': { 'month': '2024-05' }, 'totalQuantity': 42, 'count': 11 },
-        { '_id': { 'month': '2024-06' }, 'totalQuantity': 58, 'count': 16 }
+      setProcurementData([
+        { '_id': { 'month': '2024-07' }, 'approved': 12, 'pending': 3, 'rejected': 2 },
+        { '_id': { 'month': '2024-08' }, 'approved': 15, 'pending': 5, 'rejected': 1 },
+        { '_id': { 'month': '2024-09' }, 'approved': 10, 'pending': 2, 'rejected': 3 },
+        { '_id': { 'month': '2024-10' }, 'approved': 18, 'pending': 4, 'rejected': 2 },
+        { '_id': { 'month': '2024-11' }, 'approved': 11, 'pending': 6, 'rejected': 1 },
+        { '_id': { 'month': '2024-12' }, 'approved': 16, 'pending': 8, 'rejected': 2 }
       ])
 
-      // Dummy data for site-wise distribution
-      setSiteData([
-        { '_id': { 'site': 'Site A - Mumbai' }, 'totalQuantity': 320, 'count': 85 },
-        { '_id': { 'site': 'Site B - Delhi' }, 'totalQuantity': 280, 'count': 75 },
-        { '_id': { 'site': 'Site C - Bangalore' }, 'totalQuantity': 250, 'count': 65 },
-        { '_id': { 'site': 'Site D - Chennai' }, 'totalQuantity': 200, 'count': 55 },
-        { '_id': { 'site': 'Site E - Pune' }, 'totalQuantity': 180, 'count': 45 }
+      setCategoryData([
+        { '_id': { 'category': 'Electronics' }, 'totalQuantity': 320, 'count': 85 },
+        { '_id': { 'category': 'Furniture' }, 'totalQuantity': 280, 'count': 75 },
+        { '_id': { 'category': 'Raw Materials' }, 'totalQuantity': 250, 'count': 65 },
+        { '_id': { 'category': 'Equipment' }, 'totalQuantity': 200, 'count': 55 },
+        { '_id': { 'category': 'Office Supplies' }, 'totalQuantity': 180, 'count': 45 }
       ])
 
-      // Dummy data for utilization trends
-      setUtilizationData([
-        { '_id': { 'month': '2024-01' }, 'totalQuantity': 120, 'count': 25 },
-        { '_id': { 'month': '2024-02' }, 'totalQuantity': 135, 'count': 28 },
-        { '_id': { 'month': '2024-03' }, 'totalQuantity': 110, 'count': 22 },
-        { '_id': { 'month': '2024-04' }, 'totalQuantity': 145, 'count': 32 },
-        { '_id': { 'month': '2024-05' }, 'totalQuantity': 130, 'count': 27 },
-        { '_id': { 'month': '2024-06' }, 'totalQuantity': 155, 'count': 35 }
+      setSurplusData([
+        { '_id': { 'month': '2024-07' }, 'markedSurplus': 25, 'procured': 18 },
+        { '_id': { 'month': '2024-08' }, 'markedSurplus': 32, 'procured': 22 },
+        { '_id': { 'month': '2024-09' }, 'markedSurplus': 28, 'procured': 20 },
+        { '_id': { 'month': '2024-10' }, 'markedSurplus': 35, 'procured': 28 },
+        { '_id': { 'month': '2024-11' }, 'markedSurplus': 30, 'procured': 24 },
+        { '_id': { 'month': '2024-12' }, 'markedSurplus': 38, 'procured': 30 }
       ])
 
     } catch (error) {
@@ -137,7 +133,7 @@ export default function Analytics() {
 
   useEffect(() => {
     fetchAnalytics()
-  }, [dateRange, selectedSite, selectedMaterialType, selectedCondition, selectedStatus])
+  }, [dateRange, selectedCategory, selectedCondition, selectedStatus])
 
   const handleDateRangeChange = (dates: any) => {
     if (dates && dates.length === 2) {
@@ -146,8 +142,7 @@ export default function Analytics() {
   }
 
   const clearAllFilters = () => {
-    setSelectedSite(undefined)
-    setSelectedMaterialType(undefined)
+    setSelectedCategory(undefined)
     setSelectedCondition(undefined)
     setSelectedStatus(undefined)
     setDateRange([dayjs().subtract(6, 'month'), dayjs()])
@@ -156,7 +151,6 @@ export default function Analytics() {
   const handleExportReport = async () => {
     setExportLoading(true)
     try {
-      // Build query parameters for the export API
       const params = new URLSearchParams()
       
       if (dateRange[0]) {
@@ -165,11 +159,8 @@ export default function Analytics() {
       if (dateRange[1]) {
         params.append('toDate', dateRange[1].format('YYYY-MM-DD'))
       }
-      if (selectedSite) {
-        params.append('siteId', selectedSite)
-      }
-      if (selectedMaterialType) {
-        params.append('categoryId', selectedMaterialType)
+      if (selectedCategory) {
+        params.append('categoryId', selectedCategory)
       }
       if (selectedCondition) {
         params.append('condition', selectedCondition)
@@ -178,12 +169,10 @@ export default function Analytics() {
         params.append('status', selectedStatus)
       }
       
-      // Call the backend export API
       const response = await api.get(`/analytics/export?${params.toString()}`, {
         responseType: 'blob'
       })
       
-      // Create and download file
       const blob = new Blob([response.data], { type: 'text/csv;charset=utf-8;' })
       const link = document.createElement('a')
       const url = URL.createObjectURL(blob)
@@ -206,9 +195,16 @@ export default function Analytics() {
     <div>
       <div style={{ marginBottom: 24 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 }}>
-          <Title level={4} style={{ margin: 0 }}>
-            Analytics 
-          </Title>
+          <div>
+            <Title level={4} style={{ margin: 0 }}>
+              Analytics Dashboard
+            </Title>
+            {orgCategory && (
+              <Text type="secondary" style={{ fontSize: 13 }}>
+                Category: {orgCategory.replace(/_/g, ' ')}
+              </Text>
+            )}
+          </div>
           <div style={{ display: 'flex', gap: 8 }}>
             <Button 
               onClick={handleExportReport} 
@@ -219,15 +215,14 @@ export default function Analytics() {
               Export Report
             </Button>
             <Button onClick={clearAllFilters} type="default">
-              Clear All Filters
+              Clear Filters
             </Button>
           </div>
         </div>
         
-        {/* Filters Row */}
         <Card size="small" style={{ marginBottom: 16 }}>
           <Row gutter={[8, 0]} align="middle" style={{ minHeight: 60 }}>
-            <Col span={4}>
+            <Col span={6}>
               <div style={{ padding: '8px 0' }}>
                 <div style={{ fontSize: 12, color: '#666', marginBottom: 6 }}>Date Range</div>
                 <RangePicker
@@ -237,44 +232,25 @@ export default function Analytics() {
                 />
               </div>
             </Col>
-            <Col span={4}>
+            <Col span={5}>
               <div style={{ padding: '8px 0' }}>
-                <div style={{ fontSize: 12, color: '#666', marginBottom: 6 }}>Site</div>
+                <div style={{ fontSize: 12, color: '#666', marginBottom: 6 }}>Item Category</div>
                 <Select
-                  placeholder="All Sites"
-                  value={selectedSite}
-                  onChange={setSelectedSite}
+                  placeholder="All Categories"
+                  value={selectedCategory}
+                  onChange={setSelectedCategory}
                   allowClear
                   style={{ width: '100%', height: 36 }}
                 >
-                  <Option value="Site A - Mumbai">Site A - Mumbai</Option>
-                  <Option value="Site B - Delhi">Site B - Delhi</Option>
-                  <Option value="Site C - Bangalore">Site C - Bangalore</Option>
-                  <Option value="Site D - Chennai">Site D - Chennai</Option>
-                  <Option value="Site E - Pune">Site E - Pune</Option>
+                  <Option value="electronics">Electronics</Option>
+                  <Option value="furniture">Furniture</Option>
+                  <Option value="raw-materials">Raw Materials</Option>
+                  <Option value="equipment">Equipment</Option>
+                  <Option value="office-supplies">Office Supplies</Option>
                 </Select>
               </div>
             </Col>
-            <Col span={4}>
-              <div style={{ padding: '8px 0' }}>
-                <div style={{ fontSize: 12, color: '#666', marginBottom: 6 }}>Material Type</div>
-                <Select
-                  placeholder="All Types"
-                  value={selectedMaterialType}
-                  onChange={setSelectedMaterialType}
-                  allowClear
-                  style={{ width: '100%', height: 36 }}
-                >
-                  <Option value="Steel">Steel</Option>
-                  <Option value="Concrete">Concrete</Option>
-                  <Option value="Wood">Wood</Option>
-                  <Option value="Electrical">Electrical</Option>
-                  <Option value="Plumbing">Plumbing</Option>
-                  <Option value="Other">Other</Option>
-                </Select>
-              </div>
-            </Col>
-            <Col span={4}>
+            <Col span={5}>
               <div style={{ padding: '8px 0' }}>
                 <div style={{ fontSize: 12, color: '#666', marginBottom: 6 }}>Condition</div>
                 <Select
@@ -284,14 +260,15 @@ export default function Analytics() {
                   allowClear
                   style={{ width: '100%', height: 36 }}
                 >
-                  <Option value="EXCELLENT">Excellent</Option>
+                  <Option value="NEW">New</Option>
                   <Option value="GOOD">Good</Option>
-                  <Option value="FAIR">Fair</Option>
-                  <Option value="POOR">Poor</Option>
+                  <Option value="SLIGHTLY_DAMAGED">Slightly Damaged</Option>
+                  <Option value="NEEDS_REPAIR">Needs Repair</Option>
+                  <Option value="SCRAP">Scrap</Option>
                 </Select>
               </div>
             </Col>
-            <Col span={4}>
+            <Col span={5}>
               <div style={{ padding: '8px 0' }}>
                 <div style={{ fontSize: 12, color: '#666', marginBottom: 6 }}>Status</div>
                 <Select
@@ -303,8 +280,8 @@ export default function Analytics() {
                 >
                   <Option value="AVAILABLE">Available</Option>
                   <Option value="RESERVED">Reserved</Option>
-                  <Option value="IN_USE">In Use</Option>
                   <Option value="TRANSFERRED">Transferred</Option>
+                  <Option value="ARCHIVED">Archived</Option>
                 </Select>
               </div>
             </Col>
@@ -312,9 +289,8 @@ export default function Analytics() {
         </Card>
       </div>
 
-      {/* Stats Cards */}
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-        <Col xs={24} sm={6}>
+        <Col xs={24} sm={12} md={4}>
           <Card 
             hoverable
             style={{ 
@@ -328,24 +304,20 @@ export default function Analytics() {
               title={
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
                   <InboxOutlined style={{ color: '#1890ff', fontSize: 16 }} />
-                  <span style={{ color: '#666', fontSize: 13 }}>Total Materials</span>
+                  <span style={{ color: '#666', fontSize: 13 }}>Total Inventory</span>
                 </div>
               }
-              value={stats.totalMaterials}
+              value={stats.totalInventory}
               valueStyle={{ 
                 color: '#1890ff', 
                 fontSize: '24px',
                 fontWeight: 600
               }}
-              suffix={
-                <span style={{ fontSize: 12, color: '#999', marginLeft: 4 }}>
-                  items
-                </span>
-              }
+              suffix={<span style={{ fontSize: 12, color: '#999' }}>items</span>}
             />
           </Card>
         </Col>
-        <Col xs={24} sm={6}>
+        <Col xs={24} sm={12} md={4}>
           <Card 
             hoverable
             style={{ 
@@ -362,21 +334,17 @@ export default function Analytics() {
                   <span style={{ color: '#666', fontSize: 13 }}>Available</span>
                 </div>
               }
-              value={stats.availableMaterials}
+              value={stats.availableItems}
               valueStyle={{ 
                 color: '#52c41a', 
                 fontSize: '24px',
                 fontWeight: 600
               }}
-              suffix={
-                <span style={{ fontSize: 12, color: '#999', marginLeft: 4 }}>
-                  {stats.totalMaterials > 0 ? `${Math.round((stats.availableMaterials / stats.totalMaterials) * 100)}%` : '0%'}
-                </span>
-              }
+              suffix={<span style={{ fontSize: 12, color: '#999' }}>{stats.totalInventory > 0 ? `${Math.round((stats.availableItems / stats.totalInventory) * 100)}%` : '0%'}</span>}
             />
           </Card>
         </Col>
-        <Col xs={24} sm={6}>
+        <Col xs={24} sm={12} md={4}>
           <Card 
             hoverable
             style={{ 
@@ -389,25 +357,21 @@ export default function Analytics() {
             <Statistic
               title={
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                  <ClockCircleOutlined style={{ color: '#fa8c16', fontSize: 16 }} />
-                  <span style={{ color: '#666', fontSize: 13 }}>Reserved</span>
+                  <ToolOutlined style={{ color: '#fa8c16', fontSize: 16 }} />
+                  <span style={{ color: '#666', fontSize: 13 }}>Surplus</span>
                 </div>
               }
-              value={stats.reservedMaterials}
+              value={stats.surplusItems}
               valueStyle={{ 
                 color: '#fa8c16', 
                 fontSize: '24px',
                 fontWeight: 600
               }}
-              suffix={
-                <span style={{ fontSize: 12, color: '#999', marginLeft: 4 }}>
-                  {stats.totalMaterials > 0 ? `${Math.round((stats.reservedMaterials / stats.totalMaterials) * 100)}%` : '0%'}
-                </span>
-              }
+              suffix={<span style={{ fontSize: 12, color: '#999' }}>shared</span>}
             />
           </Card>
         </Col>
-        <Col xs={24} sm={6}>
+        <Col xs={24} sm={12} md={4}>
           <Card 
             hoverable
             style={{ 
@@ -420,21 +384,46 @@ export default function Analytics() {
             <Statistic
               title={
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                  <ToolOutlined style={{ color: '#1890ff', fontSize: 16 }} />
-                  <span style={{ color: '#666', fontSize: 13 }}>In Use</span>
+                  <SwapOutlined style={{ color: '#722ed1', fontSize: 16 }} />
+                  <span style={{ color: '#666', fontSize: 13 }}>Procurements</span>
                 </div>
               }
-              value={stats.inUseMaterials}
+              value={stats.procurementRequests}
               valueStyle={{ 
-                color: '#1890ff', 
+                color: '#722ed1', 
                 fontSize: '24px',
                 fontWeight: 600
               }}
-              suffix={
-                <span style={{ fontSize: 12, color: '#999', marginLeft: 4 }}>
-                  {stats.totalMaterials > 0 ? `${Math.round((stats.inUseMaterials / stats.totalMaterials) * 100)}%` : '0%'}
-                </span>
+              suffix={<span style={{ fontSize: 12, color: '#999' }}>requests</span>}
+            />
+          </Card>
+        </Col>
+        <Col xs={24} sm={24} md={8}>
+          <Card 
+            hoverable
+            style={{ 
+              borderRadius: 8,
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
+              border: '1px solid #52c41a',
+              background: '#f6ffed'
+            }}
+            bodyStyle={{ padding: '16px' }}
+          >
+            <Statistic
+              title={
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                  <DollarOutlined style={{ color: '#52c41a', fontSize: 16 }} />
+                  <span style={{ color: '#52c41a', fontSize: 13, fontWeight: 500 }}>Cost Avoided by Reuse</span>
+                </div>
               }
+              value={stats.costAvoided}
+              valueStyle={{ 
+                color: '#52c41a', 
+                fontSize: '28px',
+                fontWeight: 700
+              }}
+              prefix="₹"
+              suffix={<span style={{ fontSize: 12, color: '#52c41a' }}>saved</span>}
             />
           </Card>
         </Col>
@@ -442,9 +431,8 @@ export default function Analytics() {
 
       <Spin spinning={loading}>
         <Row gutter={[24, 24]}>
-          {/* Material Availability by Status */}
           <Col xs={24} lg={12}>
-            <Card title="Material Availability by Status">
+            <Card title="Inventory by Status">
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={availabilityData}>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -452,16 +440,15 @@ export default function Analytics() {
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                   <Bar dataKey="totalQuantity" fill="#1890ff" name="Total Quantity" />
-                  <Bar dataKey="count" fill="#52c41a" name="Count" />
+                  <Bar dataKey="totalQuantity" fill="#1890ff" name="Total Quantity" />
+                  <Bar dataKey="count" fill="#52c41a" name="Item Count" />
                 </BarChart>
               </ResponsiveContainer>
             </Card>
           </Col>
 
-          {/* Material Condition Distribution */}
           <Col xs={24} lg={12}>
-            <Card title="Material Condition Distribution">
+            <Card title="Inventory by Condition">
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
@@ -469,7 +456,7 @@ export default function Analytics() {
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    label={({ _id, percent }) => `${_id?.condition?.replace(/_/g, ' ')} ${(percent * 100).toFixed(0)}%`}
                     outerRadius={80}
                     fill="#8884d8"
                     dataKey="totalQuantity"
@@ -484,71 +471,61 @@ export default function Analytics() {
             </Card>
           </Col>
 
-          {/* Transfer Trends */}
           <Col xs={24} lg={12}>
-            <Card title="Transfer Trends">
+            <Card title="Procurement Request Trends">
               <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={transferData}>
+                <BarChart data={procurementData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="_id.month" />
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                   <Line 
-                     type="monotone" 
-                     dataKey="totalQuantity" 
-                     stroke="#1890ff" 
-                     name="Quantity Transferred"
-                   />
-                  <Line 
-                    type="monotone" 
-                    dataKey="count" 
-                    stroke="#52c41a" 
-                    name="Transfer Count"
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </Card>
-          </Col>
-
-          {/* Site-wise Distribution */}
-          <Col xs={24} lg={12}>
-            <Card title="Site-wise Material Distribution">
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={siteData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="_id.site" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                   <Bar dataKey="totalQuantity" fill="#1890ff" name="Total Quantity" />
-                  <Bar dataKey="count" fill="#52c41a" name="Count" />
+                  <Bar dataKey="approved" fill="#52c41a" name="Approved" stackId="a" />
+                  <Bar dataKey="pending" fill="#fa8c16" name="Pending" stackId="a" />
+                  <Bar dataKey="rejected" fill="#f5222d" name="Rejected" stackId="a" />
                 </BarChart>
               </ResponsiveContainer>
             </Card>
           </Col>
 
-          {/* Utilization Trends */}
-          <Col xs={24}>
-            <Card title="Material Utilization Trends">
+          <Col xs={24} lg={12}>
+            <Card title="Inventory by Category">
               <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={utilizationData}>
+                <BarChart data={categoryData} layout="vertical">
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis type="number" />
+                  <YAxis dataKey="_id.category" type="category" width={100} />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="totalQuantity" fill="#1890ff" name="Quantity" />
+                  <Bar dataKey="count" fill="#722ed1" name="Items" />
+                </BarChart>
+              </ResponsiveContainer>
+            </Card>
+          </Col>
+
+          <Col xs={24}>
+            <Card title="Surplus Activity Trends">
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={surplusData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="_id.month" />
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                   <Line 
-                     type="monotone" 
-                     dataKey="totalQuantity" 
-                     stroke="#1890ff" 
-                     name="Quantity Utilized"
-                   />
                   <Line 
                     type="monotone" 
-                    dataKey="count" 
+                    dataKey="markedSurplus" 
+                    stroke="#fa8c16" 
+                    name="Marked as Surplus"
+                    strokeWidth={2}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="procured" 
                     stroke="#52c41a" 
-                    name="Utilization Count"
+                    name="Procured by Others"
+                    strokeWidth={2}
                   />
                 </LineChart>
               </ResponsiveContainer>

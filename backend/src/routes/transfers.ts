@@ -12,13 +12,11 @@ const router = Router();
 
 router.use(requireAuthAndActive);
 
-// Get procurement requests
 router.get('/', async (req: AuthRequest, res: Response) => {
   try {
     const page = Math.max(1, parseInt(String(req.query.page || '1'), 10));
     const pageSize = Math.min(100, Math.max(1, parseInt(String(req.query.pageSize || '20'), 10)));
     
-    // Show requests involving user's organization (either from or to)
     const filter: any = {
       $or: [
         { fromOrganizationId: req.auth?.organizationId },
@@ -26,7 +24,6 @@ router.get('/', async (req: AuthRequest, res: Response) => {
       ]
     };
     
-    // Apply filters
     if (req.query.status) filter.status = req.query.status;
     if (req.query.materialId) filter.materialId = req.query.materialId;
     if (req.query.requestedBy) filter.requestedBy = req.query.requestedBy;
@@ -53,7 +50,6 @@ router.get('/', async (req: AuthRequest, res: Response) => {
   }
 });
 
-// Get single procurement request
 router.get('/:id', async (req: Request, res) => {
   try {
     const transferRequest = await TransferRequest.findById(req.params.id)
@@ -76,11 +72,10 @@ router.get('/:id', async (req: Request, res) => {
   }
 });
 
-// Create procurement request
 router.post('/', [
   body('materialId').isMongoId(),
   body('quantityRequested').isNumeric().isFloat({ min: 0 }),
-  body('purpose').isLength({ min: 10, max: 1000 }), // MANDATORY: explain why needed
+  body('purpose').isLength({ min: 10, max: 1000 }),
   body('comment').optional().isLength({ min: 1 })
 ], audit('TransferRequest', 'PROCUREMENT_REQUEST_CREATED', () => null, (req, result) => result), async (req: AuthRequest, res: Response) => {
   try {
@@ -91,7 +86,6 @@ router.post('/', [
 
     const { materialId, quantityRequested, purpose, comment } = req.body;
 
-    // Validate that material exists and is surplus
     const material = await Material.findById(materialId).populate('organizationId');
     if (!material) {
       return res.status(404).json({ error: 'Inventory item not found' });
@@ -109,7 +103,6 @@ router.post('/', [
       return res.status(400).json({ error: 'Insufficient item quantity' });
     }
 
-    // CRITICAL: Enforce same-category rule
     const fromOrg = material.organizationId as any;
     const requestingUser = await User.findById(req.auth?.userId);
     
@@ -124,18 +117,17 @@ router.post('/', [
       });
     }
 
-    // Validate that requesting organization is different from owning organization
     if (material.organizationId.toString() === req.auth?.organizationId) {
       return res.status(400).json({ error: 'Cannot request your own organization\'s items' });
     }
 
     const procurementRequest = await TransferRequest.create({
-      organizationId: req.auth?.organizationId, // Requesting organization
+      organizationId: req.auth?.organizationId,
       materialId,
       fromOrganizationId: material.organizationId,
       toOrganizationId: req.auth?.organizationId,
       quantityRequested,
-      purpose, // Mandatory field
+      purpose,
       status: 'PENDING',
       comments: [{
         comment: comment || purpose,
@@ -160,7 +152,6 @@ router.post('/', [
   }
 });
 
-// Approve procurement request - ORG_ADMIN of OWNING organization only
 router.patch('/:id/approve', requireOrgAdminOrPlatformAdmin, [
   body('comment').isLength({ min: 1 })
 ], audit('TransferRequest', 'PROCUREMENT_APPROVED', async (req) => {
@@ -183,12 +174,10 @@ router.patch('/:id/approve', requireOrgAdminOrPlatformAdmin, [
       return res.status(400).json({ error: 'Procurement request is not pending' });
     }
 
-    // Only the OWNING organization's admin can approve
     if (procurementRequest.fromOrganizationId.toString() !== req.auth?.organizationId && req.auth?.role !== 'PLATFORM_ADMIN') {
       return res.status(403).json({ error: 'Only the owning organization admin can approve this request' });
     }
 
-    // Update procurement request status
     procurementRequest.status = 'APPROVED';
     procurementRequest.approvedBy = req.auth?.userId ? new mongoose.Types.ObjectId(req.auth.userId) : undefined;
     procurementRequest.approvedAt = new Date();
@@ -201,12 +190,10 @@ router.patch('/:id/approve', requireOrgAdminOrPlatformAdmin, [
 
     await procurementRequest.save();
 
-    // Update material: reduce quantity from source
     const material = await Material.findById(procurementRequest.materialId);
     if (material) {
       material.quantity -= procurementRequest.quantityRequested;
       
-      // Update allocation history
       material.allocationHistory.push({
         procurementRequestId: procurementRequest._id as mongoose.Types.ObjectId,
         quantityAllocated: procurementRequest.quantityRequested,
@@ -215,7 +202,6 @@ router.patch('/:id/approve', requireOrgAdminOrPlatformAdmin, [
         notes: req.body.comment
       });
 
-      // If quantity reaches zero, mark as transferred
       if (material.quantity <= 0) {
         material.status = 'TRANSFERRED';
         material.isSurplus = false;
@@ -223,7 +209,6 @@ router.patch('/:id/approve', requireOrgAdminOrPlatformAdmin, [
 
       await material.save();
 
-      // Create new inventory item in destination organization
       const newMaterial = await Material.create({
         organizationId: procurementRequest.toOrganizationId,
         name: material.name,
@@ -259,7 +244,6 @@ router.patch('/:id/approve', requireOrgAdminOrPlatformAdmin, [
   }
 });
 
-// Reject procurement request
 router.patch('/:id/reject', requireOrgAdminOrPlatformAdmin, [
   body('comment').isLength({ min: 1 })
 ], audit('TransferRequest', 'REJECT', async (req) => {
@@ -282,7 +266,6 @@ router.patch('/:id/reject', requireOrgAdminOrPlatformAdmin, [
       return res.status(400).json({ error: 'Procurement request is not pending' });
     }
 
-    // Only the OWNING organization's admin can reject
     if (procurementRequest.fromOrganizationId.toString() !== req.auth?.organizationId && req.auth?.role !== 'PLATFORM_ADMIN') {
       return res.status(403).json({ error: 'Only the owning organization admin can reject this request' });
     }
@@ -312,7 +295,6 @@ router.patch('/:id/reject', requireOrgAdminOrPlatformAdmin, [
   }
 });
 
-// Cancel procurement request - Requester only
 router.patch('/:id/cancel', [
   body('comment').isLength({ min: 1 })
 ], audit('TransferRequest', 'CANCEL', async (req) => {
@@ -335,7 +317,6 @@ router.patch('/:id/cancel', [
       return res.status(400).json({ error: 'Can only cancel pending requests' });
     }
 
-    // Only the requester can cancel
     if (procurementRequest.requestedBy.toString() !== req.auth?.userId) {
       return res.status(403).json({ error: 'Only the requester can cancel this request' });
     }

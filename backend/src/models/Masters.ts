@@ -17,5 +17,11 @@ const baseFields = {
 const opts = { timestamps: true } as const;
 
 const MaterialCategorySchema = new Schema<BaseMasterDocument>(baseFields, opts);
+MaterialCategorySchema.index({ organizationId: 1, name: 1 }, { unique: true });
+
+const MaterialStatusSchema = new Schema<BaseMasterDocument>(baseFields, opts);
+MaterialStatusSchema.index({ organizationId: 1, name: 1 }, { unique: true });
 
 export const MaterialCategory: Model<BaseMasterDocument> = mongoose.models.MaterialCategory || mongoose.model<BaseMasterDocument>('MaterialCategory', MaterialCategorySchema);
+
+export const MaterialStatus: Model<BaseMasterDocument> = mongoose.models.MaterialStatus || mongoose.model<BaseMasterDocument>('MaterialStatus', MaterialStatusSchema);

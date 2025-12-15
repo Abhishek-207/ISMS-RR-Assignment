@@ -8,7 +8,6 @@ import { AuthRequest } from '../middleware/auth.js';
 
 const router = Router();
 
-// Login
 router.post('/login', [
   body('email').isEmail().normalizeEmail(),
   body('password').isLength({ min: 6 })
@@ -31,7 +30,6 @@ router.post('/login', [
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    // Update last login
     await User.findByIdAndUpdate(user._id, { lastLoginAt: new Date() });
 
     const token = jwt.sign(
@@ -49,7 +47,7 @@ router.post('/login', [
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+      maxAge: 7 * 24 * 60 * 60 * 1000
     });
 
     res.json({
@@ -72,15 +70,14 @@ router.post('/login', [
   }
 });
 
-// Signup - with organization selection/creation
 router.post('/signup', [
   body('name').isLength({ min: 2 }),
   body('email').isEmail().normalizeEmail(),
   body('password').isLength({ min: 6 }),
-  body('role').isIn(['ORG_ADMIN', 'ORG_USER']), // Can't directly create PLATFORM_ADMIN
+  body('role').isIn(['ORG_ADMIN', 'ORG_USER']),
   body('organizationCategory').isIn(['ENTERPRISE', 'MANUFACTURING_CLUSTER', 'EDUCATIONAL_INSTITUTION', 'HEALTHCARE_NETWORK', 'INFRASTRUCTURE_CONSTRUCTION']),
-  body('organizationId').optional().isMongoId(), // If joining existing org
-  body('organizationName').optional().isLength({ min: 2 }), // If creating new org
+  body('organizationId').optional().isMongoId(),
+  body('organizationName').optional().isLength({ min: 2 }),
   body('organizationDescription').optional().isLength({ max: 500 })
 ], async (req: AuthRequest, res: Response) => {
   try {
@@ -100,7 +97,6 @@ router.post('/signup', [
       organizationDescription
     } = req.body;
 
-    // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ error: 'User with this email already exists' });
@@ -108,25 +104,20 @@ router.post('/signup', [
 
     let organization;
 
-    // Determine organization: join existing or create new
     if (organizationId) {
-      // Join existing organization
       organization = await Organization.findById(organizationId);
       if (!organization) {
         return res.status(404).json({ error: 'Organization not found' });
       }
       
-      // Verify category matches
       if (organization.category !== organizationCategory) {
         return res.status(400).json({ error: 'Organization category does not match' });
       }
     } else {
-      // Create new organization
       if (!organizationName) {
         return res.status(400).json({ error: 'Organization name is required when creating a new organization' });
       }
 
-      // Check if organization name already exists in this category
       const existingOrg = await Organization.findOne({ 
         name: organizationName, 
         category: organizationCategory 
@@ -174,7 +165,7 @@ router.post('/signup', [
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+      maxAge: 7 * 24 * 60 * 60 * 1000
     });
 
     res.status(201).json({
@@ -197,7 +188,6 @@ router.post('/signup', [
   }
 });
 
-// Get current user
 router.get('/me', async (req: AuthRequest, res) => {
   try {
     const token = req.headers.authorization?.replace('Bearer ', '') || req.cookies.token;
@@ -232,7 +222,6 @@ router.get('/me', async (req: AuthRequest, res) => {
   }
 });
 
-// Logout
 router.post('/logout', (req, res) => {
   res.clearCookie('token');
   res.json({ message: 'Logged out successfully' });

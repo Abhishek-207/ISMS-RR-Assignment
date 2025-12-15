@@ -11,7 +11,6 @@ const router = Router();
 
 router.use(requireAuthAndActive);
 
-// Get inventory items with filtering and pagination
 router.get('/', async (req: AuthRequest, res: Response) => {
   try {
     const page = Math.max(1, parseInt(String(req.query.page || '1'), 10));
@@ -19,14 +18,12 @@ router.get('/', async (req: AuthRequest, res: Response) => {
     
     const filter: any = { organizationId: req.auth?.organizationId };
     
-    // Apply filters
     if (req.query.categoryId) filter.categoryId = req.query.categoryId;
     if (req.query.status) filter.status = req.query.status;
     if (req.query.condition) filter.condition = req.query.condition;
     if (req.query.isSurplus !== undefined) filter.isSurplus = req.query.isSurplus === 'true';
     if (req.query.q) filter.name = { $regex: String(req.query.q), $options: 'i' };
     
-    // Date range filters
     if (req.query.fromDate || req.query.toDate) {
       filter.availableFrom = {} as any;
       if (req.query.fromDate) (filter.availableFrom as any).$gte = new Date(String(req.query.fromDate));
@@ -52,20 +49,17 @@ router.get('/', async (req: AuthRequest, res: Response) => {
   }
 });
 
-// Get surplus items from OTHER organizations in the SAME category
 router.get('/surplus', async (req: AuthRequest, res: Response) => {
   try {
     const page = Math.max(1, parseInt(String(req.query.page || '1'), 10));
     const pageSize = Math.min(100, Math.max(1, parseInt(String(req.query.pageSize || '20'), 10)));
     
-    // CRITICAL: Surplus visibility rule - same category, different organization
     const filter: any = {
       isSurplus: true,
       status: 'AVAILABLE',
-      organizationId: { $ne: req.auth?.organizationId } // Not own organization
+      organizationId: { $ne: req.auth?.organizationId }
     };
     
-    // Get all organizations in same category
     const sameCategOrgs = await Organization.find({ 
       category: req.auth?.organizationCategory,
       isActive: true 
@@ -76,7 +70,6 @@ router.get('/surplus', async (req: AuthRequest, res: Response) => {
       $ne: new mongoose.Types.ObjectId(req.auth?.organizationId)
     };
     
-    // Apply additional filters
     if (req.query.categoryId) filter.categoryId = req.query.categoryId;
     if (req.query.condition) filter.condition = req.query.condition;
     if (req.query.minQuantity) filter.quantity = { $gte: parseFloat(String(req.query.minQuantity)) };
@@ -102,7 +95,6 @@ router.get('/surplus', async (req: AuthRequest, res: Response) => {
   }
 });
 
-// Get single inventory item
 router.get('/:id', async (req: Request, res) => {
   try {
     const material = await Material.findById(req.params.id)
@@ -126,7 +118,6 @@ router.get('/:id', async (req: Request, res) => {
   }
 });
 
-// Create inventory item
 router.post('/', [
   body('name').isLength({ min: 1 }),
   body('categoryId').isMongoId(),
@@ -169,7 +160,6 @@ router.post('/', [
   }
 });
 
-// Mark inventory item as surplus - CRITICAL FEATURE
 router.patch('/:id/mark-surplus', audit('Material', 'MARKED_AS_SURPLUS', async (req) => {
   return await Material.findById(req.params.id).lean();
 }, async (req) => {
@@ -182,17 +172,14 @@ router.patch('/:id/mark-surplus', audit('Material', 'MARKED_AS_SURPLUS', async (
       return res.status(404).json({ error: 'Inventory item not found' });
     }
 
-    // Only owning organization can mark as surplus
     if (material.organizationId.toString() !== req.auth?.organizationId) {
       return res.status(403).json({ error: 'Access denied' });
     }
 
-    // Validate quantity
     if (material.quantity <= 0) {
       return res.status(400).json({ error: 'Cannot mark item with zero quantity as surplus' });
     }
 
-    // Mark as surplus
     material.isSurplus = true;
     material.status = 'AVAILABLE';
     await material.save();
@@ -210,7 +197,6 @@ router.patch('/:id/mark-surplus', audit('Material', 'MARKED_AS_SURPLUS', async (
   }
 });
 
-// Update inventory item
 router.patch('/:id', [
   body('name').optional().isLength({ min: 1 }),
   body('categoryId').optional().isMongoId(),
@@ -237,7 +223,6 @@ router.patch('/:id', [
       return res.status(404).json({ error: 'Inventory item not found' });
     }
 
-    // Only owning organization can update
     if (material.organizationId.toString() !== req.auth?.organizationId) {
       return res.status(403).json({ error: 'Access denied' });
     }
@@ -247,7 +232,6 @@ router.patch('/:id', [
       updatedBy: req.auth?.userId
     };
 
-    // Convert dates if provided
     if (req.body.availableFrom) updateData.availableFrom = new Date(req.body.availableFrom);
     if (req.body.availableUntil) updateData.availableUntil = new Date(req.body.availableUntil);
 
@@ -270,7 +254,6 @@ router.patch('/:id', [
   }
 });
 
-// Delete inventory item
 router.delete('/:id', audit('Material', 'DELETE', async (req) => {
   return await Material.findById(req.params.id).lean();
 }, () => null), async (req: AuthRequest, res: Response) => {
@@ -281,7 +264,6 @@ router.delete('/:id', audit('Material', 'DELETE', async (req) => {
       return res.status(404).json({ error: 'Inventory item not found' });
     }
 
-    // Only owning organization can delete
     if (material.organizationId.toString() !== req.auth?.organizationId) {
       return res.status(403).json({ error: 'Access denied' });
     }
@@ -295,7 +277,6 @@ router.delete('/:id', audit('Material', 'DELETE', async (req) => {
   }
 });
 
-// Get inventory statistics (organization-level)
 router.get('/stats/overview', async (req: AuthRequest, res: Response) => {
   try {
     const organizationId = req.auth?.organizationId;

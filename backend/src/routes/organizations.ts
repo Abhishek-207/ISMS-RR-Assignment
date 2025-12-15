@@ -8,7 +8,6 @@ const router = Router();
 
 router.use(requireAuthAndActive);
 
-// Get organizations - Platform Admin can see all, others see only their category
 router.get('/', async (req: AuthRequest, res: Response) => {
   try {
     const page = Math.max(1, parseInt(String(req.query.page || '1'), 10));
@@ -16,12 +15,10 @@ router.get('/', async (req: AuthRequest, res: Response) => {
     
     const filter: any = { isActive: true };
     
-    // Non-platform admins can only see organizations in their category
     if (req.auth?.role !== 'PLATFORM_ADMIN') {
       filter.category = req.auth?.organizationCategory;
     }
     
-    // Apply filters
     if (req.query.category) filter.category = req.query.category;
     if (req.query.q) filter.name = { $regex: String(req.query.q), $options: 'i' };
 
@@ -41,7 +38,6 @@ router.get('/', async (req: AuthRequest, res: Response) => {
   }
 });
 
-// Get single organization
 router.get('/:id', async (req: AuthRequest, res: Response) => {
   try {
     const organization = await Organization.findById(req.params.id).lean();
@@ -50,7 +46,6 @@ router.get('/:id', async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ error: 'Organization not found' });
     }
 
-    // Check access: Platform Admin or same category
     if (req.auth?.role !== 'PLATFORM_ADMIN' && organization.category !== req.auth?.organizationCategory) {
       return res.status(403).json({ error: 'Access denied' });
     }
@@ -62,7 +57,6 @@ router.get('/:id', async (req: AuthRequest, res: Response) => {
   }
 });
 
-// Create organization - Anyone can create during signup, but this endpoint requires auth
 router.post('/', [
   body('name').isLength({ min: 2 }),
   body('category').isIn(['ENTERPRISE', 'MANUFACTURING_CLUSTER', 'EDUCATIONAL_INSTITUTION', 'HEALTHCARE_NETWORK', 'INFRASTRUCTURE_CONSTRUCTION']),
@@ -76,7 +70,6 @@ router.post('/', [
 
     const { name, category, description } = req.body;
 
-    // Check if organization name already exists in this category
     const existing = await Organization.findOne({ name, category });
     if (existing) {
       return res.status(400).json({ error: 'Organization with this name already exists in this category' });
@@ -96,7 +89,6 @@ router.post('/', [
   }
 });
 
-// Update organization - Org Admin or Platform Admin only
 router.patch('/:id', requireOrgAdminOrPlatformAdmin, [
   body('name').optional().isLength({ min: 2 }),
   body('description').optional().isLength({ max: 500 }),
@@ -117,12 +109,10 @@ router.patch('/:id', requireOrgAdminOrPlatformAdmin, [
       return res.status(404).json({ error: 'Organization not found' });
     }
 
-    // Check access: Platform Admin or own organization admin
     if (req.auth?.role !== 'PLATFORM_ADMIN' && (organization._id as any).toString() !== req.auth?.organizationId) {
       return res.status(403).json({ error: 'Access denied' });
     }
 
-    // Don't allow category change
     if (req.body.category) {
       return res.status(400).json({ error: 'Organization category cannot be changed' });
     }
@@ -146,7 +136,6 @@ router.patch('/:id', requireOrgAdminOrPlatformAdmin, [
   }
 });
 
-// Delete/deactivate organization - Platform Admin only
 router.delete('/:id', requirePlatformAdmin, audit('Organization', 'DELETE', async (req) => {
   return await Organization.findById(req.params.id).lean();
 }, () => null), async (req: AuthRequest, res: Response) => {

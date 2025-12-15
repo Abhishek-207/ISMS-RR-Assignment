@@ -14,7 +14,7 @@ export interface MaterialDocument extends Document {
   availableFrom: Date;
   availableUntil: Date;
   notes?: string;
-  estimatedCost?: number; // Optional: for analytics only (cost avoided by reuse)
+  estimatedCost?: number;
   attachments: mongoose.Types.ObjectId[];
   allocationHistory: {
     procurementRequestId: mongoose.Types.ObjectId;
@@ -51,7 +51,7 @@ const MaterialSchema = new Schema<MaterialDocument>(
     availableFrom: { type: Date, required: true },
     availableUntil: { type: Date, required: true },
     notes: { type: String },
-    estimatedCost: { type: Number, min: 0 }, // Optional: for analytics only
+    estimatedCost: { type: Number, min: 0 },
     attachments: [{ type: Schema.Types.ObjectId, ref: 'File' }],
     allocationHistory: [
       {
@@ -68,21 +68,18 @@ const MaterialSchema = new Schema<MaterialDocument>(
   { timestamps: true }
 );
 
-// Validation: availableFrom should not be after availableUntil
 MaterialSchema.pre('validate', function() {
   if (this.availableFrom && this.availableUntil && this.availableFrom > this.availableUntil) {
     throw new Error('Available From date cannot be after Available Until date');
   }
 });
 
-// Indexes for performance (organization-centric, no geography)
 MaterialSchema.index({ organizationId: 1, categoryId: 1 });
 MaterialSchema.index({ organizationId: 1, status: 1 });
 MaterialSchema.index({ organizationId: 1, condition: 1 });
 MaterialSchema.index({ organizationId: 1, isSurplus: 1 });
 MaterialSchema.index({ organizationId: 1, createdBy: 1 });
 MaterialSchema.index({ organizationId: 1, name: 1 });
-// Critical index for surplus discovery
 MaterialSchema.index({ isSurplus: 1, status: 1 });
 
 export const Material: Model<MaterialDocument> = mongoose.models.Material || mongoose.model<MaterialDocument>('Material', MaterialSchema);

@@ -133,7 +133,7 @@ export default function Landing() {
                   {tenantName ? `Welcome to ${tenantName}` : 'Welcome'}
                 </Text>
               </Button>
-              <Link to="/materials/new" style={{ width: isMobile ? '100%' : 'auto' }}>
+              <Link to="/inventory/new" style={{ width: isMobile ? '100%' : 'auto' }}>
                 <Button 
                   size={isMobile ? 'middle' : 'large'}
                   className="list-material-btn"

@@ -25,7 +25,6 @@ const FileSchema = new Schema<FileDocument>(
   { timestamps: false }
 );
 
-// Indexes for performance
 FileSchema.index({ organizationId: 1, uploadedBy: 1 });
 FileSchema.index({ organizationId: 1, uploadedAt: 1 });
 

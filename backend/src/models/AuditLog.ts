@@ -29,7 +29,6 @@ const AuditLogSchema = new Schema<AuditLogDocument>(
   { timestamps: false }
 );
 
-// Indexes for performance
 AuditLogSchema.index({ organizationId: 1, entity: 1 });
 AuditLogSchema.index({ organizationId: 1, entityId: 1 });
 AuditLogSchema.index({ organizationId: 1, changedBy: 1 });

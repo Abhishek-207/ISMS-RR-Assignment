@@ -1,3 +1,4 @@
+
 export interface User {
   _id: string
   name: string
@@ -28,7 +29,7 @@ export const getCurrentUser = (): User | null => {
   }
 }
 
-export const getUser = getCurrentUser // Alias for convenience
+export const getUser = getCurrentUser
 
 export const getToken = (): string | null => {
   return localStorage.getItem('token')
@@ -38,7 +39,6 @@ export const setAuth = (auth: AuthResponse): void => {
   localStorage.setItem('token', auth.token)
   localStorage.setItem('user', JSON.stringify(auth.user))
   
-  // Dispatch custom event to notify components of auth state change
   window.dispatchEvent(new Event('auth-changed'))
 }
 
@@ -47,7 +47,6 @@ export const clearAuth = (): void => {
   localStorage.removeItem('user')
   localStorage.removeItem('organization')
   
-  // Dispatch custom event to notify components of auth state change
   window.dispatchEvent(new Event('auth-changed'))
 }
 
@@ -60,11 +59,6 @@ export const isPlatformAdmin = (): boolean => {
   return user?.role === 'PLATFORM_ADMIN'
 }
 
-
-export const isAdmin = (): boolean => {
-  return isPlatformAdmin() || isOrgAdmin()
-}
-
 export const isOrgAdmin = (): boolean => {
   const user = getCurrentUser()
   return user?.role === 'ORG_ADMIN'
@@ -73,6 +67,10 @@ export const isOrgAdmin = (): boolean => {
 export const isOrgUser = (): boolean => {
   const user = getCurrentUser()
   return user?.role === 'ORG_USER'
+}
+
+export const isAdmin = (): boolean => {
+  return isPlatformAdmin() || isOrgAdmin()
 }
 
 export const canManageUsers = (): boolean => {
@@ -84,14 +82,13 @@ export const canApproveTransfers = (): boolean => {
 }
 
 export const canCreateMaterials = (): boolean => {
-  return true // All authenticated users can create materials
+  return true
 }
 
 export const canEditMaterials = (materialCreatedBy: string): boolean => {
   const user = getCurrentUser()
   if (!user) return false
   
-  // Users can edit their own materials, org admins can edit all within their org
   return user._id === materialCreatedBy || isOrgAdmin()
 }
 

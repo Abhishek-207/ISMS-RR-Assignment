@@ -1,16 +1,23 @@
 import React, { useState, useEffect } from 'react'
-import { Card, Descriptions, Button, Typography, Grid, message, Form, Input, Modal, Tag } from 'antd'
-import { EditOutlined, SaveOutlined } from '@ant-design/icons'
+import { Card, Descriptions, Button, Typography, Grid, message, Form, Input, Modal, Tag, Divider } from 'antd'
+import { EditOutlined, SaveOutlined, TeamOutlined, BankOutlined } from '@ant-design/icons'
 import { getCurrentUser } from '../lib/auth'
 
 const { Title, Text } = Typography
 const { useBreakpoint } = Grid
 
 interface User {
-  id: string
+  _id: string
   name: string
   email: string
-  role: string
+  role: 'PLATFORM_ADMIN' | 'ORG_ADMIN' | 'ORG_USER'
+  organizationId: string
+  organizationCategory: string
+  organization?: {
+    _id: string
+    name: string
+    category: string
+  }
 }
 
 export default function Profile() {
@@ -42,12 +49,9 @@ export default function Profile() {
       setLoading(true)
       const values = await form.validateFields()
       
-      // Here you would typically make an API call to update the user profile
-      // For now, we'll just update the local state
       const updatedUser = { ...user, ...values }
-      setUser(updatedUser)
+      setUser(updatedUser as User)
       
-      // Update localStorage
       localStorage.setItem('user', JSON.stringify(updatedUser))
       
       message.success('Profile updated successfully!')
@@ -67,16 +71,41 @@ export default function Profile() {
     )
   }
 
-  const roleColors: any = {
-    'admin': 'red',
-    'user': 'blue',
-    'manager': 'green'
+  const getRoleColor = (role: string) => {
+    const colors: Record<string, string> = {
+      'PLATFORM_ADMIN': 'red',
+      'ORG_ADMIN': 'blue',
+      'ORG_USER': 'green'
+    }
+    return colors[role] || 'default'
+  }
+
+  const getRoleLabel = (role: string) => {
+    const labels: Record<string, string> = {
+      'PLATFORM_ADMIN': 'Platform Admin',
+      'ORG_ADMIN': 'Organization Admin',
+      'ORG_USER': 'Organization User'
+    }
+    return labels[role] || role
+  }
+
+  const getCategoryLabel = (category: string) => {
+    return category?.replace(/_/g, ' ') || '-'
   }
 
   return (
     <div style={{ display: 'grid', gap: isMobile ? 12 : 16 }}>
-      <Title level={4} style={{ marginTop: 0 }}>About</Title>
-      <Card bodyStyle={{ padding: isMobile ? 12 : 16 }}>
+      <Title level={4} style={{ marginTop: 0 }}>My Profile</Title>
+      
+      <Card 
+        title={
+          <span>
+            <TeamOutlined style={{ marginRight: 8 }} />
+            Account Information
+          </span>
+        }
+        bodyStyle={{ padding: isMobile ? 12 : 16 }}
+      >
         <Descriptions
           column={isMobile ? 1 : 2}
           labelStyle={{ width: 180, fontWeight: 600 }}
@@ -84,18 +113,18 @@ export default function Profile() {
           size={isMobile ? 'small' : 'middle'}
         >
           <Descriptions.Item label="Name">
-            <Text>{user.name || '-'}</Text>
+            <Text strong>{user.name || '-'}</Text>
           </Descriptions.Item>
           <Descriptions.Item label="Email">
             <Text>{user.email || '-'}</Text>
           </Descriptions.Item>
           <Descriptions.Item label="Role">
-            <Tag color={roleColors[user.role?.toLowerCase()] || 'default'}>
-              {user.role || '-'}
+            <Tag color={getRoleColor(user.role)}>
+              {getRoleLabel(user.role)}
             </Tag>
           </Descriptions.Item>
           <Descriptions.Item label="User ID">
-            <Text code>{user.id || '-'}</Text>
+            <Text code style={{ fontSize: 11 }}>{user._id || '-'}</Text>
           </Descriptions.Item>
         </Descriptions>
         
@@ -108,6 +137,35 @@ export default function Profile() {
             Edit Profile
           </Button>
         </div>
+      </Card>
+
+      <Card 
+        title={
+          <span>
+            <BankOutlined style={{ marginRight: 8 }} />
+            Organization
+          </span>
+        }
+        bodyStyle={{ padding: isMobile ? 12 : 16 }}
+      >
+        <Descriptions
+          column={isMobile ? 1 : 2}
+          labelStyle={{ width: 180, fontWeight: 600 }}
+          bordered
+          size={isMobile ? 'small' : 'middle'}
+        >
+          <Descriptions.Item label="Organization Name">
+            <Text strong>{user.organization?.name || '-'}</Text>
+          </Descriptions.Item>
+          <Descriptions.Item label="Category">
+            <Tag color="blue">
+              {getCategoryLabel(user.organizationCategory || user.organization?.category)}
+            </Tag>
+          </Descriptions.Item>
+          <Descriptions.Item label="Organization ID">
+            <Text code style={{ fontSize: 11 }}>{user.organizationId || user.organization?._id || '-'}</Text>
+          </Descriptions.Item>
+        </Descriptions>
       </Card>
 
       <Modal

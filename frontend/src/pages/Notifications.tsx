@@ -20,63 +20,60 @@ export default function Notifications() {
   const screens = useBreakpoint()
   const isMobile = !screens.md
   
-  // Dummy notification data
   const [notifications, setNotifications] = useState<Notification[]>([
     {
       id: '1',
-      title: 'New Material Added',
-      message: 'Steel beams (Grade A) have been added to the inventory by Rajesh Kumar.',
+      title: 'New Inventory Added',
+      message: 'Office Chairs (25 units) have been added to your organization\'s inventory.',
       type: 'success',
-      timestamp: '2024-01-15T10:30:00Z',
+      timestamp: '2024-12-15T10:30:00Z',
       read: false,
       priority: 'medium'
     },
     {
       id: '2',
-      title: 'Transfer Request Pending',
-      message: 'Transfer request for 50 units of Cement to Site B is awaiting approval from Priya Sharma.',
+      title: 'Procurement Request Pending',
+      message: 'A procurement request for 10 Laptops from TechCorp Industries is awaiting your approval.',
       type: 'warning',
-      timestamp: '2024-01-15T09:15:00Z',
+      timestamp: '2024-12-15T09:15:00Z',
       read: false,
       priority: 'high'
     },
     {
       id: '3',
       title: 'Low Stock Alert',
-      message: 'Inventory levels for Electrical Cables are below minimum threshold. Contact Amit Patel for restocking.',
+      message: 'Printer Cartridges inventory is below minimum threshold. Consider restocking or marking as surplus.',
       type: 'error',
-      timestamp: '2024-01-15T08:45:00Z',
+      timestamp: '2024-12-15T08:45:00Z',
       read: true,
       priority: 'high'
     },
-
     {
       id: '5',
-      title: 'Transfer Completed',
-      message: 'Transfer of 25 units of Steel Rods to Site C has been completed successfully by Suresh Reddy.',
+      title: 'Procurement Completed',
+      message: 'Your procurement request for 15 Monitors has been approved and transferred to your inventory.',
       type: 'success',
-      timestamp: '2024-01-14T14:30:00Z',
+      timestamp: '2024-12-14T14:30:00Z',
       read: true,
       priority: 'medium'
     },
-   
     {
       id: '7',
-      title: 'Material Return Processed',
-      message: 'Return of 15 units of Copper Pipes has been processed by Vikram Joshi.',
+      title: 'Surplus Item Procured',
+      message: 'Your surplus item "Steel Filing Cabinets" has been procured by Metro Healthcare Network.',
       type: 'success',
-      timestamp: '2024-01-14T09:30:00Z',
+      timestamp: '2024-12-14T09:30:00Z',
       read: true,
       priority: 'medium'
     },
     {
       id: '8',
-      title: 'Quality Inspection Required',
-      message: 'New batch of Concrete Blocks requires quality inspection. Assigned to Meera Iyer.',
-      type: 'warning',
-      timestamp: '2024-01-13T15:45:00Z',
+      title: 'New Surplus Available',
+      message: 'New surplus items matching your category are available from organizations in your network.',
+      type: 'info',
+      timestamp: '2024-12-13T15:45:00Z',
       read: true,
-      priority: 'high'
+      priority: 'low'
     }
   ])
 

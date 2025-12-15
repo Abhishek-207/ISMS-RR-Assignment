@@ -254,16 +254,16 @@ body {
   background: #fff !important;
 }
 
-/* List Material button (logged-in) hover behavior */
-.list-material-btn {
+/* List Item button (logged-in) hover behavior */
+.list-item-btn {
   background: #fff !important;
   color: #000 !important;
   border-color: #fff !important;
   font-weight: 600;
 }
-.list-material-btn:hover,
-.list-material-btn:focus,
-.list-material-btn:active {
+.list-item-btn:hover,
+.list-item-btn:focus,
+.list-item-btn:active {
   color: var(--primary-color) !important;
   border-color: var(--primary-color) !important;
   background: #fff !important;

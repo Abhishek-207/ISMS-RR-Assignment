@@ -136,7 +136,7 @@ export default function Landing() {
               <Link to="/inventory/new" style={{ width: isMobile ? '100%' : 'auto' }}>
                 <Button 
                   size={isMobile ? 'middle' : 'large'}
-                  className="list-material-btn"
+                  className="list-item-btn"
                   style={{ 
                     background: '#fff', 
                     color: '#000', 
@@ -146,7 +146,7 @@ export default function Landing() {
                     width: isMobile ? '100%' : 'auto',
                   }}
                 >
-                  List Material
+                  List Item
                 </Button>
               </Link>
             </div>

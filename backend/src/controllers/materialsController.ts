@@ -207,6 +207,45 @@ export class MaterialsController {
   }
 
   /**
+   * Remove material from surplus
+   */
+  static async unmarkSurplus(req: AuthRequest, res: Response) {
+    try {
+      const material = await Material.findById(req.params.id);
+
+      if (!material) {
+        throw ApiError.notFound('Inventory item not found', ErrorCodes.MATERIAL_NOT_FOUND.code);
+      }
+
+      if (material.organizationId.toString() !== req.auth?.organizationId) {
+        throw ApiError.forbidden('Access denied');
+      }
+
+      if (!material.isSurplus) {
+        throw ApiError.badRequest('Item is not marked as surplus');
+      }
+
+      material.isSurplus = false;
+      material.status = 'AVAILABLE';
+      await material.save();
+
+      const updated = await Material.findById(material._id)
+        .populate('categoryId', 'name')
+        .populate('organizationId', 'name category')
+        .populate('createdBy', 'name')
+        .lean();
+
+      return ApiResponse.updated(res, updated, 'Item removed from surplus successfully');
+    } catch (error) {
+      if (error instanceof ApiError) {
+        return ApiResponse.error(res, error.message, error.statusCode, undefined, error.errorCode);
+      }
+      console.error('Unmark surplus error:', error);
+      return ApiResponse.error(res, 'Failed to remove from surplus', 500, undefined, ErrorCodes.INTERNAL_SERVER_ERROR.code);
+    }
+  }
+
+  /**
    * Update material
    */
   static async update(req: AuthRequest, res: Response) {

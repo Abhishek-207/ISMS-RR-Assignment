@@ -35,6 +35,12 @@ router.patch('/:id/mark-surplus', audit('Material', 'MARKED_AS_SURPLUS', async (
   return await Material.findById(req.params.id).lean();
 }), MaterialsController.markAsSurplus);
 
+router.patch('/:id/unmark-surplus', audit('Material', 'REMOVED_FROM_SURPLUS', async (req) => {
+  return await Material.findById(req.params.id).lean();
+}, async (req) => {
+  return await Material.findById(req.params.id).lean();
+}), MaterialsController.unmarkSurplus);
+
 router.patch('/:id', [
   body('name').optional().isLength({ min: 1 }),
   body('categoryId').optional().isMongoId(),

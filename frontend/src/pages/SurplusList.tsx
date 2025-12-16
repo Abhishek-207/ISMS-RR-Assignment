@@ -340,7 +340,11 @@ export default function SurplusList() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
         <div style={{ flex: 1, minWidth: '250px' }}>
           <Title level={4} style={{ margin: 0, marginBottom: 8 }}>
-            Available Surplus ({orgCategory?.replace(/_/g, ' ')})
+            Available Surplus (
+            <span style={{ color: '#0891b2' }}>
+              {orgCategory?.replace(/_/g, ' ')}
+            </span>
+            )
           </Title>
           <Paragraph type="secondary" style={{ margin: 0 }}>
             Discover surplus items from other organizations in your category. Submit procurement requests to acquire items.

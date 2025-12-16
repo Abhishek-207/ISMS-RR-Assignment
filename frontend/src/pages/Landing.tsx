@@ -242,319 +242,323 @@ export default function Landing() {
         </Paragraph>
       </div>
 
-      <div style={{ 
-        background: 'transparent', 
-        padding: isMobile ? '40px 0' : '60px 0', 
-        marginTop: isMobile ? 32 : 48,
-        borderRadius: isMobile ? 0 : '24px 24px 0 0',
-      }}>
-        <div className="container landing-mobile-tight">
-          <Title 
-            level={2} 
-            style={{ 
-              textAlign: 'center', 
-              color: '#0891b2', 
-              marginBottom: 8,
-              fontSize: isMobile ? 24 : 32,
-            }}
-          >
-            Key Features
-          </Title>
-          <Paragraph style={{ 
-            textAlign: 'center', 
-            color: '#666', 
-            marginBottom: isMobile ? 28 : 40,
-            fontSize: isMobile ? 14 : 16,
-          }}>
-            Everything you need to manage inventory and collaborate across organizations
-          </Paragraph>
-          
+      {!isLoggedIn && (
+        <>
           <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', 
-            gap: isMobile ? 16 : 24,
+            background: 'transparent', 
+            padding: isMobile ? '40px 0' : '60px 0', 
+            marginTop: isMobile ? 32 : 48,
+            borderRadius: isMobile ? 0 : '24px 24px 0 0',
           }}>
-            {features.map((feature, index) => (
-              <div 
-                key={index}
-                className="feature-card lift-reveal"
+            <div className="container landing-mobile-tight">
+              <Title 
+                level={2} 
                 style={{ 
-                  background: '#fff', 
-                  border: '0.5px solid #e8f4f8', 
-                  borderRadius: 16, 
-                  padding: isMobile ? 24 : 32,
-                  textAlign: 'center',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.04)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'flex-start',
-                  animationDelay: `calc(0.15s + ${index} * var(--uplift-delay-step))`,
+                  textAlign: 'center', 
+                  color: '#0891b2', 
+                  marginBottom: 8,
+                  fontSize: isMobile ? 24 : 32,
                 }}
               >
-                <div style={{ fontSize: isMobile ? 36 : 48, marginBottom: 16 }}>
-                  {feature.icon}
-                </div>
-                <Title level={4} style={{ marginTop: 0, marginBottom: 12, color: '#222', textAlign: 'center' }}>
-                  {feature.title}
-                </Title>
-                <Paragraph style={{ margin: 0, color: '#666', fontSize: isMobile ? 13 : 14, lineHeight: 1.6, textAlign: 'center' }}>
-                  {feature.description}
-                </Paragraph>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div style={{ 
-        background: 'transparent', 
-        padding: isMobile ? '40px 0' : '60px 0',
-      }}>
-        <div className="container landing-mobile-tight">
-          <Title 
-            level={2} 
-            style={{ 
-              textAlign: 'center', 
-              color: '#0891b2', 
-              marginBottom: 8,
-              fontSize: isMobile ? 24 : 32,
-            }}
-          >
-            How It Works
-          </Title>
-          <Paragraph style={{ 
-            textAlign: 'center', 
-            color: '#666', 
-            marginBottom: isMobile ? 28 : 40,
-            fontSize: isMobile ? 14 : 16,
-          }}>
-            Simple steps to start managing and sharing resources
-          </Paragraph>
-          
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: isMobile ? '1fr' : 'repeat(4, 1fr)', 
-            gap: isMobile ? 16 : 20,
-          }}>
-            {steps.map((step, index) => (
-              <div 
-                key={step.number}
-                className="feature-card lift-reveal"
-                style={{ 
-                  background: '#fff', 
-                  border: '1px solid #e8f4f8', 
-                  borderRadius: 16, 
-                  padding: isMobile ? 18 : 22,
-                  boxShadow: '0 6px 16px rgba(0,0,0,0.05)',
-                  display: 'grid',
-                  gap: 10,
-                  alignItems: 'flex-start',
-                  animationDelay: `calc(0.15s + ${index} * var(--uplift-delay-step))`,
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <div style={{ 
-                    width: isMobile ? 48 : 54, 
-                    height: isMobile ? 48 : 54, 
-                    borderRadius: 14, 
-                    background: 'linear-gradient(135deg, #0891b2 0%, #06b6d4 100%)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 6px 14px rgba(8, 145, 178, 0.28)',
-                  }}>
-                    <Text style={{ 
-                      color: '#fff', 
-                      fontSize: isMobile ? 20 : 22, 
-                      fontWeight: 700,
-                    }}>
-                      {step.number}
-                    </Text>
+                Key Features
+              </Title>
+              <Paragraph style={{ 
+                textAlign: 'center', 
+                color: '#666', 
+                marginBottom: isMobile ? 28 : 40,
+                fontSize: isMobile ? 14 : 16,
+              }}>
+                Everything you need to manage inventory and collaborate across organizations
+              </Paragraph>
+              
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', 
+                gap: isMobile ? 16 : 24,
+              }}>
+                {features.map((feature, index) => (
+                  <div 
+                    key={index}
+                    className="feature-card lift-reveal"
+                    style={{ 
+                      background: '#fff', 
+                      border: '0.5px solid #e8f4f8', 
+                      borderRadius: 16, 
+                      padding: isMobile ? 24 : 32,
+                      textAlign: 'center',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.04)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'flex-start',
+                      animationDelay: `calc(0.15s + ${index} * var(--uplift-delay-step))`,
+                    }}
+                  >
+                    <div style={{ fontSize: isMobile ? 36 : 48, marginBottom: 16 }}>
+                      {feature.icon}
+                    </div>
+                    <Title level={4} style={{ marginTop: 0, marginBottom: 12, color: '#222', textAlign: 'center' }}>
+                      {feature.title}
+                    </Title>
+                    <Paragraph style={{ margin: 0, color: '#666', fontSize: isMobile ? 13 : 14, lineHeight: 1.6, textAlign: 'center' }}>
+                      {feature.description}
+                    </Paragraph>
                   </div>
-                  <Text style={{ color: '#0891b2', fontWeight: 600, fontSize: isMobile ? 12 : 13 }}>
-                   
-                  </Text>
-                </div>
-                <Title level={4} style={{ margin: 0, color: '#222' }}>
-                  {step.title}
-                </Title>
-                <Paragraph style={{ margin: 0, color: '#666', fontSize: isMobile ? 13 : 14, lineHeight: 1.6 }}>
-                  {step.description}
-                </Paragraph>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
-        </div>
-      </div>
 
-      <div style={{ 
-        background: 'transparent', 
-        padding: isMobile ? '40px 0' : '60px 0',
-      }}>
-        <div className="container landing-mobile-tight">
-          <Title 
-            level={2} 
-            style={{ 
-              textAlign: 'center', 
-              color: '#0891b2', 
-              marginBottom: 8,
-              fontSize: isMobile ? 24 : 32,
-            }}
-          >
-            Why Choose Us?
-          </Title>
-          <Paragraph style={{ 
-            textAlign: 'center', 
-            color: '#666', 
-            marginBottom: isMobile ? 28 : 40,
-            fontSize: isMobile ? 14 : 16,
-          }}>
-            Benefits that make a real difference for your organization
-          </Paragraph>
-          
           <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', 
-            gap: isMobile ? 16 : 20,
+            background: 'transparent', 
+            padding: isMobile ? '40px 0' : '60px 0',
           }}>
-            {benefits.map((benefit, index) => (
-              <div 
-                key={index}
-                className="feature-card lift-reveal"
+            <div className="container landing-mobile-tight">
+              <Title 
+                level={2} 
                 style={{ 
-                  background: '#fff',
-                  border: '1px solid #e8f4f8', 
-                  borderRadius: 16, 
-                  padding: isMobile ? 20 : 24,
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: 16,
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.04)',
-                  animationDelay: `calc(0.12s + ${index} * var(--uplift-delay-step))`,
+                  textAlign: 'center', 
+                  color: '#0891b2', 
+                  marginBottom: 8,
+                  fontSize: isMobile ? 24 : 32,
                 }}
               >
-                <div style={{ fontSize: isMobile ? 28 : 32, flexShrink: 0 }}>
-                  {benefit.icon}
-                </div>
-                <div>
-                  <Title level={5} style={{ marginTop: 0, marginBottom: 8, color: '#222' }}>
-                    {benefit.title}
-                  </Title>
-                  <Paragraph style={{ margin: 0, color: '#666', fontSize: isMobile ? 13 : 14, lineHeight: 1.6 }}>
-                    {benefit.description}
-                  </Paragraph>
-                </div>
+                How It Works
+              </Title>
+              <Paragraph style={{ 
+                textAlign: 'center', 
+                color: '#666', 
+                marginBottom: isMobile ? 28 : 40,
+                fontSize: isMobile ? 14 : 16,
+              }}>
+                Simple steps to start managing and sharing resources
+              </Paragraph>
+              
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: isMobile ? '1fr' : 'repeat(4, 1fr)', 
+                gap: isMobile ? 16 : 20,
+              }}>
+                {steps.map((step, index) => (
+                  <div 
+                    key={step.number}
+                    className="feature-card lift-reveal"
+                    style={{ 
+                      background: '#fff', 
+                      border: '1px solid #e8f4f8', 
+                      borderRadius: 16, 
+                      padding: isMobile ? 18 : 22,
+                      boxShadow: '0 6px 16px rgba(0,0,0,0.05)',
+                      display: 'grid',
+                      gap: 10,
+                      alignItems: 'flex-start',
+                      animationDelay: `calc(0.15s + ${index} * var(--uplift-delay-step))`,
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div style={{ 
+                        width: isMobile ? 48 : 54, 
+                        height: isMobile ? 48 : 54, 
+                        borderRadius: 14, 
+                        background: 'linear-gradient(135deg, #0891b2 0%, #06b6d4 100%)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxShadow: '0 6px 14px rgba(8, 145, 178, 0.28)',
+                      }}>
+                        <Text style={{ 
+                          color: '#fff', 
+                          fontSize: isMobile ? 20 : 22, 
+                          fontWeight: 700,
+                        }}>
+                          {step.number}
+                        </Text>
+                      </div>
+                      <Text style={{ color: '#0891b2', fontWeight: 600, fontSize: isMobile ? 12 : 13 }}>
+                      
+                      </Text>
+                    </div>
+                    <Title level={4} style={{ margin: 0, color: '#222' }}>
+                      {step.title}
+                    </Title>
+                    <Paragraph style={{ margin: 0, color: '#666', fontSize: isMobile ? 13 : 14, lineHeight: 1.6 }}>
+                      {step.description}
+                    </Paragraph>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
-        </div>
-      </div>
 
-      <div 
-        className="lift-reveal"
-        style={{ 
-        background: '#0891b2', 
-        padding: isMobile ? '20px 0' : '30px 0',
-        borderRadius: 16,
-        position: 'relative',
-        overflow: 'hidden',
-        boxShadow: '0 14px 40px rgba(8, 145, 178, 0.35)',
-        animationDelay: '0.18s',
-      }}>
-        <div 
-          aria-hidden="true"
-          style={{ 
-            position: 'absolute',
-            top: isMobile ? -140 : -180,
-            left: isMobile ? -140 : -200,
-            width: isMobile ? 380 : 520,
-            height: isMobile ? 380 : 520,
-            background: 'radial-gradient(90% 90% at 0% 0%, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.18) 55%, rgba(255,255,255,0.0) 75%)',
-            filter: 'blur(10px)',
-            pointerEvents: 'none',
-            zIndex: 0,
-          }}
-        />
-        <div 
-          aria-hidden="true"
-          style={{ 
-            position: 'absolute',
-            bottom: isMobile ? -140 : -180,
-            right: isMobile ? -140 : -200,
-            width: isMobile ? 360 : 500,
-            height: isMobile ? 360 : 500,
-            background: 'radial-gradient(90% 90% at 100% 100%, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.2) 55%, rgba(255,255,255,0.0) 74%)',
-            filter: 'blur(10px)',
-            pointerEvents: 'none',
-            zIndex: 0,
-          }}
-        />
-        <div className="container landing-mobile-tight" style={{ textAlign: 'center' }}>
-          <Title 
-            level={2} 
-            style={{ 
-              color: '#fff', 
-              marginBottom: isMobile ? 8 : 12,
-              fontSize: isMobile ? 22 : 34,
-            }}
-          >
-            Ready to Get Started?
-          </Title>
-          <Paragraph style={{ 
-            color: 'rgba(255,255,255,0.9)', 
-            fontSize: isMobile ? 14 : 18,
-            maxWidth: 500,
-            margin: '0 auto',
-            marginBottom: isMobile ? 20 : 32,
-            paddingLeft: isMobile ? 8 : 0,
-            paddingRight: isMobile ? 8 : 0,
-          }}>
-            Join hundreds of organizations collaborating and sharing resources seamlessly.
-          </Paragraph>
           <div style={{ 
-            display: 'flex', 
-            gap: 12,
-            justifyContent: 'center',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            flexDirection: isMobile ? 'column' : 'row',
+            background: 'transparent', 
+            padding: isMobile ? '40px 0' : '60px 0',
           }}>
-            <Link to="/signup" style={{ width: isMobile ? '80%' : 'auto' }}>
-              <Button 
-                size={isMobile ? 'middle' : 'large'}
-                className="signin-btn"
+            <div className="container landing-mobile-tight">
+              <Title 
+                level={2} 
                 style={{ 
-                  background: '#fff', 
-                  color: '#000', 
-                  borderColor: '#fff',
-                  fontWeight: 500,
-                  minWidth: isMobile ? 160 : 180,
-                  width: isMobile ? '100%' : 'auto',
+                  textAlign: 'center', 
+                  color: '#0891b2', 
+                  marginBottom: 8,
+                  fontSize: isMobile ? 24 : 32,
                 }}
               >
-                Join Your Organization
-              </Button>
-            </Link>
-            <Link to="/login" style={{ width: isMobile ? '80%' : 'auto' }}>
-              <Button 
-                size={isMobile ? 'middle' : 'large'}
-                  className="signin-btn"
-                style={{ 
-                  background: '#fff', 
-                  color: '#000', 
-                  borderColor: '#fff',
-                  fontWeight: 500,
-                  minWidth: isMobile ? 120 : 140,
-                  width: isMobile ? '100%' : 'auto',
-                }}
-              >
-                Sign In
-              </Button>
-            </Link>
+                Why Choose Us?
+              </Title>
+              <Paragraph style={{ 
+                textAlign: 'center', 
+                color: '#666', 
+                marginBottom: isMobile ? 28 : 40,
+                fontSize: isMobile ? 14 : 16,
+              }}>
+                Benefits that make a real difference for your organization
+              </Paragraph>
+              
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', 
+                gap: isMobile ? 16 : 20,
+              }}>
+                {benefits.map((benefit, index) => (
+                  <div 
+                    key={index}
+                    className="feature-card lift-reveal"
+                    style={{ 
+                      background: '#fff',
+                      border: '1px solid #e8f4f8', 
+                      borderRadius: 16, 
+                      padding: isMobile ? 20 : 24,
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: 16,
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.04)',
+                      animationDelay: `calc(0.12s + ${index} * var(--uplift-delay-step))`,
+                    }}
+                  >
+                    <div style={{ fontSize: isMobile ? 28 : 32, flexShrink: 0 }}>
+                      {benefit.icon}
+                    </div>
+                    <div>
+                      <Title level={5} style={{ marginTop: 0, marginBottom: 8, color: '#222' }}>
+                        {benefit.title}
+                      </Title>
+                      <Paragraph style={{ margin: 0, color: '#666', fontSize: isMobile ? 13 : 14, lineHeight: 1.6 }}>
+                        {benefit.description}
+                      </Paragraph>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+
+          <div 
+            className="lift-reveal"
+            style={{ 
+            background: '#0891b2', 
+            padding: isMobile ? '20px 0' : '30px 0',
+            borderRadius: 16,
+            position: 'relative',
+            overflow: 'hidden',
+            boxShadow: '0 14px 40px rgba(8, 145, 178, 0.35)',
+            animationDelay: '0.18s',
+          }}>
+            <div 
+              aria-hidden="true"
+              style={{ 
+                position: 'absolute',
+                top: isMobile ? -140 : -180,
+                left: isMobile ? -140 : -200,
+                width: isMobile ? 380 : 520,
+                height: isMobile ? 380 : 520,
+                background: 'radial-gradient(90% 90% at 0% 0%, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.18) 55%, rgba(255,255,255,0.0) 75%)',
+                filter: 'blur(10px)',
+                pointerEvents: 'none',
+                zIndex: 0,
+              }}
+            />
+            <div 
+              aria-hidden="true"
+              style={{ 
+                position: 'absolute',
+                bottom: isMobile ? -140 : -180,
+                right: isMobile ? -140 : -200,
+                width: isMobile ? 360 : 500,
+                height: isMobile ? 360 : 500,
+                background: 'radial-gradient(90% 90% at 100% 100%, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.2) 55%, rgba(255,255,255,0.0) 74%)',
+                filter: 'blur(10px)',
+                pointerEvents: 'none',
+                zIndex: 0,
+              }}
+            />
+            <div className="container landing-mobile-tight" style={{ textAlign: 'center' }}>
+              <Title 
+                level={2} 
+                style={{ 
+                  color: '#fff', 
+                  marginBottom: isMobile ? 8 : 12,
+                  fontSize: isMobile ? 22 : 34,
+                }}
+              >
+                Ready to Get Started?
+              </Title>
+              <Paragraph style={{ 
+                color: 'rgba(255,255,255,0.9)', 
+                fontSize: isMobile ? 14 : 18,
+                maxWidth: 500,
+                margin: '0 auto',
+                marginBottom: isMobile ? 20 : 32,
+                paddingLeft: isMobile ? 8 : 0,
+                paddingRight: isMobile ? 8 : 0,
+              }}>
+                Join hundreds of organizations collaborating and sharing resources seamlessly.
+              </Paragraph>
+              <div style={{ 
+                display: 'flex', 
+                gap: 12,
+                justifyContent: 'center',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                flexDirection: isMobile ? 'column' : 'row',
+              }}>
+                <Link to="/signup" style={{ width: isMobile ? '80%' : 'auto' }}>
+                  <Button 
+                    size={isMobile ? 'middle' : 'large'}
+                    className="signin-btn"
+                    style={{ 
+                      background: '#fff', 
+                      color: '#000', 
+                      borderColor: '#fff',
+                      fontWeight: 500,
+                      minWidth: isMobile ? 160 : 180,
+                      width: isMobile ? '100%' : 'auto',
+                    }}
+                  >
+                    Join Your Organization
+                  </Button>
+                </Link>
+                <Link to="/login" style={{ width: isMobile ? '80%' : 'auto' }}>
+                  <Button 
+                    size={isMobile ? 'middle' : 'large'}
+                      className="signin-btn"
+                    style={{ 
+                      background: '#fff', 
+                      color: '#000', 
+                      borderColor: '#fff',
+                      fontWeight: 500,
+                      minWidth: isMobile ? 120 : 140,
+                      width: isMobile ? '100%' : 'auto',
+                    }}
+                  >
+                    Sign In
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   )
 }

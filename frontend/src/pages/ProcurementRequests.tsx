@@ -397,7 +397,7 @@ export default function ProcurementRequests() {
             Procurement Requests
           </Title>
           <Paragraph type="secondary" style={{ margin: 0, fontSize: 13 }}>
-            Manage surplus material procurement across organizations
+            Manage surplus item procurement across organizations
           </Paragraph>
         </div>
         <Space wrap>

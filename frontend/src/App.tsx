@@ -350,17 +350,23 @@ export default function App() {
         </div>
       </Header>
 
-      <Drawer 
-        placement="left" 
-        width={280} 
+      <Drawer
+        placement="left"
+        width={280}
         title={(
-          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#fff', marginLeft: 17 }}>
+          <Link
+            to="/"
+            onClick={() => {
+              setMobileMenuOpen(false)
+            }}
+            style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#fff', marginLeft: 17 }}
+          >
             <img src="/logo1.png" alt="ISMS" style={{ height: 27, width: 'auto', marginRight: 3 }} />
             <span style={{ color: '#fff', fontWeight: 700, fontSize: 18, marginTop: '10px' }}>ISMS</span>
           </Link>
         )}
-        onClose={() => setMobileMenuOpen(false)} 
-        open={mobileMenuOpen} 
+        onClose={() => setMobileMenuOpen(false)}
+        open={mobileMenuOpen}
         bodyStyle={{ padding: 0 }}
         styles={{ header: { background: '#0891b2', borderBottom: 'none' } }}
         closeIcon={<span style={{ color: '#fff', fontSize: 16 }}>✕</span>}

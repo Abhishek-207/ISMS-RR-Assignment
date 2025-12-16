@@ -21,6 +21,7 @@ uploads/
 # .env.dev
 # .env.production
 # .env.development
+backend/.env
 
 
 # Logs

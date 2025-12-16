@@ -74,6 +74,7 @@ Permissions are enforced:
 
   - Raise procurement/transfer requests for surplus items
   - Approve or reject requests (admins)
+  - View end‑to‑end transfer history for each material and request
 
 - **User & Organization Management**
 
@@ -84,6 +85,7 @@ Permissions are enforced:
 
   - High‑level analytics view for inventory, surplus, and transfers
   - Export reports as CSV/Excel for My Inventory, Browse Surplus, Procurement requests, and Analytics summaries
+  - Audit‑trail style insights powered by `AuditLog` records for key actions (create, update, delete, approvals)
 
 - **Notifications & UX**
   - In‑app notifications and alerts for important events

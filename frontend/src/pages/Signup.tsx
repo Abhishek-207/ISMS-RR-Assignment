@@ -352,7 +352,7 @@ export default function Signup() {
                 label="Password" 
                 rules={[
                   { required: true, message: 'Please enter a password' },
-                  { min: 8, },
+                  
                   {
                     pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
                     message: 'Password must be at least 8 characters and contain uppercase, lowercase, number, and special character'

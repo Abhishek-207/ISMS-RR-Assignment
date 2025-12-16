@@ -4,6 +4,11 @@ Live demo (frontend): [`https://isms-app.netlify.app`](https://isms-app.netlify.
 Backend API: [`https://sms-deploy-production.up.railway.app`](https://sms-deploy-production.up.railway.app)  
 Demo video: [`https://www.youtube.com/watch?v=z2xTUzS_kzc`](https://www.youtube.com/watch?v=z2xTUzS_kzc)
 
+**Demo Credentials (for testing):**
+
+- Email: `demoadmin@corp.com`
+- Password: `Demo@123`
+
 This repository contains a full‑stack **MERN** application that helps organizations manage their internal inventory, surplus materials, and procurement requests.  
 The system is built as a **final‑year project** and demonstrates authentication, authorization with roles, CRUD operations, analytics, and production‑ready deployment.
 

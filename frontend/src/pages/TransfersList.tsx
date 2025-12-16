@@ -43,7 +43,7 @@ interface TransferRequest {
   }
   fromOrganizationId: { _id: string; name: string }
   toOrganizationId: { _id: string; name: string }
-  requestedQuantity: number
+  quantityRequested: number
   purpose: string
   status: string
   requestedBy: { _id: string; name: string }
@@ -223,7 +223,7 @@ export default function TransfersList() {
     },
     {
       title: 'Quantity',
-      dataIndex: 'requestedQuantity',
+      dataIndex: 'quantityRequested',
       key: 'quantity',
       width: 100,
       render: (qty: number, record: TransferRequest) => (
@@ -289,7 +289,7 @@ export default function TransfersList() {
                       <div><Text strong>Material:</Text> {record.materialId.name}</div>
                       <div><Text strong>From:</Text> {record.fromOrganizationId.name}</div>
                       <div><Text strong>To:</Text> {record.toOrganizationId.name}</div>
-                      <div><Text strong>Quantity:</Text> {record.requestedQuantity} {record.materialId.unit}</div>
+                      <div><Text strong>Quantity:</Text> {record.quantityRequested} {record.materialId.unit}</div>
                       <div><Text strong>Purpose:</Text> {record.purpose}</div>
                       <div><Text strong>Status:</Text> <Tag color={getStatusColor(record.status)}>{record.status}</Tag></div>
                       <div><Text strong>Requested By:</Text> {record.requestedBy.name}</div>
@@ -466,7 +466,7 @@ export default function TransfersList() {
               <Text>{selectedTransfer.toOrganizationId.name}</Text>
               <br />
               <Text strong>Quantity: </Text>
-              <Text>{selectedTransfer.requestedQuantity} {selectedTransfer.materialId.unit}</Text>
+              <Text>{selectedTransfer.quantityRequested} {selectedTransfer.materialId.unit}</Text>
               <br />
               <Text strong>Purpose: </Text>
               <Text>{selectedTransfer.purpose}</Text>

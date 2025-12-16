@@ -51,7 +51,7 @@ interface ProcurementRequest {
   }
   fromOrganizationId: { _id: string; name: string; category: string }
   toOrganizationId: { _id: string; name: string; category: string }
-  requestedQuantity: number
+  quantityRequested: number
   purpose: string
   status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED'
   requestedBy: { _id: string; name: string }
@@ -125,7 +125,7 @@ export default function ProcurementDetail() {
         successMessage = 'Procurement request cancelled'
       }
 
-      await api.patch(endpoint, { comments: values.comments })
+      await api.patch(endpoint, { comment: values.comments || '' })
       message.success(successMessage)
       setActionModalVisible(false)
       actionForm.resetFields()
@@ -269,7 +269,7 @@ export default function ProcurementDetail() {
 
               <Descriptions.Item label="Requested Quantity">
                 <Text strong style={{ fontSize: 14 }}>
-                  {request.requestedQuantity} {request.materialId.unit}
+                  {request.quantityRequested} {request.materialId.unit}
                 </Text>
               </Descriptions.Item>
 
@@ -281,9 +281,9 @@ export default function ProcurementDetail() {
 
               {typeof request.materialId.estimatedCost === 'number' ? (
                 <Descriptions.Item label="Estimated Value" span={2}>
-                  ₹{(request.materialId.estimatedCost * request.materialId.quantity).toLocaleString()}
+                  ₹{(request.materialId.estimatedCost * request.quantityRequested).toLocaleString()}
                   <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>
-                    (₹{request.materialId.estimatedCost} per {request.materialId.unit}, using available qty)
+                    (₹{request.materialId.estimatedCost} per {request.materialId.unit}, using requested qty)
                   </Text>
                 </Descriptions.Item>
               ) : null}

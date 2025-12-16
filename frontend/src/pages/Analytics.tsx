@@ -15,7 +15,9 @@ import {
   ToolOutlined,
   DownloadOutlined,
   SwapOutlined,
-  DollarOutlined
+  DollarOutlined,
+  FilterOutlined,
+  ReloadOutlined
 } from '@ant-design/icons'
 import { 
   BarChart, 
@@ -28,7 +30,11 @@ import {
   ResponsiveContainer,
   PieChart,
   Pie,
-  Cell
+  Cell,
+  LineChart,
+  Line,
+  AreaChart,
+  Area
 } from 'recharts'
 import dayjs from 'dayjs'
 import { api } from '../lib/api'
@@ -53,6 +59,14 @@ export default function Analytics() {
   const [selectedCondition, setSelectedCondition] = useState<string | undefined>(undefined)
   const [selectedStatus, setSelectedStatus] = useState<string | undefined>(undefined)
   const [categories, setCategories] = useState<any[]>([])
+  const [showFilters, setShowFilters] = useState(false)
+
+  // Chart type states
+  const [statusChartType, setStatusChartType] = useState<'bar' | 'line' | 'area' | 'pie'>('bar')
+  const [conditionChartType, setConditionChartType] = useState<'pie' | 'bar' | 'line'>('pie')
+  const [procurementChartType, setProcurementChartType] = useState<'bar' | 'line' | 'area'>('bar')
+  const [categoryChartType, setCategoryChartType] = useState<'bar' | 'line' | 'pie'>('bar')
+  const [materialStatusChartType, setMaterialStatusChartType] = useState<'bar' | 'line' | 'area' | 'pie'>('bar')
 
   const [availabilityData, setAvailabilityData] = useState<any[]>([])
   const [procurementData, setProcurementData] = useState<any[]>([])
@@ -277,8 +291,12 @@ export default function Analytics() {
             )}
           </div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <Button onClick={clearAllFilters}>
-              Clear Filters
+            <Button 
+              icon={<ReloadOutlined />}
+              onClick={fetchAnalytics}
+              loading={loading}
+            >
+              Refresh
             </Button>
             <Button 
               onClick={handleExportReport}
@@ -292,7 +310,7 @@ export default function Analytics() {
         
         <Card size="small" style={{ marginBottom: 16 }}>
           <Row gutter={[8, 8]} align="middle">
-            <Col xs={24} sm={12} md={6}>
+            <Col xs={24} sm={12} md={6} className="hide-on-mobile">
               <div style={{ padding: '8px 0' }}>
                 <div style={{ fontSize: 12, color: '#666', marginBottom: 6 }}>Date Range</div>
                 <RangePicker
@@ -302,7 +320,7 @@ export default function Analytics() {
                 />
               </div>
             </Col>
-            <Col xs={24} sm={12} md={5}>
+            <Col xs={24} sm={12} md={5} className="hide-on-mobile">
               <div style={{ padding: '8px 0' }}>
                 <div style={{ fontSize: 12, color: '#666', marginBottom: 6 }}>Item Category</div>
                 <Select
@@ -318,7 +336,7 @@ export default function Analytics() {
                 </Select>
               </div>
             </Col>
-            <Col xs={24} sm={12} md={5}>
+            <Col xs={24} sm={12} md={5} className="hide-on-mobile">
               <div style={{ padding: '8px 0' }}>
                 <div style={{ fontSize: 12, color: '#666', marginBottom: 6 }}>Condition</div>
                 <Select
@@ -336,7 +354,7 @@ export default function Analytics() {
                 </Select>
               </div>
             </Col>
-            <Col xs={24} sm={12} md={5}>
+            <Col xs={24} sm={12} md={5} className="hide-on-mobile">
               <div style={{ padding: '8px 0' }}>
                 <div style={{ fontSize: 12, color: '#666', marginBottom: 6 }}>Status</div>
                 <Select
@@ -353,148 +371,327 @@ export default function Analytics() {
                 </Select>
               </div>
             </Col>
+            <Col xs={24} sm={12} md={3} className="hide-on-mobile">
+              <div style={{ padding: '8px 0' }}>
+                <div style={{ fontSize: 12, color: '#666', marginBottom: 6 }}>&nbsp;</div>
+                <Button 
+                  onClick={clearAllFilters}
+                  block
+                  style={{ height: 36 }}
+                >
+                  Clear Filters
+                </Button>
+              </div>
+            </Col>
+            <Col xs={12} className="show-on-mobile">
+              <Button 
+                icon={<FilterOutlined />} 
+                onClick={() => setShowFilters(!showFilters)}
+                block
+                style={{ height: 32 }}
+              >
+                {showFilters ? 'Hide Filters' : 'Show Filters'}
+              </Button>
+            </Col>
+            <Col xs={12} className="show-on-mobile">
+              <Button 
+                onClick={clearAllFilters}
+                block
+                style={{ height: 32 }}
+              >
+                Clear Filters
+              </Button>
+            </Col>
           </Row>
+          <div className="show-on-mobile" style={{ display: showFilters ? 'block' : 'none' }}>
+            <Row gutter={[8, 8]} align="middle">
+              <Col xs={24}>
+                <div style={{ padding: '8px 0' }}>
+                  <div style={{ fontSize: 12, color: '#666', marginBottom: 6 }}>Date Range</div>
+                  <RangePicker
+                    value={dateRange}
+                    onChange={handleDateRangeChange}
+                    style={{ width: '100%', height: 36 }}
+                  />
+                </div>
+              </Col>
+              <Col xs={24}>
+                <div style={{ padding: '8px 0' }}>
+                  <div style={{ fontSize: 12, color: '#666', marginBottom: 6 }}>Item Category</div>
+                  <Select
+                    placeholder="All Categories"
+                    value={selectedCategory}
+                    onChange={setSelectedCategory}
+                    allowClear
+                    style={{ width: '100%', height: 36 }}
+                  >
+                    {categories.map((cat) => (
+                      <Option key={cat._id} value={cat._id}>{cat.name}</Option>
+                    ))}
+                  </Select>
+                </div>
+              </Col>
+              <Col xs={24}>
+                <div style={{ padding: '8px 0' }}>
+                  <div style={{ fontSize: 12, color: '#666', marginBottom: 6 }}>Condition</div>
+                  <Select
+                    placeholder="All Conditions"
+                    value={selectedCondition}
+                    onChange={setSelectedCondition}
+                    allowClear
+                    style={{ width: '100%', height: 36 }}
+                  >
+                    <Option value="NEW">New</Option>
+                    <Option value="GOOD">Good</Option>
+                    <Option value="SLIGHTLY_DAMAGED">Slightly Damaged</Option>
+                    <Option value="NEEDS_REPAIR">Needs Repair</Option>
+                    <Option value="SCRAP">Scrap</Option>
+                  </Select>
+                </div>
+              </Col>
+              <Col xs={24}>
+                <div style={{ padding: '8px 0' }}>
+                  <div style={{ fontSize: 12, color: '#666', marginBottom: 6 }}>Status</div>
+                  <Select
+                    placeholder="All Status"
+                    value={selectedStatus}
+                    onChange={setSelectedStatus}
+                    allowClear
+                    style={{ width: '100%', height: 36 }}
+                  >
+                    <Option value="AVAILABLE">Available</Option>
+                    <Option value="RESERVED">Reserved</Option>
+                    <Option value="TRANSFERRED">Transferred</Option>
+                    <Option value="ARCHIVED">Archived</Option>
+                  </Select>
+                </div>
+              </Col>
+            </Row>
+          </div>
         </Card>
       </div>
 
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-        <Col xs={24} sm={12} lg={8} xl={4}>
-          <Card 
-            hoverable
-            style={{ 
-              borderRadius: 8,
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
-              border: '1px solid #f0f0f0'
-            }}
-            bodyStyle={{ padding: '16px' }}
-          >
-            <Statistic
-              title={
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                  <InboxOutlined style={{ color: '#1890ff', fontSize: 16 }} />
-                  <span style={{ color: '#666', fontSize: 13 }}>Total Inventory</span>
+        {loading ? (
+          <>
+            <Col xs={24} sm={12} lg={8} xl={4}>
+              <Card 
+                style={{ 
+                  borderRadius: 8,
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
+                  border: '1px solid #f0f0f0'
+                }}
+                bodyStyle={{ padding: '16px' }}
+              >
+                <div style={{ marginBottom: 12 }}>
+                  <div className="shimmer-wrapper" style={{ height: 16, width: '60%', marginBottom: 8 }} />
+                  <div className="shimmer-wrapper" style={{ height: 20, width: '40%' }} />
                 </div>
-              }
-              value={stats.totalInventory}
-              valueStyle={{ 
-                color: '#1890ff', 
-                fontSize: '24px',
-                fontWeight: 600
-              }}
-              suffix={<span style={{ fontSize: 12, color: '#999' }}>items</span>}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={8} xl={4}>
-          <Card 
-            hoverable
-            style={{ 
-              borderRadius: 8,
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
-              border: '1px solid #f0f0f0'
-            }}
-            bodyStyle={{ padding: '16px' }}
-          >
-            <Statistic
-              title={
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                  <CheckCircleOutlined style={{ color: '#52c41a', fontSize: 16 }} />
-                  <span style={{ color: '#666', fontSize: 13 }}>Available</span>
+              </Card>
+            </Col>
+            <Col xs={24} sm={12} lg={8} xl={4}>
+              <Card 
+                style={{ 
+                  borderRadius: 8,
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
+                  border: '1px solid #f0f0f0'
+                }}
+                bodyStyle={{ padding: '16px' }}
+              >
+                <div style={{ marginBottom: 12 }}>
+                  <div className="shimmer-wrapper" style={{ height: 16, width: '60%', marginBottom: 8 }} />
+                  <div className="shimmer-wrapper" style={{ height: 20, width: '40%' }} />
                 </div>
-              }
-              value={stats.availableItems}
-              valueStyle={{ 
-                color: '#52c41a', 
-                fontSize: '24px',
-                fontWeight: 600
-              }}
-              suffix={<span style={{ fontSize: 12, color: '#999' }}>{stats.totalInventory > 0 ? `${Math.round((stats.availableItems / stats.totalInventory) * 100)}%` : '0%'}</span>}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={8} xl={4}>
-          <Card 
-            hoverable
-            style={{ 
-              borderRadius: 8,
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
-              border: '1px solid #f0f0f0'
-            }}
-            bodyStyle={{ padding: '16px' }}
-          >
-            <Statistic
-              title={
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                  <ToolOutlined style={{ color: '#fa8c16', fontSize: 16 }} />
-                  <span style={{ color: '#666', fontSize: 13 }}>Surplus</span>
+              </Card>
+            </Col>
+            <Col xs={24} sm={12} lg={8} xl={4}>
+              <Card 
+                style={{ 
+                  borderRadius: 8,
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
+                  border: '1px solid #f0f0f0'
+                }}
+                bodyStyle={{ padding: '16px' }}
+              >
+                <div style={{ marginBottom: 12 }}>
+                  <div className="shimmer-wrapper" style={{ height: 16, width: '60%', marginBottom: 8 }} />
+                  <div className="shimmer-wrapper" style={{ height: 20, width: '40%' }} />
                 </div>
-              }
-              value={stats.surplusItems}
-              valueStyle={{ 
-                color: '#fa8c16', 
-                fontSize: '24px',
-                fontWeight: 600
-              }}
-              suffix={<span style={{ fontSize: 12, color: '#999' }}>shared</span>}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={8} xl={4}>
-          <Card 
-            hoverable
-            style={{ 
-              borderRadius: 8,
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
-              border: '1px solid #f0f0f0'
-            }}
-            bodyStyle={{ padding: '16px' }}
-          >
-            <Statistic
-              title={
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                  <SwapOutlined style={{ color: '#722ed1', fontSize: 16 }} />
-                  <span style={{ color: '#666', fontSize: 13 }}>Procurements</span>
+              </Card>
+            </Col>
+            <Col xs={24} sm={12} lg={8} xl={4}>
+              <Card 
+                style={{ 
+                  borderRadius: 8,
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
+                  border: '1px solid #f0f0f0'
+                }}
+                bodyStyle={{ padding: '16px' }}
+              >
+                <div style={{ marginBottom: 12 }}>
+                  <div className="shimmer-wrapper" style={{ height: 16, width: '60%', marginBottom: 8 }} />
+                  <div className="shimmer-wrapper" style={{ height: 20, width: '40%' }} />
                 </div>
-              }
-              value={stats.procurementRequests}
-              valueStyle={{ 
-                color: '#722ed1', 
-                fontSize: '24px',
-                fontWeight: 600
-              }}
-              suffix={<span style={{ fontSize: 12, color: '#999' }}>requests</span>}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={24} lg={16} xl={8}>
-          <Card 
-            hoverable
-            style={{ 
-              borderRadius: 8,
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
-              border: '1px solid #52c41a',
-              background: '#f6ffed'
-            }}
-            bodyStyle={{ padding: '16px' }}
-          >
-            <Statistic
-              title={
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                  <DollarOutlined style={{ color: '#52c41a', fontSize: 16 }} />
-                  <span style={{ color: '#52c41a', fontSize: 13, fontWeight: 500 }}>Cost Avoided by Reuse</span>
+              </Card>
+            </Col>
+            <Col xs={24} sm={24} lg={16} xl={8}>
+              <Card 
+                style={{ 
+                  borderRadius: 8,
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
+                  border: '1px solid #52c41a',
+                  background: '#f6ffed'
+                }}
+                bodyStyle={{ padding: '16px' }}
+              >
+                <div style={{ marginBottom: 12 }}>
+                  <div className="shimmer-wrapper" style={{ height: 16, width: '70%', marginBottom: 8 }} />
+                  <div className="shimmer-wrapper" style={{ height: 24, width: '50%' }} />
                 </div>
-              }
-              value={stats.costAvoided}
-              valueStyle={{ 
-                color: '#52c41a', 
-                fontSize: '28px',
-                fontWeight: 700
-              }}
-              prefix="₹"
-              suffix={<span style={{ fontSize: 12, color: '#52c41a' }}>saved</span>}
-            />
-          </Card>
-        </Col>
+              </Card>
+            </Col>
+          </>
+        ) : (
+          <>
+            <Col xs={24} sm={12} lg={8} xl={4}>
+              <Card 
+                hoverable
+                style={{ 
+                  borderRadius: 8,
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
+                  border: '1px solid #f0f0f0'
+                }}
+                bodyStyle={{ padding: '16px' }}
+              >
+                <Statistic
+                  title={
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                      <InboxOutlined style={{ color: '#1890ff', fontSize: 16 }} />
+                      <span style={{ color: '#666', fontSize: 13 }}>Total Inventory</span>
+                    </div>
+                  }
+                  value={stats.totalInventory}
+                  valueStyle={{ 
+                    color: '#1890ff', 
+                    fontSize: '24px',
+                    fontWeight: 600
+                  }}
+                  suffix={<span style={{ fontSize: 12, color: '#999' }}>items</span>}
+                />
+              </Card>
+            </Col>
+            <Col xs={24} sm={12} lg={8} xl={4}>
+              <Card 
+                hoverable
+                style={{ 
+                  borderRadius: 8,
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
+                  border: '1px solid #f0f0f0'
+                }}
+                bodyStyle={{ padding: '16px' }}
+              >
+                <Statistic
+                  title={
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                      <CheckCircleOutlined style={{ color: '#52c41a', fontSize: 16 }} />
+                      <span style={{ color: '#666', fontSize: 13 }}>Available</span>
+                    </div>
+                  }
+                  value={stats.availableItems}
+                  valueStyle={{ 
+                    color: '#52c41a', 
+                    fontSize: '24px',
+                    fontWeight: 600
+                  }}
+                  suffix={<span style={{ fontSize: 12, color: '#999' }}>{stats.totalInventory > 0 ? `${Math.round((stats.availableItems / stats.totalInventory) * 100)}%` : '0%'}</span>}
+                />
+              </Card>
+            </Col>
+            <Col xs={24} sm={12} lg={8} xl={4}>
+              <Card 
+                hoverable
+                style={{ 
+                  borderRadius: 8,
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
+                  border: '1px solid #f0f0f0'
+                }}
+                bodyStyle={{ padding: '16px' }}
+              >
+                <Statistic
+                  title={
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                      <ToolOutlined style={{ color: '#fa8c16', fontSize: 16 }} />
+                      <span style={{ color: '#666', fontSize: 13 }}>Surplus</span>
+                    </div>
+                  }
+                  value={stats.surplusItems}
+                  valueStyle={{ 
+                    color: '#fa8c16', 
+                    fontSize: '24px',
+                    fontWeight: 600
+                  }}
+                  suffix={<span style={{ fontSize: 12, color: '#999' }}>shared</span>}
+                />
+              </Card>
+            </Col>
+            <Col xs={24} sm={12} lg={8} xl={4}>
+              <Card 
+                hoverable
+                style={{ 
+                  borderRadius: 8,
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
+                  border: '1px solid #f0f0f0'
+                }}
+                bodyStyle={{ padding: '16px' }}
+              >
+                <Statistic
+                  title={
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                      <SwapOutlined style={{ color: '#722ed1', fontSize: 16 }} />
+                      <span style={{ color: '#666', fontSize: 13 }}>Procurements</span>
+                    </div>
+                  }
+                  value={stats.procurementRequests}
+                  valueStyle={{ 
+                    color: '#722ed1', 
+                    fontSize: '24px',
+                    fontWeight: 600
+                  }}
+                  suffix={<span style={{ fontSize: 12, color: '#999' }}>requests</span>}
+                />
+              </Card>
+            </Col>
+            <Col xs={24} sm={24} lg={16} xl={8}>
+              <Card 
+                hoverable
+                style={{ 
+                  borderRadius: 8,
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
+                  border: '1px solid #52c41a',
+                  background: '#f6ffed'
+                }}
+                bodyStyle={{ padding: '16px' }}
+              >
+                <Statistic
+                  title={
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                      <DollarOutlined style={{ color: '#52c41a', fontSize: 16 }} />
+                      <span style={{ color: '#52c41a', fontSize: 13, fontWeight: 500 }}>Cost Avoided by Reuse</span>
+                    </div>
+                  }
+                  value={stats.costAvoided}
+                  valueStyle={{ 
+                    color: '#52c41a', 
+                    fontSize: '28px',
+                    fontWeight: 700
+                  }}
+                  prefix="₹"
+                  suffix={<span style={{ fontSize: 12, color: '#52c41a' }}>saved</span>}
+                />
+              </Card>
+            </Col>
+          </>
+        )}
       </Row>
 
       {loading ? (
@@ -537,90 +734,320 @@ export default function Analytics() {
       ) : (
         <Row gutter={[24, 24]}>
           <Col xs={24} lg={12}>
-            <Card title="Inventory by Status">
+            <Card 
+              title="Inventory by Status"
+              extra={
+                <Select
+                  value={statusChartType}
+                  onChange={setStatusChartType}
+                  style={{ width: 120 }}
+                  size="small"
+                >
+                  <Option value="bar">Bar Chart</Option>
+                  <Option value="line">Line Chart</Option>
+                  <Option value="area">Area Chart</Option>
+                  <Option value="pie">Pie Chart</Option>
+                </Select>
+              }
+            >
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={availabilityData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="_id.status" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="totalQuantity" fill="#1890ff" name="Total Quantity" />
-                  <Bar dataKey="count" fill="#52c41a" name="Item Count" />
-                </BarChart>
+                {statusChartType === 'bar' ? (
+                  <BarChart data={availabilityData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="_id.status" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="totalQuantity" fill="#1890ff" name="Total Quantity" />
+                    <Bar dataKey="count" fill="#52c41a" name="Item Count" />
+                  </BarChart>
+                ) : statusChartType === 'line' ? (
+                  <LineChart data={availabilityData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="_id.status" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Line type="monotone" dataKey="totalQuantity" stroke="#1890ff" name="Total Quantity" strokeWidth={2} />
+                    <Line type="monotone" dataKey="count" stroke="#52c41a" name="Item Count" strokeWidth={2} />
+                  </LineChart>
+                ) : statusChartType === 'area' ? (
+                  <AreaChart data={availabilityData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="_id.status" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Area type="monotone" dataKey="totalQuantity" fill="#1890ff" stroke="#1890ff" name="Total Quantity" />
+                    <Area type="monotone" dataKey="count" fill="#52c41a" stroke="#52c41a" name="Item Count" />
+                  </AreaChart>
+                ) : (
+                  <PieChart>
+                    <Pie
+                      data={availabilityData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ _id, totalQuantity }) => `${_id?.status} (${totalQuantity})`}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="totalQuantity"
+                    >
+                      {availabilityData.map((_, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                  </PieChart>
+                )}
               </ResponsiveContainer>
             </Card>
           </Col>
 
           <Col xs={24} lg={12}>
-            <Card title="Inventory by Condition">
+            <Card 
+              title="Inventory by Condition"
+              extra={
+                <Select
+                  value={conditionChartType}
+                  onChange={setConditionChartType}
+                  style={{ width: 120 }}
+                  size="small"
+                >
+                  <Option value="pie">Pie Chart</Option>
+                  <Option value="bar">Bar Chart</Option>
+                  <Option value="line">Line Chart</Option>
+                </Select>
+              }
+            >
               <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={conditionData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ _id, percent }) => `${_id?.condition?.replace(/_/g, ' ')} ${(percent * 100).toFixed(0)}%`}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="totalQuantity"
-                  >
-                    {conditionData.map((_, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
+                {conditionChartType === 'pie' ? (
+                  <PieChart>
+                    <Pie
+                      data={conditionData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ _id, percent }) => `${_id?.condition?.replace(/_/g, ' ')} ${(percent * 100).toFixed(0)}%`}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="totalQuantity"
+                    >
+                      {conditionData.map((_, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                  </PieChart>
+                ) : conditionChartType === 'bar' ? (
+                  <BarChart data={conditionData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="_id.condition" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="totalQuantity" fill="#1890ff" name="Total Quantity" />
+                  </BarChart>
+                ) : (
+                  <LineChart data={conditionData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="_id.condition" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Line type="monotone" dataKey="totalQuantity" stroke="#1890ff" name="Total Quantity" strokeWidth={2} />
+                  </LineChart>
+                )}
               </ResponsiveContainer>
             </Card>
           </Col>
 
           <Col xs={24} lg={12}>
-            <Card title="Procurement Request Trends">
+            <Card 
+              title="Procurement Request Trends"
+              extra={
+                <Select
+                  value={procurementChartType}
+                  onChange={setProcurementChartType}
+                  style={{ width: 120 }}
+                  size="small"
+                >
+                  <Option value="bar">Bar Chart</Option>
+                  <Option value="line">Line Chart</Option>
+                  <Option value="area">Area Chart</Option>
+                </Select>
+              }
+            >
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={procurementData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="_id.month" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="approved" fill="#52c41a" name="Approved" stackId="a" />
-                  <Bar dataKey="pending" fill="#fa8c16" name="Pending" stackId="a" />
-                  <Bar dataKey="rejected" fill="#f5222d" name="Rejected" stackId="a" />
-                </BarChart>
+                {procurementChartType === 'bar' ? (
+                  <BarChart data={procurementData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="_id.month" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="approved" fill="#52c41a" name="Approved" stackId="a" />
+                    <Bar dataKey="pending" fill="#fa8c16" name="Pending" stackId="a" />
+                    <Bar dataKey="rejected" fill="#f5222d" name="Rejected" stackId="a" />
+                  </BarChart>
+                ) : procurementChartType === 'line' ? (
+                  <LineChart data={procurementData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="_id.month" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Line type="monotone" dataKey="approved" stroke="#52c41a" name="Approved" strokeWidth={2} />
+                    <Line type="monotone" dataKey="pending" stroke="#fa8c16" name="Pending" strokeWidth={2} />
+                    <Line type="monotone" dataKey="rejected" stroke="#f5222d" name="Rejected" strokeWidth={2} />
+                  </LineChart>
+                ) : (
+                  <AreaChart data={procurementData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="_id.month" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Area type="monotone" dataKey="approved" stackId="1" fill="#52c41a" stroke="#52c41a" name="Approved" />
+                    <Area type="monotone" dataKey="pending" stackId="1" fill="#fa8c16" stroke="#fa8c16" name="Pending" />
+                    <Area type="monotone" dataKey="rejected" stackId="1" fill="#f5222d" stroke="#f5222d" name="Rejected" />
+                  </AreaChart>
+                )}
               </ResponsiveContainer>
             </Card>
           </Col>
 
           <Col xs={24} lg={12}>
-            <Card title="Inventory by Category">
+            <Card 
+              title="Inventory by Category"
+              extra={
+                <Select
+                  value={categoryChartType}
+                  onChange={setCategoryChartType}
+                  style={{ width: 120 }}
+                  size="small"
+                >
+                  <Option value="bar">Bar Chart</Option>
+                  <Option value="line">Line Chart</Option>
+                  <Option value="pie">Pie Chart</Option>
+                </Select>
+              }
+            >
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={categoryData} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis type="number" />
-                  <YAxis dataKey="_id.category" type="category" width={100} />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="totalQuantity" fill="#1890ff" name="Quantity" />
-                  <Bar dataKey="count" fill="#722ed1" name="Items" />
-                </BarChart>
+                {categoryChartType === 'bar' ? (
+                  <BarChart data={categoryData} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis type="number" />
+                    <YAxis dataKey="_id.category" type="category" width={100} />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="totalQuantity" fill="#1890ff" name="Quantity" />
+                    <Bar dataKey="count" fill="#722ed1" name="Items" />
+                  </BarChart>
+                ) : categoryChartType === 'line' ? (
+                  <LineChart data={categoryData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="_id.category" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Line type="monotone" dataKey="totalQuantity" stroke="#1890ff" name="Quantity" strokeWidth={2} />
+                    <Line type="monotone" dataKey="count" stroke="#722ed1" name="Items" strokeWidth={2} />
+                  </LineChart>
+                ) : (
+                  <PieChart>
+                    <Pie
+                      data={categoryData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ _id, percent }) => `${_id?.category} ${(percent * 100).toFixed(0)}%`}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="totalQuantity"
+                    >
+                      {categoryData.map((_, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                  </PieChart>
+                )}
               </ResponsiveContainer>
             </Card>
           </Col>
 
           <Col xs={24}>
-            <Card title="Material Statuses Overview">
+            <Card 
+              title="Material Statuses Overview"
+              extra={
+                <Select
+                  value={materialStatusChartType}
+                  onChange={setMaterialStatusChartType}
+                  style={{ width: 120 }}
+                  size="small"
+                >
+                  <Option value="bar">Bar Chart</Option>
+                  <Option value="line">Line Chart</Option>
+                  <Option value="area">Area Chart</Option>
+                  <Option value="pie">Pie Chart</Option>
+                </Select>
+              }
+            >
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={statusData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="_id.status" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="count" fill="#fa8c16" name="Material Count" />
-                  <Bar dataKey="totalQuantity" fill="#52c41a" name="Total Quantity" />
-                </BarChart>
+                {materialStatusChartType === 'bar' ? (
+                  <BarChart data={statusData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="_id.status" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="count" fill="#fa8c16" name="Material Count" />
+                    <Bar dataKey="totalQuantity" fill="#52c41a" name="Total Quantity" />
+                  </BarChart>
+                ) : materialStatusChartType === 'line' ? (
+                  <LineChart data={statusData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="_id.status" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Line type="monotone" dataKey="count" stroke="#fa8c16" name="Material Count" strokeWidth={2} />
+                    <Line type="monotone" dataKey="totalQuantity" stroke="#52c41a" name="Total Quantity" strokeWidth={2} />
+                  </LineChart>
+                ) : materialStatusChartType === 'area' ? (
+                  <AreaChart data={statusData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="_id.status" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Area type="monotone" dataKey="count" fill="#fa8c16" stroke="#fa8c16" name="Material Count" />
+                    <Area type="monotone" dataKey="totalQuantity" fill="#52c41a" stroke="#52c41a" name="Total Quantity" />
+                  </AreaChart>
+                ) : (
+                  <PieChart>
+                    <Pie
+                      data={statusData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ _id, totalQuantity }) => `${_id?.status} (${totalQuantity})`}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="totalQuantity"
+                    >
+                      {statusData.map((_, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                  </PieChart>
+                )}
               </ResponsiveContainer>
             </Card>
           </Col>

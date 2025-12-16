@@ -8,6 +8,7 @@ import { User } from '../models/User.model.js';
 import { ApiResponse } from '../utils/apiResponse.js';
 import { ApiError } from '../utils/apiError.js';
 import { ErrorCodes } from '../utils/ErrorCodes.js';
+import { NotificationsController } from './notificationsController.js';
 import mongoose from 'mongoose';
 
 export class TransfersController {
@@ -49,24 +50,46 @@ export class TransfersController {
       if (req.query.materialId) filter.materialId = req.query.materialId;
       if (req.query.requestedBy) filter.requestedBy = req.query.requestedBy;
 
-      const [items, total] = await Promise.all([
-        TransferRequest.find(filter)
-          .populate({
-            path: 'materialId',
-            select: 'name quantity unit condition attachments',
-            populate: { path: 'attachments' }
-          })
-          .populate('fromOrganizationId', 'name category')
-          .populate('toOrganizationId', 'name category')
-          .populate('requestedBy', 'name email')
-          .populate('approvedBy', 'name email')
-          .populate('comments.createdBy', 'name')
-          .skip((page - 1) * pageSize)
-          .limit(pageSize)
-          .sort({ createdAt: -1 })
-          .lean(),
-        TransferRequest.countDocuments(filter)
-      ]);
+      // Handle search query
+      let query = TransferRequest.find(filter)
+        .populate({
+          path: 'materialId',
+          select: 'name quantity unit condition attachments',
+          populate: { path: 'attachments' }
+        })
+        .populate('fromOrganizationId', 'name category')
+        .populate('toOrganizationId', 'name category')
+        .populate('requestedBy', 'name email')
+        .populate('approvedBy', 'name email')
+        .populate('comments.createdBy', 'name')
+        .skip((page - 1) * pageSize)
+        .limit(pageSize)
+        .sort({ createdAt: -1 });
+
+      // Execute query and get items
+      let items = await query.lean();
+
+      // Apply search filter on populated fields (client-side filtering after population)
+      if (req.query.q && typeof req.query.q === 'string') {
+        const searchTerm = req.query.q.toLowerCase().trim();
+        items = items.filter((item: any) => {
+          const materialName = item.materialId?.name?.toLowerCase() || '';
+          const fromOrgName = item.fromOrganizationId?.name?.toLowerCase() || '';
+          const toOrgName = item.toOrganizationId?.name?.toLowerCase() || '';
+          const purpose = item.purpose?.toLowerCase() || '';
+          const condition = item.materialId?.condition?.toLowerCase().replace(/_/g, ' ') || '';
+          
+          return (
+            materialName.includes(searchTerm) ||
+            fromOrgName.includes(searchTerm) ||
+            toOrgName.includes(searchTerm) ||
+            purpose.includes(searchTerm) ||
+            condition.includes(searchTerm)
+          );
+        });
+      }
+
+      const total = req.query.q ? items.length : await TransferRequest.countDocuments(filter);
 
       return ApiResponse.paginated(res, items, page, pageSize, total);
     } catch (error) {
@@ -178,6 +201,35 @@ export class TransfersController {
         .populate('comments.createdBy', 'name')
         .lean();
 
+      // Create notifications for users in the source organization (who need to approve)
+      try {
+        const sourceOrgUsers = await User.find({
+          organizationId: material.organizationId,
+          isActive: true,
+          role: { $in: ['ORG_ADMIN', 'PLATFORM_ADMIN'] }
+        });
+
+        const materialName = (populatedRequest as any).materialId?.name || 'Material';
+        const toOrgName = (populatedRequest as any).toOrganizationId?.name || 'Organization';
+        
+        await NotificationsController.createBulkNotifications(
+          sourceOrgUsers.map(user => ({
+            userId: user._id as mongoose.Types.ObjectId,
+            organizationId: user.organizationId,
+            title: 'New Procurement Request',
+            message: `${toOrgName} requested ${quantityRequested} ${material.unit} of ${materialName}`,
+            type: 'warning',
+            priority: 'high',
+            relatedEntityType: 'transfer',
+            relatedEntityId: procurementRequest._id as mongoose.Types.ObjectId,
+            metadata: { transferId: procurementRequest._id }
+          }))
+        );
+      } catch (notifError) {
+        console.error('Failed to create notifications:', notifError);
+        // Don't fail the request if notification creation fails
+      }
+
       return ApiResponse.created(res, populatedRequest, 'Procurement request created successfully');
     } catch (error) {
       if (error instanceof ApiError) {
@@ -274,6 +326,33 @@ export class TransfersController {
         .populate('comments.createdBy', 'name')
         .lean();
 
+      // Create notification for the requester and their org users
+      try {
+        const targetOrgUsers = await User.find({
+          organizationId: procurementRequest.toOrganizationId,
+          isActive: true
+        });
+
+        const materialName = (populatedRequest as any).materialId?.name || 'Material';
+        const fromOrgName = (populatedRequest as any).fromOrganizationId?.name || 'Organization';
+        
+        await NotificationsController.createBulkNotifications(
+          targetOrgUsers.map(user => ({
+            userId: user._id as mongoose.Types.ObjectId,
+            organizationId: user.organizationId,
+            title: 'Procurement Request Approved',
+            message: `Your request for ${procurementRequest.quantityRequested} ${material?.unit || 'units'} of ${materialName} from ${fromOrgName} has been approved`,
+            type: 'success',
+            priority: 'medium',
+            relatedEntityType: 'transfer',
+            relatedEntityId: procurementRequest._id as mongoose.Types.ObjectId,
+            metadata: { transferId: procurementRequest._id }
+          }))
+        );
+      } catch (notifError) {
+        console.error('Failed to create notifications:', notifError);
+      }
+
       return ApiResponse.updated(res, populatedRequest, 'Procurement request approved successfully');
     } catch (error) {
       if (error instanceof ApiError) {
@@ -328,6 +407,34 @@ export class TransfersController {
         .populate('requestedBy', 'name email')
         .populate('comments.createdBy', 'name')
         .lean();
+
+      // Create notification for the requester and their org users
+      try {
+        const targetOrgUsers = await User.find({
+          organizationId: procurementRequest.toOrganizationId,
+          isActive: true
+        });
+
+        const material = await Material.findById(procurementRequest.materialId);
+        const materialName = (populatedRequest as any).materialId?.name || 'Material';
+        const fromOrgName = (populatedRequest as any).fromOrganizationId?.name || 'Organization';
+        
+        await NotificationsController.createBulkNotifications(
+          targetOrgUsers.map(user => ({
+            userId: user._id as mongoose.Types.ObjectId,
+            organizationId: user.organizationId,
+            title: 'Procurement Request Rejected',
+            message: `Your request for ${procurementRequest.quantityRequested} ${material?.unit || 'units'} of ${materialName} from ${fromOrgName} has been rejected`,
+            type: 'error',
+            priority: 'medium',
+            relatedEntityType: 'transfer',
+            relatedEntityId: procurementRequest._id as mongoose.Types.ObjectId,
+            metadata: { transferId: procurementRequest._id }
+          }))
+        );
+      } catch (notifError) {
+        console.error('Failed to create notifications:', notifError);
+      }
 
       return ApiResponse.updated(res, populatedRequest, 'Procurement request rejected');
     } catch (error) {

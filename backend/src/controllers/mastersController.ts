@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { validationResult } from 'express-validator';
 import { AuthRequest } from '../middleware/auth.js';
 import { MaterialCategory, MaterialStatus } from '../models/Masters.model.js';
+import { Organization } from '../models/Organization.model.js';
 import { ApiResponse } from '../utils/apiResponse.js';
 import { ApiError } from '../utils/apiError.js';
 import { ErrorCodes } from '../utils/ErrorCodes.js';
@@ -37,6 +38,45 @@ export class MastersController {
       return ApiResponse.paginated(res, items, page, pageSize, total);
     } catch (error) {
       console.error('Get material categories error:', error);
+      return ApiResponse.error(res, 'Failed to fetch material categories', 500, undefined, ErrorCodes.INTERNAL_SERVER_ERROR.code);
+    }
+  }
+
+  // Get material categories from organizations with same category
+  static async getCategoriesForSurplus(req: AuthRequest, res: Response) {
+    try {
+      // Get all organizations with the same category as the user's organization
+      const sameCategOrgs = await Organization.find({ 
+        category: req.auth?.organizationCategory,
+        isActive: true 
+      }).select('_id').lean();
+
+      const filter: any = {
+        organizationId: { $in: sameCategOrgs.map(o => o._id) },
+        isActive: true
+      };
+      
+      if (req.query.q) {
+        filter.name = { $regex: String(req.query.q), $options: 'i' };
+      }
+
+      // Get unique categories (deduplicate by name) from all organizations in the same category
+      const categories = await MaterialCategory.find(filter)
+        .sort({ name: 1 })
+        .lean();
+
+      // Deduplicate categories by name (case-insensitive)
+      const uniqueCategories = categories.reduce((acc: any[], curr) => {
+        const exists = acc.find(cat => cat.name.toLowerCase() === curr.name.toLowerCase());
+        if (!exists) {
+          acc.push(curr);
+        }
+        return acc;
+      }, []);
+
+      return ApiResponse.success(res, uniqueCategories, 'Material categories fetched successfully');
+    } catch (error) {
+      console.error('Get surplus categories error:', error);
       return ApiResponse.error(res, 'Failed to fetch material categories', 500, undefined, ErrorCodes.INTERNAL_SERVER_ERROR.code);
     }
   }

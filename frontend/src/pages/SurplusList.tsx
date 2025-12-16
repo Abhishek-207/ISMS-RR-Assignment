@@ -27,7 +27,8 @@ import {
   DownloadOutlined,
   EyeOutlined,
   FileOutlined,
-  MoreOutlined
+  MoreOutlined,
+  FilterOutlined
 } from '@ant-design/icons'
 import { api } from '../lib/api'
 import { getOrganizationCategory } from '../lib/auth'
@@ -61,7 +62,7 @@ export default function SurplusList() {
   const [materials, setMaterials] = useState<Material[]>([])
   const [loading, setLoading] = useState(false)
   const [exportLoading, setExportLoading] = useState(false)
-  const [pagination, setPagination] = useState({ current: 1, pageSize: 20, total: 0 })
+  const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 })
   const [filters, setFilters] = useState({
     search: '',
     categoryId: '',
@@ -75,6 +76,7 @@ export default function SurplusList() {
   const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null)
   const [requestForm] = Form.useForm()
   const [submitting, setSubmitting] = useState(false)
+  const [showFilters, setShowFilters] = useState(false)
 
   const fetchSurplusMaterials = async () => {
     setLoading(true)
@@ -104,7 +106,7 @@ export default function SurplusList() {
 
   const fetchMasterData = async () => {
     try {
-      const categoriesRes = await api.get('/masters/material-categories')
+      const categoriesRes = await api.get('/masters/material-categories-surplus')
       setCategories(categoriesRes.data.data || [])
     } catch (error) {
       console.error('Failed to fetch material categories:', error)
@@ -293,7 +295,9 @@ export default function SurplusList() {
       dataIndex: 'estimatedCost',
       key: 'estimatedCost',
       width: 100,
-      render: (cost: number) => cost ? `₹${cost.toLocaleString()}` : '-'
+      render: (cost: number) => cost ? (
+        <span>₹{cost.toLocaleString()} <Text type="secondary" style={{ fontSize: 11 }}>/ item</Text></span>
+      ) : '-'
     },
     {
       title: 'Action',
@@ -339,13 +343,17 @@ export default function SurplusList() {
             Available Surplus ({orgCategory?.replace(/_/g, ' ')})
           </Title>
           <Paragraph type="secondary" style={{ margin: 0 }}>
-            Discover surplus materials from other organizations in your category. Submit procurement requests to acquire materials.
+            Discover surplus items from other organizations in your category. Submit procurement requests to acquire items.
           </Paragraph>
         </div>
         <Space wrap>
-          <Button onClick={clearAllFilters}>
-            <span className="hide-on-mobile">Clear Filters</span>
-            <span className="show-on-mobile">Clear</span>
+          <Button 
+            icon={<ReloadOutlined />}
+            onClick={fetchSurplusMaterials}
+            loading={loading}
+          >
+            <span className="hide-on-mobile">Refresh</span>
+            <span className="show-on-mobile">Refresh</span>
           </Button>
           <Button 
             icon={<DownloadOutlined />}
@@ -371,7 +379,7 @@ export default function SurplusList() {
           <InfoCircleOutlined style={{ color: '#1890ff', marginRight: 8, marginTop: 2 }} />
           <div>
             <Text style={{ fontSize: 13 }}>
-              You can only view and request surplus materials from organizations in the same category as yours.
+              You can only view and request surplus items from organizations in the same category as yours.
               All requests require approval from the source organization.
             </Text>
           </div>
@@ -380,19 +388,24 @@ export default function SurplusList() {
         <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
           <Col xs={24} sm={12} md={7}>
             <Input
-              placeholder="Search surplus materials..."
+              placeholder="Search surplus items..."
               prefix={<SearchOutlined />}
               value={filters.search}
               onChange={(e) => handleFilterChange('search', e.target.value)}
               allowClear
             />
           </Col>
-          <Col xs={24} sm={12} md={6}>
+          <Col xs={24} sm={12} md={6} className="hide-on-mobile">
             <Select
-              placeholder="Category"
+              placeholder="All Categories"
               style={{ width: '100%' }}
               value={filters.categoryId}
               onChange={(value) => handleFilterChange('categoryId', value)}
+              showSearch
+              allowClear
+              filterOption={(input, option) =>
+                (option?.children as string)?.toLowerCase().includes(input.toLowerCase())
+              }
             >
               <Select.Option value="">All Categories</Select.Option>
               {categories.map((category: any) => (
@@ -402,7 +415,7 @@ export default function SurplusList() {
               ))}
             </Select>
           </Col>
-          <Col xs={24} sm={12} md={5}>
+          <Col xs={24} sm={12} md={5} className="hide-on-mobile">
             <Select
               placeholder="Condition"
               style={{ width: '100%' }}
@@ -417,17 +430,73 @@ export default function SurplusList() {
               <Select.Option value="SCRAP">Scrap</Select.Option>
             </Select>
           </Col>
-          <Col xs={24} sm={12} md={4}>
+          <Col xs={24} sm={12} md={6} className="hide-on-mobile">
             <Button 
-              icon={<ReloadOutlined />} 
-              onClick={fetchSurplusMaterials}
-              loading={loading}
+              onClick={clearAllFilters}
               block
             >
-              Refresh
+              Clear Filters
+            </Button>
+          </Col>
+          <Col xs={12} className="show-on-mobile">
+            <Button 
+              icon={<FilterOutlined />} 
+              onClick={() => setShowFilters(!showFilters)}
+              block
+              style={{ height: 32 }}
+            >
+              {showFilters ? 'Hide Filters' : 'Show Filters'}
+            </Button>
+          </Col>
+          <Col xs={12} className="show-on-mobile">
+            <Button 
+              onClick={clearAllFilters}
+              block
+              style={{ height: 32 }}
+            >
+              Clear Filters
             </Button>
           </Col>
         </Row>
+        <div className="show-on-mobile" style={{ display: showFilters ? 'block' : 'none', marginBottom: 16 }}>
+          <Row gutter={[16, 16]}>
+            <Col xs={24}>
+              <Select
+                placeholder="All Categories"
+                style={{ width: '100%' }}
+                value={filters.categoryId}
+                onChange={(value) => handleFilterChange('categoryId', value)}
+                showSearch
+                allowClear
+                filterOption={(input, option) =>
+                  (option?.children as string)?.toLowerCase().includes(input.toLowerCase())
+                }
+              >
+                <Select.Option value="">All Categories</Select.Option>
+                {categories.map((category: any) => (
+                  <Select.Option key={category._id} value={category._id}>
+                    {category.name}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Col>
+            <Col xs={24}>
+              <Select
+                placeholder="Condition"
+                style={{ width: '100%' }}
+                value={filters.condition}
+                onChange={(value) => handleFilterChange('condition', value)}
+              >
+                <Select.Option value="">All Conditions</Select.Option>
+                <Select.Option value="NEW">New</Select.Option>
+                <Select.Option value="GOOD">Good</Select.Option>
+                <Select.Option value="SLIGHTLY_DAMAGED">Slightly Damaged</Select.Option>
+                <Select.Option value="NEEDS_REPAIR">Needs Repair</Select.Option>
+                <Select.Option value="SCRAP">Scrap</Select.Option>
+              </Select>
+            </Col>
+          </Row>
+        </div>
 
         {loading && materials.length === 0 ? (
           <div>
@@ -455,7 +524,7 @@ export default function SurplusList() {
             pagination={{
               ...pagination,
               showSizeChanger: true,
-              showQuickJumper: true,
+              showQuickJumper: false,
               showTotal: (total, range) => 
                 `${range[0]}-${range[1]} of ${total} surplus items`,
               size: 'small'
@@ -470,7 +539,7 @@ export default function SurplusList() {
         title={
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <InfoCircleOutlined style={{ color: '#1890ff' }} />
-            <span>Material Details</span>
+            <span>Item Details</span>
           </div>
         }
         open={detailModalVisible}
@@ -494,10 +563,11 @@ export default function SurplusList() {
               openRequestModal(selectedMaterial!)
             }}
           >
-            Request Material
+            Request Item
           </Button>
         ]}
         width={800}
+        className="item-detail-modal"
       >
         {selectedMaterial && (
           <div>
@@ -508,7 +578,7 @@ export default function SurplusList() {
               column={{ xs: 1, sm: 2 }}
               style={{ marginBottom: 16 }}
             >
-              <Descriptions.Item label="Material Name" span={2}>
+              <Descriptions.Item label="Item Name" span={2}>
                 <Text strong style={{ fontSize: 15 }}>{selectedMaterial.name}</Text>
               </Descriptions.Item>
               
@@ -680,7 +750,7 @@ export default function SurplusList() {
         {selectedMaterial && (
           <div>
             <div style={{ marginBottom: 20, padding: 12, background: '#f5f5f5', borderRadius: 4 }}>
-              <Text strong>Material: </Text>
+              <Text strong>Item: </Text>
               <Text>{selectedMaterial.name}</Text>
               <br />
               <Text strong>Source: </Text>

@@ -399,7 +399,6 @@ body {
   }
 
   .auth-form {
-    /* Add comfortable inner padding on mobile without shrinking the form too much */
     padding: 0 16px;
   }
 
@@ -446,29 +445,24 @@ body {
   color: #067e9b;
 }
 
-/* Mobile-first responsive design */
 @media (max-width: 768px) {
   .hide-mobile { display: none !important; }
   .show-mobile { display: block !important; }
   
-  /* Container adjustments */
   .container { 
     padding: 0 16px; 
   }
   
-  /* Hero section mobile optimization */
   .hero { 
     padding: 32px 20px; 
     border-radius: 16px; 
     margin: 0;
   }
   
-  /* Content padding adjustments */
   .ant-layout-content {
     padding: 16px !important;
   }
   
-  /* Form responsiveness */
   .ant-form-inline .ant-form-item { 
     flex: 1 1 100%; 
     display: block; 
@@ -478,32 +472,26 @@ body {
     width: 100%; 
   }
   
-  /* Button adjustments */
   .ant-btn {
     min-height: 44px;
     font-size: 16px;
   }
   
-  /* Table responsiveness */
   .ant-table-wrapper {
     overflow-x: auto;
   }
   
-  /* Card adjustments */
   .ant-card {
     margin-bottom: 12px;
   }
   
-  /* Menu adjustments */
   .ant-menu-horizontal {
     font-size: 14px;
   }
   
-  /* Drawer adjustments */
   .ant-drawer-body {
     padding: 16px !important;
   }
-  /* Drawer menu typography */
   .ant-drawer .ant-menu {
     font-size: 16px;
   }
@@ -515,34 +503,28 @@ body {
     font-size: 16px;
   }
   
-  /* Space component adjustments */
   .ant-space-vertical {
     width: 100%;
   }
   
-  /* Ensure form items have proper spacing on mobile */
   .ant-form-item {
     margin-bottom: 16px !important;
   }
   
-  /* Fix card body padding on mobile */
   .ant-card-body {
     padding: 12px !important;
   }
 
-  /* Extra bottom padding inside auth cards for login/signup footer text on mobile */
   .auth-card .ant-card-body {
     padding: 12px 12px 24px !important;
   }
   
-  /* Ensure proper button sizing on mobile */
   .ant-btn {
     min-height: 44px !important;
     font-size: 16px !important;
   }
 }
 
-/* Tablet adjustments */
 @media (min-width: 769px) and (max-width: 1024px) {
   .container { 
     padding: 0 24px; 
@@ -553,7 +535,6 @@ body {
   }
 }
 
-/* Small mobile devices */
 @media (max-width: 480px) {
   .container { 
     padding: 0 12px; 
@@ -568,12 +549,10 @@ body {
     padding: 12px !important;
   }
   
-  /* Extra small mobile form adjustments */
   .ant-card-body {
     padding: 8px !important;
   }
 
-  /* Extra bottom padding inside auth cards for login/signup footer text on very small devices */
   .auth-card .ant-card-body {
     padding: 8px 8px 20px !important;
   }
@@ -624,7 +603,6 @@ body {
   color: #8c8c8c;
 }
 
-/* Desktop-only drop shadows */
 @media (min-width: 769px) {
   .ant-layout-header {
     box-shadow: 0 6px 14px rgba(8, 145, 178, 0.30);
@@ -634,7 +612,6 @@ body {
   }
 }
 
-/* Global scrollbar styling */
 * {
   scrollbar-width: thin; /* Firefox */
   scrollbar-color: #0891b2 #e0f7fa; /* thumb color | track color */
@@ -659,7 +636,6 @@ body {
   background-color: #06b6d4;
 }
 
-/* Date picker font styling */
 .ant-picker-header-view {
   font-family: var(--app-font, "Nunito"), system-ui, -apple-system, Segoe UI, Roboto, Inter, Outfit, Arial, sans-serif !important;
 }
@@ -676,7 +652,6 @@ body {
   font-family: var(--app-font, "Nunito"), system-ui, -apple-system, Segoe UI, Roboto, Inter, Outfit, Arial, sans-serif !important;
 }
 
-/* Mobile center buttons - center align on mobile, left align on desktop */
 @media (max-width: 768px) {
   .mobile-center-buttons {
     justify-content: center !important;
@@ -689,7 +664,6 @@ body {
   }
 }
 
-/* Refresh button spinner animation */
 .refresh-icon.spinning {
   animation: spin 1s linear infinite;
 }
@@ -703,7 +677,6 @@ body {
   }
 }
 
-/* Landing page specific styles */
 .landing-section {
   padding: 48px 0;
 }
@@ -717,7 +690,6 @@ body {
 
 
 
-/* Stats card gradient */
 .stats-card {
   background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%);
   border-radius: 20px;
@@ -733,7 +705,6 @@ body {
   }
 }
 
-/* Section headings */
 .section-title {
   color: var(--primary-color);
   text-align: center;
@@ -752,7 +723,6 @@ body {
   }
 }
 
-/* CTA section gradient */
 .cta-section {
   background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%);
   padding: 48px 0;
@@ -764,7 +734,6 @@ body {
   }
 }
 
-/* Benefit cards alternating background */
 .benefit-card {
   border: 1px solid #e8f4f8;
   border-radius: 16px;
@@ -788,7 +757,6 @@ body {
   background: #fff;
 }
 
-/* Step number circles */
 .step-number {
   width: 64px;
   height: 64px;
@@ -812,7 +780,6 @@ body {
   }
 }
 
-/* Footer */
 .landing-footer {
   background: var(--bg-light);
   padding: 20px 0;
@@ -830,7 +797,6 @@ body {
   }
 }
 
-/* Landing page tighter padding on mobile */
 .landing-mobile-tight {
   padding-left: 20px;
   padding-right: 20px;
@@ -850,7 +816,6 @@ body {
   }
 }
 
-/* Ensure form and filter placeholders are clearly visible */
 .ant-input::placeholder,
 .ant-input-affix-wrapper input::placeholder,
 .ant-select-single .ant-select-selector .ant-select-selection-placeholder,
@@ -859,8 +824,7 @@ body {
   color: rgba(0, 0, 0, 0.45) !important;
 }
 
-/* Mobile Responsive Utilities */
-/* Hide text on mobile devices (screens smaller than 768px) */
+/* Hide text on mobile */
 .hide-on-mobile {
   display: inline;
 }
@@ -871,7 +835,7 @@ body {
   }
 }
 
-/* Show text only on mobile devices */
+/* Show text only on mobile */
 .show-on-mobile {
   display: none;
 }
@@ -882,7 +846,6 @@ body {
   }
 }
 
-/* Mobile responsive table - make it scrollable */
 @media (max-width: 767px) {
   .ant-table-wrapper {
     overflow-x: auto;
@@ -893,7 +856,6 @@ body {
   }
 }
 
-/* Responsive spacing adjustments */
 @media (max-width: 767px) {
   .ant-card {
     margin-bottom: 12px;
@@ -907,7 +869,6 @@ body {
     font-size: 13px;
   }
   
-  /* Make buttons more compact on mobile */
   .ant-btn {
     padding: 4px 12px;
     font-size: 13px;
@@ -918,13 +879,12 @@ body {
     font-size: 14px;
   }
   
-  /* Stack space items vertically on mobile */
   .ant-space-horizontal {
     flex-wrap: wrap;
   }
 }
 
-/* Ensure charts are responsive */
+
 @media (max-width: 767px) {
   .recharts-responsive-container {
     width: 100% !important;
@@ -932,7 +892,6 @@ body {
   }
 }
 
-/* Mobile-friendly modals */
 @media (max-width: 767px) {
   .ant-modal {
     max-width: calc(100vw - 32px);
@@ -941,6 +900,20 @@ body {
   
   .ant-modal-body {
     padding: 16px;
+  }
+  
+ 
+  .item-detail-modal.ant-modal {
+    max-width: calc(100vw - 16px);
+    width: calc(100vw - 16px) !important;
+  }
+}
+
+
+@media (min-width: 768px) {
+  .item-detail-modal.ant-modal {
+    width: 1200px !important;
+    max-width: 90vw;
   }
 }
 

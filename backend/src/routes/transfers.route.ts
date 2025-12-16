@@ -21,7 +21,7 @@ router.post('/', [
 ], audit('TransferRequest', 'PROCUREMENT_REQUEST_CREATED', () => null, (req, result) => result), TransfersController.create);
 
 router.patch('/:id/approve', requireOrgAdminOrPlatformAdmin, [
-  body('comment').isLength({ min: 1 })
+  body('comment').optional().isLength({ min: 1 }).withMessage('Comment must not be empty if provided')
 ], audit('TransferRequest', 'PROCUREMENT_APPROVED', async (req) => {
   return await TransferRequest.findById(req.params.id).lean();
 }, async (req, result) => {

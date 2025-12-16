@@ -3,7 +3,6 @@ import { Card, List, Typography, Tag, Button, Empty, Space, Badge, message } fro
 import { BellOutlined, CheckOutlined, DeleteOutlined, InfoCircleOutlined, ExclamationCircleOutlined, CheckCircleOutlined } from '@ant-design/icons'
 import { Grid } from 'antd'
 import { api } from '../lib/api'
-import { getCurrentUser } from '../lib/auth'
 
 const { Title, Text } = Typography
 const { useBreakpoint } = Grid
@@ -67,51 +66,24 @@ export default function Notifications() {
     const fetchNotifications = async () => {
       setLoading(true)
       try {
-        const user = getCurrentUser()
-        const response = await api.get('/transfers', {
+        const response = await api.get('/notifications', {
           params: {
             page: 1,
-            pageSize: 20
+            pageSize: 50
           }
         })
 
-        const orgId = user?.organizationId
         const items = response.data?.data || []
-
-        const mapped: Notification[] = items.map((item: any) => {
-          const status: string = item.status || 'PENDING'
-          const materialName = item.materialId?.name || 'Material'
-          const quantityRequested = item.quantityRequested ?? item.requestedQuantity
-          const unit = item.materialId?.unit || ''
-          const fromOrg = item.fromOrganizationId?.name || 'Unknown'
-          const toOrg = item.toOrganizationId?.name || 'Unknown'
-          const createdAt = item.createdAt
-          const approvedAt = item.approvedAt
-          const isOrgInvolved =
-            orgId && (item.fromOrganizationId?._id === orgId || item.toOrganizationId?._id === orgId)
-
-          let type: Notification['type'] = 'info'
-          if (status === 'APPROVED') type = 'success'
-          else if (status === 'PENDING') type = 'warning'
-          else if (status === 'REJECTED' || status === 'CANCELLED') type = 'error'
-
-          const priority: Notification['priority'] =
-            status === 'PENDING' ? 'high' : status === 'APPROVED' ? 'medium' : 'low'
-
-          const title = `Procurement ${status === 'PENDING' ? 'request pending' : status.toLowerCase()}`
-
-          const messageText = `${materialName} • ${quantityRequested} ${unit} • ${fromOrg} → ${toOrg}`
-
-          return {
-            id: item._id,
-            title,
-            message: messageText,
-            type,
-            timestamp: approvedAt || createdAt,
-            read: !isOrgInvolved ? true : status !== 'PENDING',
-            priority
-          }
-        })
+        
+        const mapped: Notification[] = items.map((item: any) => ({
+          id: item._id,
+          title: item.title,
+          message: item.message,
+          type: item.type,
+          timestamp: item.createdAt,
+          read: item.read,
+          priority: item.priority
+        }))
 
         setNotifications(mapped)
       } catch (error) {
@@ -125,24 +97,45 @@ export default function Notifications() {
     fetchNotifications()
   }, [])
 
-  const markAsRead = (id: string) => {
-    setNotifications(prev => 
-      prev.map(notification => 
-        notification.id === id 
-          ? { ...notification, read: true }
-          : notification
+  const markAsRead = async (id: string) => {
+    try {
+      await api.patch(`/notifications/${id}/read`)
+      setNotifications(prev => 
+        prev.map(notification => 
+          notification.id === id 
+            ? { ...notification, read: true }
+            : notification
+        )
       )
-    )
+      message.success('Notification marked as read')
+    } catch (error) {
+      console.error('Failed to mark notification as read', error)
+      message.error('Failed to mark notification as read')
+    }
   }
 
-  const markAllAsRead = () => {
-    setNotifications(prev => 
-      prev.map(notification => ({ ...notification, read: true }))
-    )
+  const markAllAsRead = async () => {
+    try {
+      await api.patch('/notifications/mark-all-read')
+      setNotifications(prev => 
+        prev.map(notification => ({ ...notification, read: true }))
+      )
+      message.success('All notifications marked as read')
+    } catch (error) {
+      console.error('Failed to mark all notifications as read', error)
+      message.error('Failed to mark all notifications as read')
+    }
   }
 
-  const deleteNotification = (id: string) => {
-    setNotifications(prev => prev.filter(notification => notification.id !== id))
+  const deleteNotification = async (id: string) => {
+    try {
+      await api.delete(`/notifications/${id}`)
+      setNotifications(prev => prev.filter(notification => notification.id !== id))
+      message.success('Notification deleted')
+    } catch (error) {
+      console.error('Failed to delete notification', error)
+      message.error('Failed to delete notification')
+    }
   }
 
   const unreadCount = notifications.filter(n => !n.read).length
@@ -168,7 +161,38 @@ export default function Notifications() {
         )}
       </div>
 
-      {notifications.length === 0 ? (
+      {loading && notifications.length === 0 ? (
+        <Card bodyStyle={{ padding: isMobile ? 12 : 16 }}>
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div
+              key={i}
+              style={{
+                display: 'flex',
+                gap: 12,
+                padding: isMobile ? 8 : 12,
+                marginBottom: 8,
+                borderRadius: 8,
+                backgroundColor: '#fff',
+                border: '1px solid #f0f0f0'
+              }}
+            >
+              <div className="shimmer-wrapper shimmer-circle" style={{ flexShrink: 0 }} />
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div className="shimmer-wrapper" style={{ height: 18, width: '60%' }} />
+                  <div className="shimmer-wrapper" style={{ height: 20, width: 60, borderRadius: 4 }} />
+                </div>
+                <div className="shimmer-wrapper" style={{ height: 16, width: '90%' }} />
+                <div className="shimmer-wrapper" style={{ height: 14, width: '40%' }} />
+              </div>
+              <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+                <div className="shimmer-wrapper" style={{ height: 24, width: 24, borderRadius: 4 }} />
+                <div className="shimmer-wrapper" style={{ height: 24, width: 24, borderRadius: 4 }} />
+              </div>
+            </div>
+          ))}
+        </Card>
+      ) : notifications.length === 0 ? (
         <Card>
           <Empty
             image={Empty.PRESENTED_IMAGE_SIMPLE}
@@ -179,7 +203,7 @@ export default function Notifications() {
         <Card bodyStyle={{ padding: isMobile ? 12 : 16 }}>
           <List
             dataSource={notifications}
-            loading={loading}
+            loading={loading && notifications.length > 0}
             renderItem={(notification) => (
               <List.Item
                 style={{
@@ -215,14 +239,14 @@ export default function Notifications() {
                   title={
                     <Space>
                       <Text strong={!notification.read}>{notification.title}</Text>
-                      <Tag color={getPriorityColor(notification.priority)} size="small">
+                      <Tag color={getPriorityColor(notification.priority)}>
                         {notification.priority.toUpperCase()}
                       </Tag>
                     </Space>
                   }
                   description={
                     <div>
-                      <Text type={notification.read ? 'secondary' : 'default'}>
+                      <Text type={notification.read ? 'secondary' : undefined}>
                         {notification.message}
                       </Text>
                       <div style={{ marginTop: 4 }}>

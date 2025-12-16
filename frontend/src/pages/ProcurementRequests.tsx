@@ -22,7 +22,8 @@ import {
   EyeOutlined,
   ShoppingCartOutlined,
   MoreOutlined,
-  DownloadOutlined
+  DownloadOutlined,
+  FilterOutlined
 } from '@ant-design/icons'
 import { api } from '../lib/api'
 import { getCurrentUser, isOrgAdmin } from '../lib/auth'
@@ -43,7 +44,7 @@ interface ProcurementRequest {
   }
   fromOrganizationId: { _id: string; name: string; category: string }
   toOrganizationId: { _id: string; name: string; category: string }
-  requestedQuantity: number
+  quantityRequested: number
   purpose: string
   status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED'
   requestedBy: { _id: string; name: string }
@@ -61,18 +62,20 @@ export default function ProcurementRequests() {
   const [requests, setRequests] = useState<ProcurementRequest[]>([])
   const [loading, setLoading] = useState(false)
   const [exportLoading, setExportLoading] = useState(false)
-  const [pagination, setPagination] = useState({ current: 1, pageSize: 20, total: 0 })
+  const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 })
   const [filters, setFilters] = useState({
     search: '',
     status: '',
     direction: 'all'
   })
+  const [searchInput, setSearchInput] = useState('')
 
   const [actionModalVisible, setActionModalVisible] = useState(false)
   const [selectedRequest, setSelectedRequest] = useState<ProcurementRequest | null>(null)
   const [actionType, setActionType] = useState<'approve' | 'reject' | 'cancel'>('approve')
   const [actionForm] = Form.useForm()
   const [submitting, setSubmitting] = useState(false)
+  const [showFilters, setShowFilters] = useState(false)
 
   const fetchRequests = async () => {
     setLoading(true)
@@ -100,6 +103,16 @@ export default function ProcurementRequests() {
   useEffect(() => {
     fetchRequests()
   }, [pagination.current, pagination.pageSize, filters])
+
+  // Debounce search input
+  useEffect(() => {
+    const debounceTimer = setTimeout(() => {
+      setFilters(prev => ({ ...prev, search: searchInput }))
+      setPagination(prev => ({ ...prev, current: 1 }))
+    }, 500)
+
+    return () => clearTimeout(debounceTimer)
+  }, [searchInput])
 
   const handleTableChange = (pagination: any) => {
     setPagination(pagination)
@@ -220,6 +233,7 @@ export default function ProcurementRequests() {
       status: '',
       direction: 'all'
     })
+    setSearchInput('')
     setPagination(prev => ({ ...prev, current: 1 }))
   }
 
@@ -276,7 +290,7 @@ export default function ProcurementRequests() {
     },
     {
       title: 'Quantity',
-      dataIndex: 'requestedQuantity',
+      dataIndex: 'quantityRequested',
       key: 'quantity',
       width: 100,
       render: (qty: number, record: ProcurementRequest) => (
@@ -387,9 +401,13 @@ export default function ProcurementRequests() {
           </Paragraph>
         </div>
         <Space wrap>
-          <Button onClick={clearAllFilters}>
-            <span className="hide-on-mobile">Clear Filters</span>
-            <span className="show-on-mobile">Clear</span>
+          <Button 
+            icon={<ReloadOutlined />}
+            onClick={fetchRequests}
+            loading={loading}
+          >
+            <span className="hide-on-mobile">Refresh</span>
+            <span className="show-on-mobile">Refresh</span>
           </Button>
           <Button 
             icon={<DownloadOutlined />}
@@ -416,12 +434,13 @@ export default function ProcurementRequests() {
             <Input
               placeholder="Search requests..."
               prefix={<SearchOutlined />}
-              value={filters.search}
-              onChange={(e) => handleFilterChange('search', e.target.value)}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
               allowClear
+              onClear={() => setSearchInput('')}
             />
           </Col>
-          <Col xs={24} sm={12} md={5}>
+          <Col xs={24} sm={12} md={5} className="hide-on-mobile">
             <Select
               placeholder="Status"
               style={{ width: '100%' }}
@@ -435,7 +454,7 @@ export default function ProcurementRequests() {
               <Select.Option value="CANCELLED">Cancelled</Select.Option>
             </Select>
           </Col>
-          <Col xs={24} sm={12} md={6}>
+          <Col xs={24} sm={12} md={6} className="hide-on-mobile">
             <Select
               placeholder="Direction"
               style={{ width: '100%' }}
@@ -447,17 +466,64 @@ export default function ProcurementRequests() {
               <Select.Option value="outgoing">Outgoing (My Requests)</Select.Option>
             </Select>
           </Col>
-          <Col xs={24} sm={12} md={4}>
+          <Col xs={24} sm={12} md={6} className="hide-on-mobile">
             <Button 
-              icon={<ReloadOutlined />} 
-              onClick={fetchRequests}
-              loading={loading}
+              onClick={clearAllFilters}
               block
             >
-              Refresh
+              Clear Filters
+            </Button>
+          </Col>
+          <Col xs={12} className="show-on-mobile">
+            <Button 
+              icon={<FilterOutlined />} 
+              onClick={() => setShowFilters(!showFilters)}
+              block
+              style={{ height: 32 }}
+            >
+              {showFilters ? 'Hide Filters' : 'Show Filters'}
+            </Button>
+          </Col>
+          <Col xs={12} className="show-on-mobile">
+            <Button 
+              onClick={clearAllFilters}
+              block
+              style={{ height: 32 }}
+            >
+              Clear Filters
             </Button>
           </Col>
         </Row>
+        <div className="show-on-mobile" style={{ display: showFilters ? 'block' : 'none', marginBottom: 16 }}>
+          <Row gutter={[16, 16]}>
+            <Col xs={24}>
+              <Select
+                placeholder="Status"
+                style={{ width: '100%' }}
+                value={filters.status}
+                onChange={(value) => handleFilterChange('status', value)}
+              >
+                <Select.Option value="">All Statuses</Select.Option>
+                <Select.Option value="PENDING">Pending</Select.Option>
+                <Select.Option value="APPROVED">Approved</Select.Option>
+                <Select.Option value="REJECTED">Rejected</Select.Option>
+                <Select.Option value="CANCELLED">Cancelled</Select.Option>
+              </Select>
+            </Col>
+            <Col xs={24}>
+              <Select
+                placeholder="Direction"
+                style={{ width: '100%' }}
+                value={filters.direction}
+                onChange={(value) => handleFilterChange('direction', value)}
+              >
+                <Select.Option value="all">All Requests</Select.Option>
+                <Select.Option value="incoming">Incoming (To Approve)</Select.Option>
+                <Select.Option value="outgoing">Outgoing (My Requests)</Select.Option>
+              </Select>
+            </Col>
+          </Row>
+        </div>
 
         {loading && requests.length === 0 ? (
           <div>
@@ -485,7 +551,7 @@ export default function ProcurementRequests() {
             pagination={{
               ...pagination,
               showSizeChanger: true,
-              showQuickJumper: true,
+              showQuickJumper: false,
               showTotal: (total, range) => 
                 `${range[0]}-${range[1]} of ${total} requests`,
               size: 'small'
@@ -524,7 +590,7 @@ export default function ProcurementRequests() {
               <Text>{selectedRequest.toOrganizationId.name}</Text>
               <br />
               <Text strong>Quantity: </Text>
-              <Text>{selectedRequest.requestedQuantity} {selectedRequest.materialId.unit}</Text>
+              <Text>{selectedRequest.quantityRequested} {selectedRequest.materialId.unit}</Text>
               <br />
               <Text strong>Purpose: </Text>
               <Text>{selectedRequest.purpose}</Text>

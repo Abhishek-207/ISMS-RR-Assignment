@@ -13,12 +13,14 @@ import transferRoutes from './routes/transfers.route.js';
 import filesRoutes from './routes/files.route.js';
 import usersRoutes from './routes/users.route.js';
 import analyticsRoutes from './routes/analytics.route.js';
+import notificationsRoutes from './routes/notifications.route.js';
 
 const app = express();
 
 // Default allowed origins (local + deployed frontend)
 const defaultAllowedOrigins = [
   'http://localhost:5173',
+  'http://192.168.29.152:5173',
   'https://isms-app.netlify.app'
 ];
 
@@ -56,6 +58,7 @@ app.use('/api/transfers', transferRoutes);
 app.use('/api/files', filesRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/notifications', notificationsRoutes);
 
 app.get('/health', (req, res) => {
   res.json({ 

@@ -8,6 +8,7 @@ const router = Router();
 router.use(requireAuthAndActive);
 
 router.get('/material-categories', MastersController.getMaterialCategories);
+router.get('/material-categories-surplus', MastersController.getCategoriesForSurplus);
 
 router.post('/material-categories', requireOrgAdmin, [
   body('name').isLength({ min: 1 }).trim()

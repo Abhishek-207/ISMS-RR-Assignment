@@ -9,8 +9,8 @@ import { TransferRequest } from './models/TransferRequest.model.js';
 dotenv.config();
 
 // Updated to seed data for the requested organization & user
-const ORGANIZATION_ID = '694059d538fa32f0bb2601bc';
-const USER_ID = '694059d538fa32f0bb2601be';
+const ORGANIZATION_ID = '6940fc679f9611543ec9a9c9';
+const USER_ID = '6940fc689f9611543ec9a9cb';
 const ORGANIZATION_CATEGORY = 'ENTERPRISE';
 
 async function seedDatabase() {
@@ -39,10 +39,10 @@ async function seedDatabase() {
       console.log('Organization not found, creating...');
       await Organization.create({
         _id: new mongoose.Types.ObjectId(ORGANIZATION_ID),
-        name: 'Enterprise Cut Area India Pvt. Ltd.',
+        name: 'Rural Handicrafts & Materials Cooperative Ltd.',
         category: ORGANIZATION_CATEGORY,
         description:
-          'Integrated garment and textile cutting enterprise managing surplus fabrics, trims, and production offcuts across Indian manufacturing hubs',
+          'Premier cooperative managing traditional Indian handicraft materials, handloom fabrics, natural dyes, and artisan supplies across rural India',
         isActive: true,
       });
     }
@@ -55,27 +55,27 @@ async function seedDatabase() {
         _id: new mongoose.Types.ObjectId(USER_ID),
         organizationId: ORGANIZATION_ID,
         organizationCategory: ORGANIZATION_CATEGORY,
-        name: 'Anita Sharma',
-        email: 'anita.sharma@enterprisecutarea.in',
+        name: 'Priya Mehta',
+        email: 'priya.mehta@ruralhandicrafts.in',
         passwordHash,
         role: 'ORG_ADMIN',
         isActive: true,
       });
     }
 
-    // Create Material Categories (10 categories) - focused on garment / textile cutting operations in India
+    // Create Material Categories (10 categories) - focused on Indian handicrafts and traditional materials
     console.log('Creating Material Categories...');
     const categories = [
-      { name: 'Knitted Fabric Rolls', description: 'Single jersey, interlock and rib fabrics used for T-shirts and knitwear' },
-      { name: 'Woven Fabric Rolls', description: 'Shirting, suiting and denim fabrics for bulk cutting' },
-      { name: 'Cut Panels & Offcuts', description: 'Pre-cut garment panels and surplus cutting waste' },
-      { name: 'Trims & Accessories', description: 'Labels, elastic, zippers, drawcords and other garment trims' },
-      { name: 'Lining & Fusing', description: 'Interlinings, fusing and pocketing materials' },
-      { name: 'Packing Material', description: 'Cartons, polybags, hangers and tagging material' },
-      { name: 'Safety & Compliance', description: 'PPE, safety gear and compliance-related consumables' },
-      { name: 'Industrial Sewing Inputs', description: 'Threads, needles and machine-specific consumables' },
-      { name: 'Sampling & Development', description: 'Small lot fabrics and trims kept for sampling & R&D' },
-      { name: 'Recyclable Textile Waste', description: 'Sorted textile waste suitable for recycling and upcycling' },
+      { name: 'Handloom Cotton Fabrics', description: 'Traditional handwoven cotton fabrics from various Indian states like Khadi, Kalamkari, and Ikat' },
+      { name: 'Silk & Silk Blends', description: 'Pure silk, tussar silk, and silk-cotton blends from Karnataka, West Bengal, and Bihar' },
+      { name: 'Natural Dyes & Pigments', description: 'Traditional Indian natural dyes like indigo, turmeric, madder root, and pomegranate peel' },
+      { name: 'Hand Embroidery Threads', description: 'Zari threads, silk threads, and cotton threads for traditional embroidery work' },
+      { name: 'Bamboo & Cane Materials', description: 'Bamboo strips, cane reeds, and natural fibers for basket weaving and handicrafts' },
+      { name: 'Clay & Pottery Supplies', description: 'Terracotta clay, glazing materials, and pottery tools for traditional ceramic work' },
+      { name: 'Wood Carving Materials', description: 'Sandalwood, teak, rosewood, and carving tools for traditional Indian woodwork' },
+      { name: 'Metal Craft Supplies', description: 'Brass, copper, silver sheets, and traditional metalworking tools for Indian metal crafts' },
+      { name: 'Jute & Coir Products', description: 'Jute fibers, coir yarn, and natural jute products for eco-friendly handicrafts' },
+      { name: 'Traditional Beads & Stones', description: 'Rudraksha beads, semi-precious stones, glass beads, and traditional jewelry materials' },
     ];
 
     const createdCategories = [];
@@ -92,16 +92,16 @@ async function seedDatabase() {
     // Create Material Statuses (10 statuses)
     console.log('\nCreating Material Statuses...');
     const statuses = [
-      'In Stock',
-      'Low Stock',
-      'Awaiting Quality Check',
-      'Ready for Dispatch',
-      'Under Processing',
-      'Reserved for Order',
-      'Needs Repair',
-      'Damaged - Salvageable',
-      'Surplus - Available',
-      'Discontinued'
+      'Available in Stock',
+      'Low Inventory',
+      'Quality Inspection Pending',
+      'Ready for Distribution',
+      'Currently in Use',
+      'Reserved for Artisan',
+      'Requires Restoration',
+      'Partially Damaged',
+      'Surplus Stock Available',
+      'Seasonal Item'
     ];
 
     const createdStatuses = [];
@@ -115,118 +115,118 @@ async function seedDatabase() {
       console.log(`  ✓ Created status: ${status}`);
     }
 
-    // Create Materials (10 materials with Indian enterprise cut area context)
+    // Create Materials (10 materials with Indian handicraft and traditional material context)
     console.log('\nCreating Materials...');
     const materials = [
       {
-        name: 'Single Jersey Cotton Rolls - Tiruppur',
+        name: 'Kalamkari Handloom Cotton - Andhra Pradesh',
         categoryId: createdCategories[0]._id,
-        quantity: 1200,
+        quantity: 850,
         unit: 'meters',
         condition: 'NEW',
         isSurplus: true,
-        estimatedCost: 290,
+        estimatedCost: 450,
         notes:
-          'Combed cotton single jersey, 180 GSM, reactive dyed. Surplus from export order to EU buyer, stored in Tiruppur unit.',
+          'Traditional hand-painted Kalamkari cotton fabric from Machilipatnam, Andhra Pradesh. Natural dyes used, perfect for traditional garments and home decor.',
       },
       {
-        name: 'Denim Fabric Rolls - Ahmedabad Mill',
+        name: 'Tussar Silk Rolls - Jharkhand',
         categoryId: createdCategories[1]._id,
-        quantity: 850,
+        quantity: 320,
         unit: 'meters',
+        condition: 'GOOD',
+        isSurplus: true,
+        estimatedCost: 1200,
+        notes:
+          'Pure tussar silk from Jharkhand tribal weavers. Natural golden color, handwoven, suitable for sarees and traditional wear. Limited surplus stock.',
+      },
+      {
+        name: 'Natural Indigo Dye Powder - Tamil Nadu',
+        categoryId: createdCategories[2]._id,
+        quantity: 150,
+        unit: 'kg',
+        condition: 'NEW',
+        isSurplus: true,
+        estimatedCost: 850,
+        notes:
+          'Organic indigo dye powder sourced from traditional dyers in Tamil Nadu. Pure natural indigo, no synthetic additives. Ideal for traditional textile dyeing.',
+      },
+      {
+        name: 'Zari Embroidery Threads - Surat',
+        categoryId: createdCategories[3]._id,
+        quantity: 280,
+        unit: 'spools',
+        condition: 'GOOD',
+        isSurplus: false,
+        estimatedCost: 320,
+        notes:
+          'Traditional zari threads from Surat, Gujarat. Gold and silver zari threads for intricate embroidery work on sarees and traditional garments.',
+      },
+      {
+        name: 'Bamboo Strips for Weaving - Assam',
+        categoryId: createdCategories[4]._id,
+        quantity: 1200,
+        unit: 'strips',
+        condition: 'NEW',
+        isSurplus: true,
+        estimatedCost: 180,
+        notes:
+          'Premium bamboo strips from Assam, treated and ready for basket weaving and traditional handicraft work. Sustainable and eco-friendly material.',
+      },
+      {
+        name: 'Terracotta Clay - Khurja',
+        categoryId: createdCategories[5]._id,
+        quantity: 800,
+        unit: 'kg',
+        condition: 'GOOD',
+        isSurplus: false,
+        estimatedCost: 95,
+        notes:
+          'Fine terracotta clay from Khurja, Uttar Pradesh. Traditional pottery clay suitable for hand-molded and wheel-thrown ceramics. Well-aged and ready to use.',
+      },
+      {
+        name: 'Sandalwood Blocks - Karnataka',
+        categoryId: createdCategories[6]._id,
+        quantity: 45,
+        unit: 'blocks',
+        condition: 'NEW',
+        isSurplus: true,
+        estimatedCost: 2500,
+        notes:
+          'Premium sandalwood blocks from Mysore, Karnataka. A-grade quality for traditional wood carving and handicraft work. Natural fragrance preserved.',
+      },
+      {
+        name: 'Brass Sheets for Metalwork - Moradabad',
+        categoryId: createdCategories[7]._id,
+        quantity: 220,
+        unit: 'sheets',
+        condition: 'GOOD',
+        isSurplus: false,
+        estimatedCost: 680,
+        notes:
+          'Traditional brass sheets from Moradabad, Uttar Pradesh. Suitable for handcrafted brass items, utensils, and decorative pieces. Various thicknesses available.',
+      },
+      {
+        name: 'Jute Yarn & Fibers - West Bengal',
+        categoryId: createdCategories[8]._id,
+        quantity: 650,
+        unit: 'kg',
+        condition: 'NEW',
+        isSurplus: true,
+        estimatedCost: 140,
+        notes:
+          'Natural jute yarn and fibers from West Bengal. Eco-friendly material for bags, mats, and traditional handicrafts. Biodegradable and sustainable.',
+      },
+      {
+        name: 'Rudraksha Beads & Semi-Precious Stones - Varanasi',
+        categoryId: createdCategories[9]._id,
+        quantity: 1800,
+        unit: 'pieces',
         condition: 'GOOD',
         isSurplus: true,
         estimatedCost: 420,
         notes:
-          '12 oz stretch denim, indigo dyed, mill surplus from Ahmedabad cluster. Slight shade variation between lots.',
-      },
-      {
-        name: 'Men’s Shirt Panels - Bengaluru Cutting',
-        categoryId: createdCategories[2]._id,
-        quantity: 650,
-        unit: 'sets',
-        condition: 'NEW',
-        isSurplus: true,
-        estimatedCost: 155,
-        notes:
-          'Full cut panels (front, back, sleeves, collar, cuff) for mens formal shirts. Balance quantity after style change.',
-      },
-      {
-        name: 'Elastic & Drawcord Assortment',
-        categoryId: createdCategories[3]._id,
-        quantity: 500,
-        unit: 'kg',
-        condition: 'GOOD',
-        isSurplus: false,
-        estimatedCost: 380,
-        notes:
-          'Assorted knitted elastic, flat elastic and cotton drawcords used in joggers and sportswear. Mixed colours and widths.',
-      },
-      {
-        name: 'Fusible Interlining Rolls',
-        categoryId: createdCategories[4]._id,
-        quantity: 400,
-        unit: 'meters',
-        condition: 'NEW',
-        isSurplus: true,
-        estimatedCost: 95,
-        notes:
-          'Non-woven fusible interlining suitable for shirt collars and plackets. Surplus due to buyer spec change.',
-      },
-      {
-        name: 'Corrugated Cartons - Export Grade',
-        categoryId: createdCategories[5]._id,
-        quantity: 900,
-        unit: 'pieces',
-        condition: 'GOOD',
-        isSurplus: false,
-        estimatedCost: 55,
-        notes:
-          '5-ply export quality cartons with generic print. Over-ordered for cancelled US buyer shipment.',
-      },
-      {
-        name: 'Polyester Sewing Thread Cones',
-        categoryId: createdCategories[6]._id,
-        quantity: 1100,
-        unit: 'cones',
-        condition: 'NEW',
-        isSurplus: true,
-        estimatedCost: 32,
-        notes:
-          '40/2 polyester sewing thread cones in core export colours. Balance stock kept for repeat orders, now surplus.',
-      },
-      {
-        name: 'Hi-Vis Safety Vests & Helmets',
-        categoryId: createdCategories[7]._id,
-        quantity: 250,
-        unit: 'sets',
-        condition: 'GOOD',
-        isSurplus: false,
-        estimatedCost: 620,
-        notes:
-          'Safety vests, helmets and basic PPE used in cutting and finishing sections. Extra stock after compliance audit.',
-      },
-      {
-        name: 'Sample Lengths - Printed Rayon',
-        categoryId: createdCategories[8]._id,
-        quantity: 320,
-        unit: 'meters',
-        condition: 'NEW',
-        isSurplus: true,
-        estimatedCost: 210,
-        notes:
-          'Assorted printed rayon sample lots from Jaipur printers, used for style development and fit samples.',
-      },
-      {
-        name: 'Sorted Knits for Recycling',
-        categoryId: createdCategories[9]._id,
-        quantity: 1500,
-        unit: 'kg',
-        condition: 'GOOD',
-        isSurplus: true,
-        estimatedCost: 65,
-        notes:
-          'Colour and fibre-wise sorted knit waste from Tiruppur and Bengaluru units, suitable for open-end recycling.',
+          'Authentic Rudraksha beads and semi-precious stones from Varanasi. Traditional materials for jewelry making, mala beads, and spiritual handicrafts.',
       },
     ];
 
@@ -260,19 +260,19 @@ async function seedDatabase() {
       console.log(`  ✓ Created material: ${mat.name} (${mat.quantity} ${mat.unit})`);
     }
 
-    // Create other organizations for transfer requests (Indian garment / textile ecosystem)
+    // Create other organizations for transfer requests (Indian handicraft and traditional craft ecosystem)
     console.log('\nCreating additional organizations for transfers...');
     const otherOrgs = [
-      { name: 'Tiruppur Knitwear Cluster Association', category: 'MANUFACTURING_CLUSTER' },
-      { name: 'Bengaluru Apparel Park Trust', category: 'MANUFACTURING_CLUSTER' },
-      { name: 'Noida Export Garment Hub', category: 'MANUFACTURING_CLUSTER' },
-      { name: 'NIFT Bengaluru Campus', category: 'EDUCATIONAL_INSTITUTION' },
-      { name: 'Textile Committee of India', category: 'INFRASTRUCTURE_CONSTRUCTION' },
-      { name: 'Surat Powerloom Development Society', category: 'MANUFACTURING_CLUSTER' },
-      { name: 'Mumbai Port Logistics & Warehousing', category: 'ENTERPRISE' },
-      { name: 'Gurugram Buying Office Consortium', category: 'MANUFACTURING_CLUSTER' },
-      { name: 'Ahmedabad Textile Research Center', category: 'EDUCATIONAL_INSTITUTION' },
-      { name: 'Pan-India Textile Recycling Mission', category: 'INFRASTRUCTURE_CONSTRUCTION' },
+      { name: 'Kalamkari Artisan Cooperative - Machilipatnam', category: 'MANUFACTURING_CLUSTER' },
+      { name: 'Jharkhand Tribal Handloom Society', category: 'MANUFACTURING_CLUSTER' },
+      { name: 'Tamil Nadu Natural Dyeing Center', category: 'MANUFACTURING_CLUSTER' },
+      { name: 'National Institute of Fashion Technology - Delhi', category: 'EDUCATIONAL_INSTITUTION' },
+      { name: 'Crafts Council of India', category: 'INFRASTRUCTURE_CONSTRUCTION' },
+      { name: 'Assam Bamboo Craft Development Society', category: 'MANUFACTURING_CLUSTER' },
+      { name: 'Khurja Pottery Artisan Guild', category: 'MANUFACTURING_CLUSTER' },
+      { name: 'Mysore Sandalwood Carving Association', category: 'MANUFACTURING_CLUSTER' },
+      { name: 'Moradabad Brass Craft Training Institute', category: 'EDUCATIONAL_INSTITUTION' },
+      { name: 'West Bengal Jute Products Cooperative', category: 'MANUFACTURING_CLUSTER' },
     ];
 
     const createdOrgs = [];
@@ -295,16 +295,16 @@ async function seedDatabase() {
     // Create Transfer Requests (10 requests)
     console.log('\nCreating Transfer Requests...');
     const transferPurposes = [
-      'Balancing knit fabric requirement for urgent export order in Tiruppur cluster',
-      'Reallocation of denim rolls to Bengaluru unit for fast fashion program',
-      'Supply of ready cut shirt panels for subcontracting unit in Noida',
-      'Trims transfer to NIFT Bengaluru for industrial training program',
-      'Interlining requirement for buyer compliance sampling at Textile Committee',
-      'Carton and packing material support for Surat cluster shipment surge',
-      'Thread and consumables dispatch to Mumbai port consolidation warehouse',
-      'Safety gear deployment to Gurugram buying office audit sites',
-      'Sample fabric movement to Ahmedabad research center for testing',
-      'Recyclable textile waste transfer to national recycling mission pilot',
+      'Kalamkari fabric supply for traditional garment production at Machilipatnam cooperative',
+      'Tussar silk allocation to Jharkhand tribal weavers for traditional saree making',
+      'Natural indigo dye distribution to Tamil Nadu dyers for traditional textile dyeing workshop',
+      'Zari thread supply to NIFT Delhi for traditional embroidery design course',
+      'Bamboo strips transfer to Assam craft society for traditional basket weaving training',
+      'Terracotta clay supply to Khurja pottery guild for traditional ceramic workshop',
+      'Sandalwood blocks allocation to Mysore carving association for traditional woodwork training',
+      'Brass sheets transfer to Moradabad training institute for traditional metal craft education',
+      'Jute fibers supply to West Bengal cooperative for eco-friendly handicraft production',
+      'Rudraksha beads and stones transfer to Varanasi artisans for traditional jewelry making',
     ];
 
     const statuses_transfer = ['PENDING', 'APPROVED', 'COMPLETED', 'PENDING', 'APPROVED', 'REJECTED', 'COMPLETED', 'PENDING', 'APPROVED', 'COMPLETED'];
@@ -338,7 +338,7 @@ async function seedDatabase() {
         transferData.approvedBy = USER_ID;
         transferData.approvedAt = new Date(now.getTime() - (9 - i) * 24 * 60 * 60 * 1000);
         comments.push({
-          comment: 'Request approved. Material quality verified and ready for dispatch.',
+          comment: 'Request approved. Traditional material quality verified and ready for dispatch to artisan community.',
           createdAt: transferData.approvedAt,
           createdBy: new mongoose.Types.ObjectId(USER_ID),
           type: 'APPROVAL'
@@ -348,7 +348,7 @@ async function seedDatabase() {
       if (status === 'COMPLETED') {
         transferData.completedAt = new Date(now.getTime() - (8 - i) * 24 * 60 * 60 * 1000);
         comments.push({
-          comment: 'Transfer completed successfully. Material received in good condition.',
+          comment: 'Transfer completed successfully. Traditional handicraft material received in excellent condition by artisan group.',
           createdAt: transferData.completedAt,
           createdBy: new mongoose.Types.ObjectId(USER_ID),
           type: 'COMPLETION'
@@ -357,7 +357,7 @@ async function seedDatabase() {
 
       if (status === 'REJECTED') {
         comments.push({
-          comment: 'Request rejected due to insufficient quantity available at this time.',
+          comment: 'Request rejected due to limited traditional material stock availability. Will prioritize in next procurement cycle.',
           createdAt: new Date(now.getTime() - (9 - i) * 24 * 60 * 60 * 1000),
           createdBy: new mongoose.Types.ObjectId(USER_ID),
           type: 'REJECTION'
@@ -372,15 +372,15 @@ async function seedDatabase() {
 
     console.log('\n✅ Database seeded successfully!');
     console.log('\n📊 Summary:');
-    console.log(`   • Organization: Enterprise Cut Area India Pvt. Ltd. (ENTERPRISE)`);
-    console.log(`   • User: Anita Sharma (ORG_ADMIN)`);
+    console.log(`   • Organization: Rural Handicrafts & Materials Cooperative Ltd. (ENTERPRISE)`);
+    console.log(`   • User: Priya Mehta (ORG_ADMIN)`);
     console.log(`   • Material Categories: 10`);
     console.log(`   • Material Statuses: 10`);
-    console.log(`   • Materials: 10 (with Indian handicraft context)`);
+    console.log(`   • Materials: 10 (with Indian handicraft and traditional material context)`);
     console.log(`   • Partner Organizations: 10`);
     console.log(`   • Transfer Requests: 10`);
     console.log(`\n🔑 Login Credentials:`);
-    console.log(`   Email: rajesh.kumar@ruralhandicrafts.in`);
+    console.log(`   Email: priya.mehta@ruralhandicrafts.in`);
     console.log(`   Password: Password123!`);
 
   } catch (error) {

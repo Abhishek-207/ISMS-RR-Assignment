@@ -63,9 +63,9 @@ export default function Analytics() {
 
   // Chart type states
   const [statusChartType, setStatusChartType] = useState<'bar' | 'line' | 'area' | 'pie'>('bar')
-  const [conditionChartType, setConditionChartType] = useState<'pie' | 'bar' | 'line'>('pie')
-  const [procurementChartType, setProcurementChartType] = useState<'bar' | 'line' | 'area'>('bar')
-  const [categoryChartType, setCategoryChartType] = useState<'bar' | 'line' | 'pie'>('bar')
+  const [conditionChartType, setConditionChartType] = useState<'pie' | 'bar' | 'line' | 'area'>('area')
+  const [procurementChartType, setProcurementChartType] = useState<'bar' | 'line' | 'area' | 'pie'>('pie')
+  const [categoryChartType, setCategoryChartType] = useState<'bar' | 'line' | 'area' | 'pie'>('line')
   const [materialStatusChartType, setMaterialStatusChartType] = useState<'bar' | 'line' | 'area' | 'pie'>('bar')
 
   const [availabilityData, setAvailabilityData] = useState<any[]>([])
@@ -286,7 +286,10 @@ export default function Analytics() {
             </Title>
             {orgCategory && (
               <Text type="secondary" style={{ fontSize: 13 }}>
-                Category: {orgCategory.replace(/_/g, ' ')}
+                Category:{' '}
+                <span style={{ color: '#0891b2', fontWeight: 600 }}>
+                  {orgCategory.replace(/_/g, ' ')}
+                </span>
               </Text>
             )}
           </div>
@@ -539,8 +542,8 @@ export default function Analytics() {
                 style={{ 
                   borderRadius: 8,
                   boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
-                  border: '1px solid #52c41a',
-                  background: '#f6ffed'
+                  border: '1px solid #0891b2',
+                  background: '#e0f7fa'
                 }}
                 bodyStyle={{ padding: '16px' }}
               >
@@ -667,26 +670,26 @@ export default function Analytics() {
                 style={{ 
                   borderRadius: 8,
                   boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
-                  border: '1px solid #52c41a',
-                  background: '#f6ffed'
+                  border: '1px solid #0891b2',
+                  background: '#e0f7fa'
                 }}
                 bodyStyle={{ padding: '16px' }}
               >
                 <Statistic
                   title={
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                      <DollarOutlined style={{ color: '#52c41a', fontSize: 16 }} />
-                      <span style={{ color: '#52c41a', fontSize: 13, fontWeight: 500 }}>Cost Avoided by Reuse</span>
+                      <DollarOutlined style={{ color: '#0891b2', fontSize: 16 }} />
+                      <span style={{ color: '#0891b2', fontSize: 13, fontWeight: 500 }}>Cost Avoided by Reuse</span>
                     </div>
                   }
                   value={stats.costAvoided}
                   valueStyle={{ 
-                    color: '#52c41a', 
+                    color: '#0891b2', 
                     fontSize: '28px',
                     fontWeight: 700
                   }}
                   prefix="₹"
-                  suffix={<span style={{ fontSize: 12, color: '#52c41a' }}>saved</span>}
+                  suffix={<span style={{ fontSize: 12, color: '#0891b2' }}>saved</span>}
                 />
               </Card>
             </Col>
@@ -698,34 +701,130 @@ export default function Analytics() {
         <Row gutter={[24, 24]}>
           <Col xs={24} lg={12}>
             <Card title="Inventory by Status">
-              <div style={{ padding: '20px 0' }}>
-                {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <div key={i} className="shimmer-wrapper" style={{ marginBottom: 10, height: 40, borderRadius: 6 }} />
+              <div
+                style={{
+                  padding: '20px 0',
+                  display: 'flex',
+                  alignItems: 'flex-end',
+                  justifyContent: 'space-between',
+                  gap: 8,
+                  height: 300
+                }}
+              >
+                {[60, 100, 140, 180, 120, 90].map((height, index) => (
+                  <div
+                    key={index}
+                    className="shimmer-wrapper"
+                    style={{
+                      flex: 1,
+                      height,
+                      borderRadius: 6
+                    }}
+                  />
                 ))}
               </div>
             </Card>
           </Col>
           <Col xs={24} lg={12}>
             <Card title="Inventory by Condition">
-              <div style={{ padding: '20px 0', display: 'flex', justifyContent: 'center', alignItems: 'center', height: 300 }}>
-                <div className="shimmer-wrapper" style={{ width: 180, height: 180, borderRadius: '50%' }} />
+              <div
+                style={{
+                  padding: '20px 0',
+                  display: 'flex',
+                  alignItems: 'flex-end',
+                  justifyContent: 'space-between',
+                  gap: 8,
+                  height: 300
+                }}
+              >
+                {[60, 100, 140, 180, 120, 90].map((height, index) => (
+                  <div
+                    key={index}
+                    className="shimmer-wrapper"
+                    style={{
+                      flex: 1,
+                      height,
+                      borderRadius: 6
+                    }}
+                  />
+                ))}
               </div>
             </Card>
           </Col>
           <Col xs={24} lg={12}>
             <Card title="Procurement Request Trends">
-              <div style={{ padding: '20px 0' }}>
-                {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <div key={i} className="shimmer-wrapper" style={{ marginBottom: 10, height: 40, borderRadius: 6 }} />
+              <div
+                style={{
+                  padding: '20px 0',
+                  display: 'flex',
+                  alignItems: 'flex-end',
+                  justifyContent: 'space-between',
+                  gap: 8,
+                  height: 300
+                }}
+              >
+                {[60, 100, 140, 180, 120, 90].map((height, index) => (
+                  <div
+                    key={index}
+                    className="shimmer-wrapper"
+                    style={{
+                      flex: 1,
+                      height,
+                      borderRadius: 6
+                    }}
+                  />
                 ))}
               </div>
             </Card>
           </Col>
           <Col xs={24} lg={12}>
             <Card title="Inventory by Category">
-              <div style={{ padding: '20px 0' }}>
-                {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <div key={i} className="shimmer-wrapper" style={{ marginBottom: 10, height: 40, borderRadius: 6 }} />
+              <div
+                style={{
+                  padding: '20px 0',
+                  display: 'flex',
+                  alignItems: 'flex-end',
+                  justifyContent: 'space-between',
+                  gap: 8,
+                  height: 300
+                }}
+              >
+                {[60, 100, 140, 180, 120, 90].map((height, index) => (
+                  <div
+                    key={index}
+                    className="shimmer-wrapper"
+                    style={{
+                      flex: 1,
+                      height,
+                      borderRadius: 6
+                    }}
+                  />
+                ))}
+              </div>
+            </Card>
+          </Col>
+          <Col xs={24}>
+            <Card title="Material Statuses Overview">
+              <div
+                style={{
+                  padding: '20px 0',
+                  display: 'flex',
+                  alignItems: 'flex-end',
+                  justifyContent: 'space-between',
+                  gap: 8,
+                  height: 300
+                }}
+              >
+                {[60, 100, 140, 180, 120, 90].map((height, index) => (
+                  <div
+                    key={index}
+                    className="shimmer-wrapper"
+                    style={{
+                      flex: 1,
+                      height,
+                      borderRadius: 6
+                    }}
+                  />
                 ))}
               </div>
             </Card>
@@ -744,9 +843,10 @@ export default function Analytics() {
                   size="small"
                 >
                   <Option value="bar">Bar Chart</Option>
+                  <Option value="pie">Pie Chart</Option>
                   <Option value="line">Line Chart</Option>
                   <Option value="area">Area Chart</Option>
-                  <Option value="pie">Pie Chart</Option>
+                
                 </Select>
               }
             >
@@ -818,6 +918,7 @@ export default function Analytics() {
                   <Option value="pie">Pie Chart</Option>
                   <Option value="bar">Bar Chart</Option>
                   <Option value="line">Line Chart</Option>
+                  <Option value="area">Area Chart</Option>
                 </Select>
               }
             >
@@ -850,7 +951,7 @@ export default function Analytics() {
                     <Legend />
                     <Bar dataKey="totalQuantity" fill="#1890ff" name="Total Quantity" />
                   </BarChart>
-                ) : (
+                ) : conditionChartType === 'line' ? (
                   <LineChart data={conditionData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="_id.condition" />
@@ -859,6 +960,15 @@ export default function Analytics() {
                     <Legend />
                     <Line type="monotone" dataKey="totalQuantity" stroke="#1890ff" name="Total Quantity" strokeWidth={2} />
                   </LineChart>
+                ) : (
+                  <AreaChart data={conditionData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="_id.condition" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Area type="monotone" dataKey="totalQuantity" fill="#1890ff" stroke="#1890ff" name="Total Quantity" />
+                  </AreaChart>
                 )}
               </ResponsiveContainer>
             </Card>
@@ -874,9 +984,11 @@ export default function Analytics() {
                   style={{ width: 120 }}
                   size="small"
                 >
+                  <Option value="pie">Pie Chart</Option>
                   <Option value="bar">Bar Chart</Option>
                   <Option value="line">Line Chart</Option>
                   <Option value="area">Area Chart</Option>
+                 
                 </Select>
               }
             >
@@ -903,7 +1015,7 @@ export default function Analytics() {
                     <Line type="monotone" dataKey="pending" stroke="#fa8c16" name="Pending" strokeWidth={2} />
                     <Line type="monotone" dataKey="rejected" stroke="#f5222d" name="Rejected" strokeWidth={2} />
                   </LineChart>
-                ) : (
+                ) : procurementChartType === 'area' ? (
                   <AreaChart data={procurementData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="_id.month" />
@@ -914,6 +1026,38 @@ export default function Analytics() {
                     <Area type="monotone" dataKey="pending" stackId="1" fill="#fa8c16" stroke="#fa8c16" name="Pending" />
                     <Area type="monotone" dataKey="rejected" stackId="1" fill="#f5222d" stroke="#f5222d" name="Rejected" />
                   </AreaChart>
+                ) : (
+                  <PieChart>
+                    <Pie
+                      data={[
+                        {
+                          name: 'Approved',
+                          value: procurementData.reduce((sum, d: any) => sum + (d.approved || 0), 0)
+                        },
+                        {
+                          name: 'Pending',
+                          value: procurementData.reduce((sum, d: any) => sum + (d.pending || 0), 0)
+                        },
+                        {
+                          name: 'Rejected',
+                          value: procurementData.reduce((sum, d: any) => sum + (d.rejected || 0), 0)
+                        }
+                      ]}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {['#52c41a', '#fa8c16', '#f5222d'].map((color, index) => (
+                        <Cell key={`procurement-pie-${index}`} fill={color} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                  </PieChart>
                 )}
               </ResponsiveContainer>
             </Card>
@@ -931,6 +1075,7 @@ export default function Analytics() {
                 >
                   <Option value="bar">Bar Chart</Option>
                   <Option value="line">Line Chart</Option>
+                  <Option value="area">Area Chart</Option>
                   <Option value="pie">Pie Chart</Option>
                 </Select>
               }
@@ -956,6 +1101,16 @@ export default function Analytics() {
                     <Line type="monotone" dataKey="totalQuantity" stroke="#1890ff" name="Quantity" strokeWidth={2} />
                     <Line type="monotone" dataKey="count" stroke="#722ed1" name="Items" strokeWidth={2} />
                   </LineChart>
+                ) : categoryChartType === 'area' ? (
+                  <AreaChart data={categoryData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="_id.category" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Area type="monotone" dataKey="totalQuantity" fill="#1890ff" stroke="#1890ff" name="Quantity" />
+                    <Area type="monotone" dataKey="count" fill="#722ed1" stroke="#722ed1" name="Items" />
+                  </AreaChart>
                 ) : (
                   <PieChart>
                     <Pie

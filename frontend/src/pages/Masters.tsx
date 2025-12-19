@@ -34,18 +34,21 @@ export default function Masters() {
 
   const [categories, setCategories] = useState<any[]>([])
   const [statuses, setStatuses] = useState<any[]>([])
+  const [userCount, setUserCount] = useState<number>(0)
 
   const fetchData = async () => {
     setLoading(true)
     try {
-      const [categoriesRes, statusesRes] = await Promise.all([
+      const [categoriesRes, statusesRes, usersRes] = await Promise.all([
         fetchMaterialCategories({ includeInactive: true }),
-        fetchMaterialStatuses({ includeInactive: true })
+        fetchMaterialStatuses({ includeInactive: true }),
+        api.get('/users', { params: { page: 1, pageSize: 1 } })
       ])
 
       // Ensure we always store arrays to avoid runtime errors when accessing .length
       setCategories(Array.isArray(categoriesRes) ? categoriesRes : [])
       setStatuses(Array.isArray(statusesRes) ? statusesRes : [])
+      setUserCount(usersRes?.data?.meta?.total ?? 0)
     } catch (error) {
       message.error('Failed to fetch configuration data')
     } finally {
@@ -230,10 +233,23 @@ export default function Masters() {
         </Button>
       </div>
 
-      <Collapse defaultActiveKey={['users']} size="small" accordion>
-        {/* Users (managed as part of configuration) */}
+      <Collapse defaultActiveKey={[]} size="small" accordion>
         <Collapse.Panel 
-          header="Users"
+          header={
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+              <span>Users</span>
+              <span style={{ 
+                backgroundColor: '#f0f0f0', 
+                color: '#666', 
+                padding: '2px 8px', 
+                borderRadius: '12px', 
+                fontSize: '12px',
+                fontWeight: 'normal'
+              }}>
+                {userCount}
+              </span>
+            </div>
+          }
           key="users"
         >
           <Users />

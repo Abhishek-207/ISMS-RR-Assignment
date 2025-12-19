@@ -43,9 +43,10 @@ api.interceptors.response.use(
       storage.removeItem('user')
       
       // Show appropriate message for expired token
-      if (isExpired || errorCode === 1001) { // 1001 is TOKEN_EXPIRED code
+      if (isExpired || errorCode === 1001) { 
         // Set a flag to show the session expired message
-        sessionStorage.setItem('sessionExpired', 'true')
+        
+        localStorage.setItem('sessionExpired', 'true')
       }
       
       // Redirect to login

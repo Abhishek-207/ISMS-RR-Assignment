@@ -17,12 +17,20 @@ export default function Login() {
 
   useEffect(() => {
     // Check if session expired flag is set
-    const sessionExpired = sessionStorage.getItem('sessionExpired')
+    const sessionExpired =
+      sessionStorage.getItem('sessionExpired') ||
+      localStorage.getItem('sessionExpired')
+
     if (sessionExpired === 'true') {
       setShowSessionExpired(true)
+      // Show a toast as well so the user sees it even without looking at the alert
+      message.warning('Your session has expired. Please login again.', 4)
+
+      // Clear from both storages
       sessionStorage.removeItem('sessionExpired')
+      localStorage.removeItem('sessionExpired')
     }
-  }, [])
+  }, [message])
 
   const onFinish = async (values: any) => {
     setLoading(true)
@@ -55,7 +63,7 @@ export default function Login() {
         message.error(errorMessage || 'Login failed. Please check your credentials.', 4)
       }
       
-      // Keep form values intact after error
+      
       form.setFieldsValue(values)
     } finally {
       setLoading(false)
@@ -64,7 +72,7 @@ export default function Login() {
 
   const onFinishFailed = (errorInfo: any) => {
     console.log('Form validation failed:', errorInfo)
-    message.error('Please check the form and fix any errors.', 3)
+    message.error('Please provide your email and password.', 3)
   }
 
   return (
@@ -77,7 +85,7 @@ export default function Login() {
           Sign in
         </Title>
         
-        {showSessionExpired && (
+        {/* {showSessionExpired && (
           <Alert
             message="Session Expired"
             description="Your session has expired. Please login again."
@@ -87,7 +95,7 @@ export default function Login() {
             onClose={() => setShowSessionExpired(false)}
             style={{ marginBottom: 16 }}
           />
-        )}
+        )} */}
         
         <Form 
           form={form} 

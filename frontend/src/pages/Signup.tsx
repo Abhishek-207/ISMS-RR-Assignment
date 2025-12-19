@@ -172,7 +172,7 @@ export default function Signup() {
 
   const onFinishFailed = (errorInfo: any) => {
     console.log('Form validation failed:', errorInfo)
-    message.error('Please check the form and fix any errors.', 3)
+    message.error('Please provide your full name, email, and password.', 3)
   }
 
   const nextStep = async () => {
@@ -352,7 +352,7 @@ export default function Signup() {
                 label="Password" 
                 rules={[
                   { required: true, message: 'Please enter a password' },
-                  
+                  { min: 8, message: 'Password must be at least 8 characters' },
                   {
                     pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
                     message: 'Password must be at least 8 characters and contain uppercase, lowercase, number, and special character'

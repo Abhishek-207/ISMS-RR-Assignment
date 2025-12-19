@@ -66,8 +66,8 @@ export default function App() {
         
         if (error?.response?.status === 401) {
           // Set flag for session expired message if token expired
-          if (isExpired || errorCode === 1001) { // 1001 is TOKEN_EXPIRED code
-            sessionStorage.setItem('sessionExpired', 'true')
+          if (isExpired || errorCode === 1001) { 
+            localStorage.setItem('sessionExpired', 'true')
           }
           
           clearAuth()

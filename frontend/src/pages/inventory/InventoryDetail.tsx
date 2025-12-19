@@ -22,8 +22,8 @@ import {
   EyeOutlined
 } from '@ant-design/icons'
 import { useParams, useNavigate } from 'react-router-dom'
-import { api } from '../lib/api'
-import { getCurrentUser as getUser, isOrgAdmin } from '../lib/auth'
+import { api } from '../../lib/api'
+import { getCurrentUser as getUser, isOrgAdmin } from '../../lib/auth'
 import dayjs from 'dayjs'
 
 const { Title, Text } = Typography

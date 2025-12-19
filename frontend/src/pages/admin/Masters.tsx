@@ -19,8 +19,8 @@ import {
   ReloadOutlined,
   MoreOutlined
 } from '@ant-design/icons'
-import { api } from '../lib/api'
-import { fetchMaterialCategories, fetchMaterialStatuses } from '../lib/masters'
+import { api } from '../../lib/api'
+import { fetchMaterialCategories, fetchMaterialStatuses } from '../../lib/masters'
 import Users from './Users'
 
 const { Title } = Typography

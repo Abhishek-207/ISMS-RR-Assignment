@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Card, Descriptions, Button, Typography, Grid, message, Form, Input, Modal, Tag } from 'antd'
 import { EditOutlined, SaveOutlined, TeamOutlined, BankOutlined } from '@ant-design/icons'
-import { getCurrentUser } from '../lib/auth'
-import { api } from '../lib/api'
+import { getCurrentUser } from '../../lib/auth'
+import { api } from '../../lib/api'
 
 const { Title, Text } = Typography
 const { useBreakpoint } = Grid

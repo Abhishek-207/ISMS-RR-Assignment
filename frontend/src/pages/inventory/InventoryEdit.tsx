@@ -25,9 +25,9 @@ import {
   ArrowLeftOutlined
 } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
-import { api } from '../lib/api'
-import { fetchMaterialCategories, fetchMaterialStatuses, MaterialStatus } from '../lib/masters'
-import { getCurrentUser as getUser, isOrgAdmin } from '../lib/auth'
+import { api } from '../../lib/api'
+import { fetchMaterialCategories, fetchMaterialStatuses, MaterialStatus } from '../../lib/masters'
+import { getCurrentUser as getUser, isOrgAdmin } from '../../lib/auth'
 import dayjs from 'dayjs'
 
 const { Title, Text } = Typography

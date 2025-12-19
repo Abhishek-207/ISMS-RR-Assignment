@@ -25,8 +25,8 @@ import {
   DownloadOutlined,
   FilterOutlined
 } from '@ant-design/icons'
-import { api } from '../lib/api'
-import { getCurrentUser, isOrgAdmin } from '../lib/auth'
+import { api } from '../../lib/api'
+import { getCurrentUser, isOrgAdmin } from '../../lib/auth'
 import dayjs from 'dayjs'
 import { useNavigate } from 'react-router-dom'
 

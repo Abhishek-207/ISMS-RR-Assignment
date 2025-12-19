@@ -23,8 +23,8 @@ import {
   FileOutlined
 } from '@ant-design/icons'
 import { useParams, useNavigate } from 'react-router-dom'
-import { api } from '../lib/api'
-import { getCurrentUser, isOrgAdmin } from '../lib/auth'
+import { api } from '../../lib/api'
+import { getCurrentUser, isOrgAdmin } from '../../lib/auth'
 import dayjs from 'dayjs'
 
 const { Title, Text } = Typography

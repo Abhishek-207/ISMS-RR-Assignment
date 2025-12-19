@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Button, Card, Form, Input, Typography, message, Grid, Select, Radio, Space, Steps } from 'antd'
 import { useNavigate, Link } from 'react-router-dom'
-import { api } from '../lib/api'
-import { setAuth } from '../lib/auth'
+import { api } from '../../lib/api'
+import { setAuth } from '../../lib/auth'
 
 const { Title } = Typography
 const { Option } = Select

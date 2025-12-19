@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Button, Typography, Grid } from 'antd'
 import { Link } from 'react-router-dom'
-import { getCurrentUser } from '../lib/auth'
+import { getCurrentUser } from '../../lib/auth'
 
 const { Title, Paragraph, Text } = Typography
 const { useBreakpoint } = Grid

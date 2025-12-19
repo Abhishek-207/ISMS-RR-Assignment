@@ -1,7 +1,7 @@
 import { Button, Card, Form, Input, Typography, Grid, Alert, App } from 'antd'
 import { useNavigate, Link } from 'react-router-dom'
-import { api } from '../lib/api'
-import { setAuth } from '../lib/auth'
+import { api } from '../../lib/api'
+import { setAuth } from '../../lib/auth'
 import { useEffect, useState } from 'react'
 
 const { Title } = Typography
@@ -150,3 +150,4 @@ export default function Login() {
     </div>
   )
 }
+

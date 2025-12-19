@@ -37,8 +37,8 @@ import {
   Area
 } from 'recharts'
 import dayjs from 'dayjs'
-import { api } from '../lib/api'
-import { getOrganizationCategory } from '../lib/auth'
+import { api } from '../../lib/api'
+import { getOrganizationCategory } from '../../lib/auth'
 
 const { Title, Text } = Typography
 const { RangePicker } = DatePicker

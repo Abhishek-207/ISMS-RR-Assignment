@@ -24,8 +24,8 @@ import {
   EyeOutlined
 } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
-import { api } from '../lib/api'
-import { fetchMaterialCategories, fetchMaterialStatuses, MaterialStatus } from '../lib/masters'
+import { api } from '../../lib/api'
+import { fetchMaterialCategories, fetchMaterialStatuses, MaterialStatus } from '../../lib/masters'
 import dayjs from 'dayjs'
 
 const { Title, Text } = Typography

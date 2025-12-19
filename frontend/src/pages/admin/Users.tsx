@@ -25,8 +25,8 @@ import {
   CheckCircleOutlined,
   StopOutlined
 } from '@ant-design/icons'
-import { api } from '../lib/api'
-import { isPlatformAdmin, isOrgAdmin } from '../lib/auth'
+import { api } from '../../lib/api'
+import { isPlatformAdmin, isOrgAdmin } from '../../lib/auth'
 import dayjs from 'dayjs'
 
 const { Title } = Typography

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Card, List, Typography, Tag, Button, Empty, Space, Badge, message } from 'antd'
 import { BellOutlined, CheckOutlined, DeleteOutlined, InfoCircleOutlined, ExclamationCircleOutlined, CheckCircleOutlined } from '@ant-design/icons'
 import { Grid } from 'antd'
-import { api } from '../lib/api'
+import { api } from '../../lib/api'
 
 const { Title, Text } = Typography
 const { useBreakpoint } = Grid

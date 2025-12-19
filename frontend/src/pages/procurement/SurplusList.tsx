@@ -30,8 +30,8 @@ import {
   MoreOutlined,
   FilterOutlined
 } from '@ant-design/icons'
-import { api } from '../lib/api'
-import { getOrganizationCategory } from '../lib/auth'
+import { api } from '../../lib/api'
+import { getOrganizationCategory } from '../../lib/auth'
 import dayjs from 'dayjs'
 
 const { Title, Text, Paragraph } = Typography

@@ -19,8 +19,8 @@ import {
   SaveOutlined 
 } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
-import { api } from '../lib/api'
-import { fetchMaterialCategories } from '../lib/masters'
+import { api } from '../../lib/api'
+import { fetchMaterialCategories } from '../../lib/masters'
 import dayjs from 'dayjs'
 
 const { Title, Text } = Typography

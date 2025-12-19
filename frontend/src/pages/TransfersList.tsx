@@ -133,7 +133,7 @@ export default function TransfersList() {
         successMessage = 'Procurement request cancelled'
       }
 
-      await api.patch(endpoint, { comments: values.comments })
+      await api.patch(endpoint, { comment: values.comments })
       message.success(successMessage)
       setActionModalVisible(false)
       actionForm.resetFields()
@@ -479,7 +479,8 @@ export default function TransfersList() {
             >
               <Form.Item
                 name="comments"
-                label="Comments (Optional)"
+                label="Comments"
+                rules={[{ required: true, message: 'Please provide a reason' }]}
               >
                 <TextArea
                   rows={3}

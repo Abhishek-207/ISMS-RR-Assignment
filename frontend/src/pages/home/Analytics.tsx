@@ -44,7 +44,17 @@ const { Title, Text } = Typography
 const { RangePicker } = DatePicker
 const { Option } = Select
 
-const COLORS = ['#1890ff', '#52c41a', '#fa8c16', '#f5222d', '#722ed1']
+// Green shades based on tail green (#0891b2)
+const COLORS = [
+  '#0891b2', // Base tail green
+  '#06b6d4', // Lighter shade
+  '#22d3ee', // Light shade
+  '#67e8f9', // Very light shade
+  '#0e7490', // Darker shade
+  '#155e75', // Dark shade
+  '#164e63', // Very dark shade
+  '#a5f3fc'  // Lightest shade
+]
 
 export default function Analytics() {
   const orgCategory = getOrganizationCategory()
@@ -569,13 +579,13 @@ export default function Analytics() {
                 <Statistic
                   title={
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                      <InboxOutlined style={{ color: '#1890ff', fontSize: 16 }} />
+                      <InboxOutlined style={{ color: '#0891b2', fontSize: 16 }} />
                       <span style={{ color: '#666', fontSize: 13 }}>Total Inventory</span>
                     </div>
                   }
                   value={stats.totalInventory}
                   valueStyle={{ 
-                    color: '#1890ff', 
+                    color: '#0891b2', 
                     fontSize: '24px',
                     fontWeight: 600
                   }}
@@ -596,13 +606,13 @@ export default function Analytics() {
                 <Statistic
                   title={
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                      <CheckCircleOutlined style={{ color: '#52c41a', fontSize: 16 }} />
+                      <CheckCircleOutlined style={{ color: '#0891b2', fontSize: 16 }} />
                       <span style={{ color: '#666', fontSize: 13 }}>Available</span>
                     </div>
                   }
                   value={stats.availableItems}
                   valueStyle={{ 
-                    color: '#52c41a', 
+                    color: '#0891b2', 
                     fontSize: '24px',
                     fontWeight: 600
                   }}
@@ -623,13 +633,13 @@ export default function Analytics() {
                 <Statistic
                   title={
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                      <ToolOutlined style={{ color: '#fa8c16', fontSize: 16 }} />
+                      <ToolOutlined style={{ color: '#0891b2', fontSize: 16 }} />
                       <span style={{ color: '#666', fontSize: 13 }}>Surplus</span>
                     </div>
                   }
                   value={stats.surplusItems}
                   valueStyle={{ 
-                    color: '#fa8c16', 
+                    color: '#0891b2', 
                     fontSize: '24px',
                     fontWeight: 600
                   }}
@@ -650,13 +660,13 @@ export default function Analytics() {
                 <Statistic
                   title={
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                      <SwapOutlined style={{ color: '#722ed1', fontSize: 16 }} />
+                      <SwapOutlined style={{ color: '#0891b2', fontSize: 16 }} />
                       <span style={{ color: '#666', fontSize: 13 }}>Procurements</span>
                     </div>
                   }
                   value={stats.procurementRequests}
                   valueStyle={{ 
-                    color: '#722ed1', 
+                    color: '#0891b2', 
                     fontSize: '24px',
                     fontWeight: 600
                   }}
@@ -858,8 +868,8 @@ export default function Analytics() {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="totalQuantity" fill="#1890ff" name="Total Quantity" />
-                    <Bar dataKey="count" fill="#52c41a" name="Item Count" />
+                    <Bar dataKey="totalQuantity" fill="#0891b2" name="Total Quantity" />
+                    <Bar dataKey="count" fill="#06b6d4" name="Item Count" />
                   </BarChart>
                 ) : statusChartType === 'line' ? (
                   <LineChart data={availabilityData}>
@@ -868,8 +878,8 @@ export default function Analytics() {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Line type="monotone" dataKey="totalQuantity" stroke="#1890ff" name="Total Quantity" strokeWidth={2} />
-                    <Line type="monotone" dataKey="count" stroke="#52c41a" name="Item Count" strokeWidth={2} />
+                    <Line type="monotone" dataKey="totalQuantity" stroke="#0891b2" name="Total Quantity" strokeWidth={2} />
+                    <Line type="monotone" dataKey="count" stroke="#06b6d4" name="Item Count" strokeWidth={2} />
                   </LineChart>
                 ) : statusChartType === 'area' ? (
                   <AreaChart data={availabilityData}>
@@ -878,8 +888,8 @@ export default function Analytics() {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Area type="monotone" dataKey="totalQuantity" fill="#1890ff" stroke="#1890ff" name="Total Quantity" />
-                    <Area type="monotone" dataKey="count" fill="#52c41a" stroke="#52c41a" name="Item Count" />
+                    <Area type="monotone" dataKey="totalQuantity" fill="#0891b2" stroke="#0891b2" name="Total Quantity" />
+                    <Area type="monotone" dataKey="count" fill="#06b6d4" stroke="#06b6d4" name="Item Count" />
                   </AreaChart>
                 ) : (
                   <PieChart>
@@ -949,7 +959,7 @@ export default function Analytics() {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="totalQuantity" fill="#1890ff" name="Total Quantity" />
+                    <Bar dataKey="totalQuantity" fill="#0891b2" name="Total Quantity" />
                   </BarChart>
                 ) : conditionChartType === 'line' ? (
                   <LineChart data={conditionData}>
@@ -958,7 +968,7 @@ export default function Analytics() {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Line type="monotone" dataKey="totalQuantity" stroke="#1890ff" name="Total Quantity" strokeWidth={2} />
+                    <Line type="monotone" dataKey="totalQuantity" stroke="#0891b2" name="Total Quantity" strokeWidth={2} />
                   </LineChart>
                 ) : (
                   <AreaChart data={conditionData}>
@@ -967,7 +977,7 @@ export default function Analytics() {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Area type="monotone" dataKey="totalQuantity" fill="#1890ff" stroke="#1890ff" name="Total Quantity" />
+                    <Area type="monotone" dataKey="totalQuantity" fill="#0891b2" stroke="#0891b2" name="Total Quantity" />
                   </AreaChart>
                 )}
               </ResponsiveContainer>
@@ -1000,9 +1010,9 @@ export default function Analytics() {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="approved" fill="#52c41a" name="Approved" stackId="a" />
-                    <Bar dataKey="pending" fill="#fa8c16" name="Pending" stackId="a" />
-                    <Bar dataKey="rejected" fill="#f5222d" name="Rejected" stackId="a" />
+                    <Bar dataKey="approved" fill="#0891b2" name="Approved" stackId="a" />
+                    <Bar dataKey="pending" fill="#06b6d4" name="Pending" stackId="a" />
+                    <Bar dataKey="rejected" fill="#22d3ee" name="Rejected" stackId="a" />
                   </BarChart>
                 ) : procurementChartType === 'line' ? (
                   <LineChart data={procurementData}>
@@ -1011,9 +1021,9 @@ export default function Analytics() {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Line type="monotone" dataKey="approved" stroke="#52c41a" name="Approved" strokeWidth={2} />
-                    <Line type="monotone" dataKey="pending" stroke="#fa8c16" name="Pending" strokeWidth={2} />
-                    <Line type="monotone" dataKey="rejected" stroke="#f5222d" name="Rejected" strokeWidth={2} />
+                    <Line type="monotone" dataKey="approved" stroke="#0891b2" name="Approved" strokeWidth={2} />
+                    <Line type="monotone" dataKey="pending" stroke="#06b6d4" name="Pending" strokeWidth={2} />
+                    <Line type="monotone" dataKey="rejected" stroke="#22d3ee" name="Rejected" strokeWidth={2} />
                   </LineChart>
                 ) : procurementChartType === 'area' ? (
                   <AreaChart data={procurementData}>
@@ -1022,9 +1032,9 @@ export default function Analytics() {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Area type="monotone" dataKey="approved" stackId="1" fill="#52c41a" stroke="#52c41a" name="Approved" />
-                    <Area type="monotone" dataKey="pending" stackId="1" fill="#fa8c16" stroke="#fa8c16" name="Pending" />
-                    <Area type="monotone" dataKey="rejected" stackId="1" fill="#f5222d" stroke="#f5222d" name="Rejected" />
+                    <Area type="monotone" dataKey="approved" stackId="1" fill="#0891b2" stroke="#0891b2" name="Approved" />
+                    <Area type="monotone" dataKey="pending" stackId="1" fill="#06b6d4" stroke="#06b6d4" name="Pending" />
+                    <Area type="monotone" dataKey="rejected" stackId="1" fill="#22d3ee" stroke="#22d3ee" name="Rejected" />
                   </AreaChart>
                 ) : (
                   <PieChart>
@@ -1051,7 +1061,7 @@ export default function Analytics() {
                       fill="#8884d8"
                       dataKey="value"
                     >
-                      {['#52c41a', '#fa8c16', '#f5222d'].map((color, index) => (
+                      {['#0891b2', '#06b6d4', '#22d3ee'].map((color, index) => (
                         <Cell key={`procurement-pie-${index}`} fill={color} />
                       ))}
                     </Pie>
@@ -1088,8 +1098,8 @@ export default function Analytics() {
                     <YAxis dataKey="_id.category" type="category" width={100} />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="totalQuantity" fill="#1890ff" name="Quantity" />
-                    <Bar dataKey="count" fill="#722ed1" name="Items" />
+                    <Bar dataKey="totalQuantity" fill="#0891b2" name="Quantity" />
+                    <Bar dataKey="count" fill="#06b6d4" name="Items" />
                   </BarChart>
                 ) : categoryChartType === 'line' ? (
                   <LineChart data={categoryData}>
@@ -1098,8 +1108,8 @@ export default function Analytics() {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Line type="monotone" dataKey="totalQuantity" stroke="#1890ff" name="Quantity" strokeWidth={2} />
-                    <Line type="monotone" dataKey="count" stroke="#722ed1" name="Items" strokeWidth={2} />
+                    <Line type="monotone" dataKey="totalQuantity" stroke="#0891b2" name="Quantity" strokeWidth={2} />
+                    <Line type="monotone" dataKey="count" stroke="#06b6d4" name="Items" strokeWidth={2} />
                   </LineChart>
                 ) : categoryChartType === 'area' ? (
                   <AreaChart data={categoryData}>
@@ -1108,8 +1118,8 @@ export default function Analytics() {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Area type="monotone" dataKey="totalQuantity" fill="#1890ff" stroke="#1890ff" name="Quantity" />
-                    <Area type="monotone" dataKey="count" fill="#722ed1" stroke="#722ed1" name="Items" />
+                    <Area type="monotone" dataKey="totalQuantity" fill="#0891b2" stroke="#0891b2" name="Quantity" />
+                    <Area type="monotone" dataKey="count" fill="#06b6d4" stroke="#06b6d4" name="Items" />
                   </AreaChart>
                 ) : (
                   <PieChart>
@@ -1160,8 +1170,8 @@ export default function Analytics() {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="count" fill="#fa8c16" name="Material Count" />
-                    <Bar dataKey="totalQuantity" fill="#52c41a" name="Total Quantity" />
+                    <Bar dataKey="count" fill="#0891b2" name="Material Count" />
+                    <Bar dataKey="totalQuantity" fill="#06b6d4" name="Total Quantity" />
                   </BarChart>
                 ) : materialStatusChartType === 'line' ? (
                   <LineChart data={statusData}>
@@ -1170,8 +1180,8 @@ export default function Analytics() {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Line type="monotone" dataKey="count" stroke="#fa8c16" name="Material Count" strokeWidth={2} />
-                    <Line type="monotone" dataKey="totalQuantity" stroke="#52c41a" name="Total Quantity" strokeWidth={2} />
+                    <Line type="monotone" dataKey="count" stroke="#0891b2" name="Material Count" strokeWidth={2} />
+                    <Line type="monotone" dataKey="totalQuantity" stroke="#06b6d4" name="Total Quantity" strokeWidth={2} />
                   </LineChart>
                 ) : materialStatusChartType === 'area' ? (
                   <AreaChart data={statusData}>
@@ -1180,8 +1190,8 @@ export default function Analytics() {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Area type="monotone" dataKey="count" fill="#fa8c16" stroke="#fa8c16" name="Material Count" />
-                    <Area type="monotone" dataKey="totalQuantity" fill="#52c41a" stroke="#52c41a" name="Total Quantity" />
+                    <Area type="monotone" dataKey="count" fill="#0891b2" stroke="#0891b2" name="Material Count" />
+                    <Area type="monotone" dataKey="totalQuantity" fill="#06b6d4" stroke="#06b6d4" name="Total Quantity" />
                   </AreaChart>
                 ) : (
                   <PieChart>
